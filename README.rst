@@ -44,7 +44,7 @@ Python 3.5 might work, but this is not tested.
 Documentation
 -------------
 
-The documentation for the *Connectors* librariy can be found `here <https://jonassc.github.com/Connectors/documentation/>`_.
+The documentation for the *Connectors* librariy can be found `here <https://jonassc.github.io/Connectors/docs/>`_.
 
 
 License

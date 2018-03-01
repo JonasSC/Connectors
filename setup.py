@@ -21,6 +21,6 @@ setup(name="Connectors",
       install_requires=[],
       extras_require={"dev": ["pytest-cov", "pylint"],
                       "test": ["pytest", "numpy"]},
-      project_urls={"Documentation": "https://jonassc.github.com/Connectors/documentation/",
+      project_urls={"Documentation": "https://jonassc.github.io/Connectors/docs/",
                     "Bug Reports": "https://github.com/JonasSC/Connectors/issues",
                     "Source": "https://github.com/JonasSC/Connectors"})
