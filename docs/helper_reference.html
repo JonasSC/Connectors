@@ -1,0 +1,174 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>5. Reference: Helper functionalities &#8212; Connectors 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="6. Tutorial: Implementing a polynomial (demonstrates macros and memory saving techniques)" href="polynomial.html" />
+    <link rel="prev" title="4. Reference: Macro connectors for encapsulating processing networks in a class" href="macro_reference.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="polynomial.html" title="6. Tutorial: Implementing a polynomial (demonstrates macros and memory saving techniques)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="macro_reference.html" title="4. Reference: Macro connectors for encapsulating processing networks in a class"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Connectors 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="reference-helper-functionalities">
+<h1>5. Reference: Helper functionalities<a class="headerlink" href="#reference-helper-functionalities" title="Permalink to this headline">¶</a></h1>
+<p>This is the API reference for helper functionalities, that facilitate the use of the <em>Connectors</em> package.</p>
+<div class="section" id="facilitating-the-implementation-of-multi-inputs">
+<h2>5.1. Facilitating the implementation of multi inputs<a class="headerlink" href="#facilitating-the-implementation-of-multi-inputs" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="connectors.MultiInputData">
+<em class="property">class </em><code class="descclassname">connectors.</code><code class="descname">MultiInputData</code><span class="sig-paren">(</span><em>datas=()</em><span class="sig-paren">)</span><a class="headerlink" href="#connectors.MultiInputData" title="Permalink to this definition">¶</a></dt>
+<dd><p>A container for data that is managed with a MultiInput connector.
+This is basically an OrderedDict with an add method, that stores the added
+data under a unique key.
+This facilitates the implementation of a class with a <a class="reference internal" href="core_reference.html#connectors.MultiInput" title="connectors.MultiInput"><code class="xref py py-class docutils literal"><span class="pre">MultiInput</span></code></a> connector:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ReplacingMultiInput</span><span class="p">(</span><span class="n">BaseTestClass</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="n">connectors</span><span class="o">.</span><span class="n">MultiInputData</span><span class="p">()</span>
+
+    <span class="nd">@connectors</span><span class="o">.</span><span class="n">MultiInput</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">add_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@add_value</span><span class="o">.</span><span class="n">remove</span>
+    <span class="k">def</span> <span class="nf">remove_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_id</span><span class="p">):</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="n">data_id</span><span class="p">]</span>
+
+    <span class="nd">@add_value</span><span class="o">.</span><span class="n">replace</span>
+    <span class="k">def</span> <span class="nf">replace_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_id</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="n">data_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>datas</strong> – an optional sequence of data objects, that shall be added to the container</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="connectors.MultiInputData.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#connectors.MultiInputData.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a data set to the container.
+:param data: the data set that shall be added
+:returns: the id under which the data is stored</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="reducing-the-memory-consumption">
+<h2>5.2. Reducing the memory consumption<a class="headerlink" href="#reducing-the-memory-consumption" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="connectors.WeakrefProxyGenerator">
+<em class="property">class </em><code class="descclassname">connectors.</code><code class="descname">WeakrefProxyGenerator</code><span class="sig-paren">(</span><em>data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#connectors.WeakrefProxyGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>A helper class to reduce memory usage in certain processing chains by
+discarding intermediate results. It takes an object as input and outputs a
+weak reference proxy to it.
+The deletion of the strong reference to the input object can triggered by connecting
+the output connector for the final result to this class’s <code class="xref py py-meth docutils literal"><span class="pre">delete_reference()</span></code>
+method. This will cause the input object to be garbage collected, if no further
+references to it exist.
+This class should be used in combination with the caching of the final result,
+since this prevents, that the deleted input data is required to re-compute the
+result, when it’s retrieved repeatedly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> – the input object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="macro_reference.html"
+                        title="previous chapter">4. Reference: Macro connectors for encapsulating processing networks in a class</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="polynomial.html"
+                        title="next chapter">6. Tutorial: Implementing a polynomial (demonstrates macros and memory saving techniques)</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="polynomial.html" title="6. Tutorial: Implementing a polynomial (demonstrates macros and memory saving techniques)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="macro_reference.html" title="4. Reference: Macro connectors for encapsulating processing networks in a class"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Connectors 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Jonas Schulte-Coerne.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,137 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>9. Information: Implementation details &#8212; Connectors 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="10. Infrastructure: Dependencies" href="dependencies.html" />
+    <link rel="prev" title="8. Information: Automated parallelization" href="parallelization.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="dependencies.html" title="10. Infrastructure: Dependencies"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="parallelization.html" title="8. Information: Automated parallelization"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Connectors 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="information-implementation-details">
+<h1>9. Information: Implementation details<a class="headerlink" href="#information-implementation-details" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="asyncio">
+<h2>9.1. <a class="reference external" href="https://docs.python.org/3.6/library/asyncio.html#module-asyncio" title="(in Python v3.6)"><code class="xref py py-mod docutils literal"><span class="pre">asyncio</span></code></a><a class="headerlink" href="#asyncio" title="Permalink to this headline">¶</a></h2>
+<p>The <em>Connectors</em> package uses <a class="reference external" href="https://docs.python.org/3.6/library/asyncio.html#module-asyncio" title="(in Python v3.6)"><code class="xref py py-mod docutils literal"><span class="pre">asyncio</span></code></a> to model the dependencies between the connectors and schedule their execution.
+The event loop is started by the connector, which triggers the computations and ends, when that connector’s computation has finished.</p>
+</div>
+<div class="section" id="connector-proxies-avoiding-circular-references">
+<h2>9.2. Connector proxies - avoiding circular references<a class="headerlink" href="#connector-proxies-avoiding-circular-references" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Circular references occur, when objects have references to each other, so that their reference count never reaches zero, even when there is no reference to the objects in the active code.
+In such a case, the objects are not automatically deleted by Python’s reference counting mechanism.</p>
+<p class="last">Python uses <em>bound methods</em> and <em>unbound methods</em> to avoid circular references, in which an object has references to its methods, while the methods have a reference to the object.
+Unbound methods are basically functions, which require the object to be passed as the first parameter, which is commonly called <em>self</em>.
+An object has a reference to its class, which has references to its unbound methods, but the unbound methods have no reference to the object.
+When a method is accessed, Python automatically creates a bound method by predefining the first parameter with the object.
+Obviously, this causes bound methods to have a reference to the object, but since the object does not store references to bound methods, circular references do not occur.</p>
+</div>
+<p>Unbound methods are attributes of a class, which cannot store information about individual objects.
+Connectors on the other hand must be able to store such information, like established connections or configurations about their behavior.
+This requires the connectors to be persistent, unlike bound methods, which are created freshly, whenever they are required.
+Also, in order to execute the method, which they have replaced, connectors have a reference to the object, to which they belong, which leads to circular references.</p>
+<p>In the <em>Connectors</em> package, this problem is addressed by using weak references for the connector’s reference to their object.
+This alone is not sufficient though, since this would break the functionality to call a connector immediately after instantiating an object:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">ExampleClass</span><span class="p">()</span><span class="o">.</span><span class="n">connector</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>In the above example, an object of <code class="xref py py-class docutils literal"><span class="pre">ExampleClass</span></code> is created and and its connector <code class="xref py py-meth docutils literal"><span class="pre">connector()</span></code> is accessed.
+Since no reference of the object is stored, except for the weak reference of the connector, the object will be garbage collected after accessing the connector, but before executing it.
+So the connector cannot be executed.</p>
+<p>To prevent objects from being garbage collected prematurely, the <em>Connectors</em> package uses a mechanism similar to the bound and unbound methods from Python.
+As long as no individual information has to be stored in the connector, the method is not replaced by a connector object.
+Instead a <code class="xref py py-class docutils literal"><span class="pre">ConnectorProxy</span></code> object is created each time, when the connector is accessed.
+Similar to bound methods, the connector proxy has a reference to the object, but not vice versa.
+Only when establishing a connection or when changing the configuration, the method is replaced by a connector.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="parallelization.html"
+                        title="previous chapter">8. Information: Automated parallelization</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dependencies.html"
+                        title="next chapter">10. Infrastructure: Dependencies</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="dependencies.html" title="10. Infrastructure: Dependencies"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="parallelization.html" title="8. Information: Automated parallelization"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Connectors 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Jonas Schulte-Coerne.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.
+    </div>
+  </body>
+</html>

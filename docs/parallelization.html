@@ -1,0 +1,143 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>8. Information: Automated parallelization &#8212; Connectors 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="9. Information: Implementation details" href="implementation_details.html" />
+    <link rel="prev" title="7. Information: Lazy execution" href="lazy_execution.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="implementation_details.html" title="9. Information: Implementation details"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="lazy_execution.html" title="7. Information: Lazy execution"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Connectors 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="information-automated-parallelization">
+<h1>8. Information: Automated parallelization<a class="headerlink" href="#information-automated-parallelization" title="Permalink to this headline">¶</a></h1>
+<p>If a processing network is branched, so that different operations can be executed in parallel, the <em>Connectors</em> package has the functionality to do so.
+This document provides some background information on this topic, since the distinction between a connector’s <em>parallelization</em> parameter and its executor might be counter-intuitive.</p>
+<div class="section" id="the-default-settings">
+<h2>8.1. The default settings<a class="headerlink" href="#the-default-settings" title="Permalink to this headline">¶</a></h2>
+<p>By default, the execution of output connectors are parallelized in different threads, while input connectors are executed sequentially.
+This choice has been made, because the complex computations are usually done in the getter methods, while the setters often only store parameters, which is such a short operation, that it would be slowed down by the overhead of a parallelization.</p>
+<p>Preferring threads over processes in the default setting is justified by the lower overhead of threads and fewer constraints (e.g. pickle-ability of objects, that are passed between processes).
+Also, many libraries such as <em>NumPy</em> release the GIL in many of their functions, so that they do run concurrently, when using threads.</p>
+</div>
+<div class="section" id="the-parallelization-parameter">
+<h2>8.2. The <em>parallelization</em> parameter<a class="headerlink" href="#the-parallelization-parameter" title="Permalink to this headline">¶</a></h2>
+<p>The <em>parallelization</em> parameter defines, which methods of parallelization are allowed for the given connector.</p>
+<p>The <em>parallelization</em> parameter is meant to be configured in the decorator, when implementing processing classes, but connectors also provide a <code class="xref py py-meth docutils literal"><span class="pre">set_parallelization()</span></code> method to configure the parallelization of individual instances.
+It must be set to a flag of the <a class="reference internal" href="core_reference.html#connectors.Parallelization" title="connectors.Parallelization"><code class="xref py py-class docutils literal"><span class="pre">connectors.Parallelization</span></code></a> enum.</p>
+<ul class="simple">
+<li>Enforcing a sequential execution is useful for reducing the overhead, when doing short operations.
+Sometimes it is even necessary to disable the parallelization, like for example in GUI applications, where the drawing operations must be executed in the same thread.</li>
+<li>As explained above, threaded parallelization is often a good compromise.</li>
+<li>Using processes for the parallelization requires both the processing class and the data, that is passed through its connectors, to be pickle-able.
+Also, the overhead of starting an operation in a separate process and retrieving its result is much higher than with using threads, so process-based parallelization is only worth the effort for long running computations.
+Nevertheless, it is often recommended to allow the use of processes with the <em>parallelization</em> parameter, when implementing a processing class, if the constraints on pickle-ability are met.
+The actual parallelization method can later be chosen after setting up a processing network for a specific application, by specifying the executor of the connector, that triggers the computations.
+At this stage, the lengths of the computations can often be estimated better, than during the implementation of the classes.</li>
+</ul>
+</div>
+<div class="section" id="executors">
+<h2>8.3. Executors<a class="headerlink" href="#executors" title="Permalink to this headline">¶</a></h2>
+<p>If an operation actually is parallelized as allowed by its <em>parallelization</em> parameter, is decided by the executor of the connector, that triggers the computations.</p>
+<p>Executors are created with the factory function <a class="reference internal" href="core_reference.html#connectors.executor" title="connectors.executor"><code class="xref py py-func docutils literal"><span class="pre">connectors.executor()</span></code></a>, which takes the maximum number of threads and processes for the parallelization as parameters.
+Think of executors as wrappers around the <a class="reference external" href="https://docs.python.org/3.6/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">concurrent.futures.ThreadPoolExecutor</span></code></a> and <a class="reference external" href="https://docs.python.org/3.6/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">concurrent.futures.ProcessPoolExecutor</span></code></a> classes.
+They check, how a connector is allowed to be parallelized and then execute it accordingly:</p>
+<ul class="simple">
+<li>If a connector is allowed to be parallelized in a more complex way than the executor is capable of, the next simpler method for parallelization, that is available is used.
+The complexity hierarchy for this decision in descending order is process-based parallelization, separate threads and as last resort sequential execution.</li>
+<li>If a connector can be executed in a separate thread/process and the executor provides this functionality, the connector will never be executed in the main thread/process.</li>
+</ul>
+<p>Only one executor is used for all computations, that are required for a requested result.
+This is usually the executor of the output connector, through which the result is retrieved.
+With non-lazy connectors, that request results immediately, when a parameter is set, the executor of the input connector for that parameter is used.
+So changing the executors of connectors in the middle of a processing chain usually has no effect.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="lazy_execution.html"
+                        title="previous chapter">7. Information: Lazy execution</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="implementation_details.html"
+                        title="next chapter">9. Information: Implementation details</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="implementation_details.html" title="9. Information: Implementation details"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="lazy_execution.html" title="7. Information: Lazy execution"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Connectors 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Jonas Schulte-Coerne.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.
+    </div>
+  </body>
+</html>

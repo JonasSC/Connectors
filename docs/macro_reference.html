@@ -1,0 +1,386 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>4. Reference: Macro connectors for encapsulating processing networks in a class &#8212; Connectors 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="5. Reference: Helper functionalities" href="helper_reference.html" />
+    <link rel="prev" title="3. Tutorial: Measuring a transfer function (demonstrates the core functionalities)" href="transfer_function.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="helper_reference.html" title="5. Reference: Helper functionalities"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="transfer_function.html" title="3. Tutorial: Measuring a transfer function (demonstrates the core functionalities)"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Connectors 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="reference-macro-connectors-for-encapsulating-processing-networks-in-a-class">
+<h1>4. Reference: Macro connectors for encapsulating processing networks in a class<a class="headerlink" href="#reference-macro-connectors-for-encapsulating-processing-networks-in-a-class" title="Permalink to this headline">¶</a></h1>
+<p>Classes, which encapsulate networks of objects, that are connected with the functionalities of the <em>Connectors</em> package, are called <em>macros</em> or <em>macro classes</em> in the scope of this package.
+The connectors, that are used to export connectors from the internal network as connectors of the macro, are called macro connectors.
+This is the API reference for the functionalities, that are related to macro connectors.</p>
+<div class="section" id="decorating-methods">
+<h2>4.1. Decorating methods<a class="headerlink" href="#decorating-methods" title="Permalink to this headline">¶</a></h2>
+<p>The following classes can be used to decorate methods, so they become macro connectors.</p>
+<dl class="class">
+<dt id="connectors.MacroOutput">
+<em class="property">class </em><code class="descclassname">connectors.</code><code class="descname">MacroOutput</code><a class="headerlink" href="#connectors.MacroOutput" title="Permalink to this definition">¶</a></dt>
+<dd><p>A decorator to replace a method with a macro output connector.</p>
+<p>Macro connectors are useful, when a processing network shall be encapsulated
+in a class. In such a case, macro output connectors are used to export output
+connectors from the internal processing network to be accessible as connectors
+of the encapsulating class’s instance.</p>
+<p>The decorated method must not take any parameters and return the output connector
+from the internal processing network, that it exports.</p>
+<p>The resulting connector will behave like an output connector, which is very
+different from the decorated method:</p>
+<ul class="simple">
+<li>the connector takes no argument.</li>
+<li>when called, the connector returns the result of the exported connector.</li>
+</ul>
+</dd></dl>
+
+<dl class="class">
+<dt id="connectors.MacroInput">
+<em class="property">class </em><code class="descclassname">connectors.</code><code class="descname">MacroInput</code><a class="headerlink" href="#connectors.MacroInput" title="Permalink to this definition">¶</a></dt>
+<dd><p>A decorator to replace a method with a macro input connector.</p>
+<p>Macro connectors are useful, when a processing network shall be encapsulated
+in a class. In such a case, macro input connectors are used to export input
+connectors from the internal processing network to be accessible as connectors
+of the encapsulating class’s instance.</p>
+<p>The decorated method must not take any parameters and yield all input connectors
+from the internal processing network, that it exports. Exporting multiple
+connectors through the same macro connector is possible and useful, when all
+of these connectors shall always receive the same input value.</p>
+<p>The resulting connector will behave like an input connector, which is very
+different from the decorated method:</p>
+<ul class="simple">
+<li>the connector’s arguments are passed to all the exported input connectors,
+when it is called.</li>
+<li>when called, the connector returns the instance to which it belongs, so
+that changing a parameter and retrieving a result in one line is possible</li>
+<li>when a behavior (e.g. laziness) of the connector is changed, the change
+is passed on to all the exported connectors.</li>
+</ul>
+</dd></dl>
+
+</div>
+<div class="section" id="configuring-macro-connectors">
+<h2>4.2. Configuring macro connectors<a class="headerlink" href="#configuring-macro-connectors" title="Permalink to this headline">¶</a></h2>
+<p>Instances of the following classes replace the decorated methods, so they are enhanced with the functionality of a macro connector.</p>
+<dl class="class">
+<dt id="connectors.connectors.MacroOutputConnector">
+<em class="property">class </em><code class="descclassname">connectors.connectors.</code><code class="descname">MacroOutputConnector</code><span class="sig-paren">(</span><em>instance</em>, <em>method</em><span class="sig-paren">)</span><a class="headerlink" href="#connectors.connectors.MacroOutputConnector" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Connector-class that exports an output connector from an internal processing
+network to the API of the class, that encapsulates the network.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>instance</strong> – the instance in which the method is replaced by this connector</li>
+<li><strong>method</strong> – the unbound method, that is replaced by this connector</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="connectors.connectors.MacroOutputConnector.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><em>connector</em><span class="sig-paren">)</span><a class="headerlink" href="#connectors.connectors.MacroOutputConnector.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connects the exported output connector to the given input.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>connector</strong> – the input connector to which the exported connector shall be connected</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the instance of which this connector has replaced a method</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="connectors.connectors.MacroOutputConnector.disconnect">
+<code class="descname">disconnect</code><span class="sig-paren">(</span><em>connector</em><span class="sig-paren">)</span><a class="headerlink" href="#connectors.connectors.MacroOutputConnector.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disconnects the exported output connector from the given input.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>connector</strong> – the input connector from which the exported connector shall be disconnected</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the instance of which this connector has replaced a method</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="connectors.connectors.MacroOutputConnector.set_caching">
+<code class="descname">set_caching</code><span class="sig-paren">(</span><em>caching</em><span class="sig-paren">)</span><a class="headerlink" href="#connectors.connectors.MacroOutputConnector.set_caching" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies, if the result value of this output connector shall be cached.
+If caching is enabled and the result value is retrieved (e.g. through a
+connection or by calling the connector), the cached value is returned and
+the replaced getter method is not called unless the result value has to
+be re-computed, because an observed setter method has changed a parameter
+for the computation. In this case, the getter method is only called once,
+independent of the number of connections through which the result value
+has to be passed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>caching</strong> – True, if caching shall be enabled, False otherwise</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="connectors.connectors.MacroOutputConnector.set_executor">
+<code class="descname">set_executor</code><span class="sig-paren">(</span><em>executor</em><span class="sig-paren">)</span><a class="headerlink" href="#connectors.connectors.MacroOutputConnector.set_executor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the executor, which handles the computations, when the data is
+retrieved through this connector.
+An executor can be created with the <a class="reference internal" href="core_reference.html#connectors.executor" title="connectors.executor"><code class="xref py py-func docutils literal"><span class="pre">connectors.executor()</span></code></a> function. It
+manages the order and the parallelization of the computations, when updating
+the data in a processing chain.
+If multiple connectors in a processing chain need to be computed, the
+executor of the connector, which started the computations, is used for
+all computations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>executor</strong> – an <code class="xref py py-class docutils literal"><span class="pre">Executor</span></code> instance, that can be created with
+the <a class="reference internal" href="core_reference.html#connectors.executor" title="connectors.executor"><code class="xref py py-func docutils literal"><span class="pre">connectors.executor()</span></code></a> function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="connectors.connectors.MacroOutputConnector.set_parallelization">
+<code class="descname">set_parallelization</code><span class="sig-paren">(</span><em>parallelization</em><span class="sig-paren">)</span><a class="headerlink" href="#connectors.connectors.MacroOutputConnector.set_parallelization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies, if and how the execution of this connector can be parallelized.
+The choices are no parallelization, the execution in a separate thread
+and the execution in a separate process.
+This method specifies a hint, which level of parallelization is possible
+with the connector. If the executor of the connector, through which the
+computation is started, does not support the specified level, the next simpler
+one will be chosen. E.g. if a connector can be parallelized in a separate
+process, but the executor only allows threads or sequential execution, the
+connector will be executed in a separate thread.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parallelization</strong> – a flag from the <a class="reference internal" href="core_reference.html#connectors.Parallelization" title="connectors.Parallelization"><code class="xref py py-class docutils literal"><span class="pre">connectors.Parallelization</span></code></a> enum</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="connectors.connectors.MacroInputConnector">
+<em class="property">class </em><code class="descclassname">connectors.connectors.</code><code class="descname">MacroInputConnector</code><span class="sig-paren">(</span><em>instance</em>, <em>method</em><span class="sig-paren">)</span><a class="headerlink" href="#connectors.connectors.MacroInputConnector" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Connector-class that exports input connectors from an internal processing
+network to the API of the class, that encapsulates the network.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>instance</strong> – the instance in which the method is replaced by this connector</li>
+<li><strong>method</strong> – the unbound method, that is replaced by this connector</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="connectors.connectors.MacroInputConnector.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><em>connector</em><span class="sig-paren">)</span><a class="headerlink" href="#connectors.connectors.MacroInputConnector.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connects all exported input connectors to the given output.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>connector</strong> – the output connector to which the exported connectors shall be connected</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the instance of which this connector has replaced a method</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="connectors.connectors.MacroInputConnector.disconnect">
+<code class="descname">disconnect</code><span class="sig-paren">(</span><em>connector</em><span class="sig-paren">)</span><a class="headerlink" href="#connectors.connectors.MacroInputConnector.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disconnects all exported input connectors from the given output.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>connector</strong> – the output connector from which the exported connectors shall be disconnected</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the instance of which this connector has replaced a method</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="connectors.connectors.MacroInputConnector.set_executor">
+<code class="descname">set_executor</code><span class="sig-paren">(</span><em>executor</em><span class="sig-paren">)</span><a class="headerlink" href="#connectors.connectors.MacroInputConnector.set_executor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the executor, which handles the computations, when the data is
+retrieved through this connector.
+An executor can be created with the <a class="reference internal" href="core_reference.html#connectors.executor" title="connectors.executor"><code class="xref py py-func docutils literal"><span class="pre">connectors.executor()</span></code></a> function. It
+manages the order and the parallelization of the computations, when updating
+the data in a processing chain.
+If multiple connectors in a processing chain need to be computed, the
+executor of the connector, which started the computations, is used for
+all computations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>executor</strong> – an <code class="xref py py-class docutils literal"><span class="pre">Executor</span></code> instance, that can be created with
+the <a class="reference internal" href="core_reference.html#connectors.executor" title="connectors.executor"><code class="xref py py-func docutils literal"><span class="pre">connectors.executor()</span></code></a> function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="connectors.connectors.MacroInputConnector.set_laziness">
+<code class="descname">set_laziness</code><span class="sig-paren">(</span><em>laziness</em><span class="sig-paren">)</span><a class="headerlink" href="#connectors.connectors.MacroInputConnector.set_laziness" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures the lazy execution of the connector.
+Normally the connectors are executed lazily, which means, that any computation
+is only started, when the result of a processing chain is requested. For
+certain use cases it is necessary to disable this lazy execution, though,
+so that the values are updated immediately as soon as new data is available.
+There are different behaviors for the (non) lazy execution, which are
+described in the <a class="reference internal" href="core_reference.html#connectors.Laziness" title="connectors.Laziness"><code class="xref py py-class docutils literal"><span class="pre">connectors.Laziness</span></code></a> enum.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>laziness</strong> – a flag from the <a class="reference internal" href="core_reference.html#connectors.Laziness" title="connectors.Laziness"><code class="xref py py-class docutils literal"><span class="pre">connectors.Laziness</span></code></a> enum</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="connectors.connectors.MacroInputConnector.set_parallelization">
+<code class="descname">set_parallelization</code><span class="sig-paren">(</span><em>parallelization</em><span class="sig-paren">)</span><a class="headerlink" href="#connectors.connectors.MacroInputConnector.set_parallelization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies, if and how the execution of this connector can be parallelized.
+The choices are no parallelization, the execution in a separate thread
+and the execution in a separate process.
+This method specifies a hint, which level of parallelization is possible
+with the connector. If the executor of the connector, through which the
+computation is started, does not support the specified level, the next simpler
+one will be chosen. E.g. if a connector can be parallelized in a separate
+process, but the executor only allows threads or sequential execution, the
+connector will be executed in a separate thread.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parallelization</strong> – a flag from the <a class="reference internal" href="core_reference.html#connectors.Parallelization" title="connectors.Parallelization"><code class="xref py py-class docutils literal"><span class="pre">connectors.Parallelization</span></code></a> enum</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="transfer_function.html"
+                        title="previous chapter">3. Tutorial: Measuring a transfer function (demonstrates the core functionalities)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="helper_reference.html"
+                        title="next chapter">5. Reference: Helper functionalities</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="helper_reference.html" title="5. Reference: Helper functionalities"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="transfer_function.html" title="3. Tutorial: Measuring a transfer function (demonstrates the core functionalities)"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Connectors 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Jonas Schulte-Coerne.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.
+    </div>
+  </body>
+</html>

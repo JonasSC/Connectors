@@ -1,0 +1,315 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>6. Tutorial: Implementing a polynomial (demonstrates macros and memory saving techniques) &#8212; Connectors 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="7. Information: Lazy execution" href="lazy_execution.html" />
+    <link rel="prev" title="5. Reference: Helper functionalities" href="helper_reference.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="lazy_execution.html" title="7. Information: Lazy execution"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="helper_reference.html" title="5. Reference: Helper functionalities"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Connectors 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="tutorial-implementing-a-polynomial-demonstrates-macros-and-memory-saving-techniques">
+<h1>6. Tutorial: Implementing a polynomial (demonstrates macros and memory saving techniques)<a class="headerlink" href="#tutorial-implementing-a-polynomial-demonstrates-macros-and-memory-saving-techniques" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial shall demonstrate the use of macros and the use of the <a class="reference internal" href="helper_reference.html#connectors.WeakrefProxyGenerator" title="connectors.WeakrefProxyGenerator"><code class="xref py py-class docutils literal"><span class="pre">connectors.WeakrefProxyGenerator</span></code></a> class in order to avoid the caching intermediate results in the setters.
+For this, the computation of polynomial is implemented as a processing network, that is encapsulated in a macro class.</p>
+<div class="section" id="the-block-diagram-representation-of-a-polynomial">
+<h2>6.1. The block diagram representation of a polynomial<a class="headerlink" href="#the-block-diagram-representation-of-a-polynomial" title="Permalink to this headline">¶</a></h2>
+<p>A polynomial is a weighted sum of powers of its input variable:</p>
+<div class="math">
+\[y = a + b x + c x^2 + d x^3 + ...\]</div>
+<p>This can be organized in a block diagram:</p>
+<img src="_images/graphviz-275478d63fc08ee6fb524b220f4e122a0e093603.png" alt="digraph Polynomial{
+   rankdir=LR;
+   x -&gt; x0 -&gt; a -&gt; sum -&gt; y;
+   x -&gt; x1 -&gt; b -&gt; sum;
+   x -&gt; x2 -&gt; c -&gt; sum;
+   x -&gt; x3 -&gt; d -&gt; sum;
+   x -&gt; xn -&gt; n -&gt; sum;
+   x [label=&quot;x&quot;, shape=parallelogram];
+   x0 [label=&quot;1&quot;, shape=box];
+   a [label=&quot;a&quot;, shape=box];
+   x1 [label=&quot;(·)&quot;, shape=box];
+   b [label=&quot;·b&quot;, shape=box];
+   x2 [label=&quot;(·)²&quot;, shape=box];
+   c [label=&quot;·c&quot;, shape=box];
+   x3 [label=&quot;(·)³&quot;, shape=box];
+   d [label=&quot;·d&quot;, shape=box];
+   xn [label=&quot;...&quot;, shape=box];
+   n [label=&quot;...&quot;, shape=box];
+   sum [label=&quot;+&quot;];
+   y [label=&quot;y&quot;, shape=parallelogram];
+   {rank=same; x0, x1, x2, x3, xn};
+   {rank=same; a, b, c, d, n};
+}" />
+</div>
+<div class="section" id="implementing-the-basic-building-blocks-power-multiplication-and-summation">
+<h2>6.2. Implementing the basic building blocks: power, multiplication and summation<a class="headerlink" href="#implementing-the-basic-building-blocks-power-multiplication-and-summation" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>As seen in the block diagram, the basic building blocks can be implemented with three processing classes:</dt>
+<dd><ul class="first last simple">
+<li>one that computes a specified power of its input value</li>
+<li>one that multiplies its input value with a given factor</li>
+<li>one that sums up all its input values</li>
+</ul>
+</dd>
+</dl>
+<p>For this task, it would be sufficient, if the exponent of the power and the weighting factor of the multiplication, were constants, that are specified through the constructor of the class.
+But assuming, that a project, in which polynomials are computed, would also benefit from processing classes, that compute arbitrary powers and products, the following, more general implementations are used in this tutorial.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">connectors</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Power</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">exponent</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">__base</span> <span class="o">=</span> <span class="n">base</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">__exponent</span> <span class="o">=</span> <span class="n">exponent</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@connectors</span><span class="o">.</span><span class="n">Output</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">get_result</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__base</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__exponent</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@connectors</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span><span class="s2">&quot;get_result&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">set_base</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">__base</span> <span class="o">=</span> <span class="n">base</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@connectors</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span><span class="s2">&quot;get_result&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">set_exponent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exponent</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">__exponent</span> <span class="o">=</span> <span class="n">exponent</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Multiply</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">factor2</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">__factor1</span> <span class="o">=</span> <span class="n">factor1</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">__factor2</span> <span class="o">=</span> <span class="n">factor2</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@connectors</span><span class="o">.</span><span class="n">Output</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">get_result</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__factor1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factor2</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@connectors</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span><span class="s2">&quot;get_result&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">set_factor1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">__factor1</span> <span class="o">=</span> <span class="n">factor</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@connectors</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span><span class="s2">&quot;get_result&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">set_factor2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">__factor2</span> <span class="o">=</span> <span class="n">factor</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Sum</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">__summands</span> <span class="o">=</span> <span class="n">connectors</span><span class="o">.</span><span class="n">MultiInputData</span><span class="p">()</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@connectors</span><span class="o">.</span><span class="n">Output</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">get_result</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__summands</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@connectors</span><span class="o">.</span><span class="n">MultiInput</span><span class="p">(</span><span class="s2">&quot;get_result&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">add_summand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">summand</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__summands</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">summand</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@add_summand</span><span class="o">.</span><span class="n">remove</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">remove_summand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_id</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__summands</span><span class="p">[</span><span class="n">data_id</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="avoiding-the-caching-of-intermediate-results">
+<h2>6.3. Avoiding the caching of intermediate results<a class="headerlink" href="#avoiding-the-caching-of-intermediate-results" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="xref py py-class docutils literal"><span class="pre">Power</span></code> and <code class="xref py py-class docutils literal"><span class="pre">Multiply</span></code> classes store references to their input parameters.
+Also, because these classes are meant to be useful outside the scope of the polynomial computation, the caching of their result value is not disabled.
+This leads to all intermediate results of the polynomial to remain in memory, even after the computation of the final result has finished.
+Due to the caching of the final result, the intermediate results are no longer needed, once the computation has finished.</p>
+<p>The <code class="xref py py-class docutils literal"><span class="pre">FourierTransform</span></code> class in the <em>transfer function</em> tutorial has solved the issue of storing its input value, by deleting it in the getter method.
+This solution is only applicable to classes with not more than one input and one output connector, which is not the case with the <code class="xref py py-class docutils literal"><span class="pre">Power</span></code> and <code class="xref py py-class docutils literal"><span class="pre">Multiply</span></code> classes.</p>
+<p>To solve this problem for use cases like this, the <em>Connectors</em> package provides the <a class="reference internal" href="helper_reference.html#connectors.WeakrefProxyGenerator" title="connectors.WeakrefProxyGenerator"><code class="xref py py-class docutils literal"><span class="pre">WeakrefProxyGenerator</span></code></a> class, that stores a strong reference to its input value, propagates a weak reference to it through its output connector and provides an input connector, that deletes the strong reference, once the result of the following processing step has been computed.
+In combination with disabling the caching of the output connector, that produced the input value for the <a class="reference internal" href="helper_reference.html#connectors.WeakrefProxyGenerator" title="connectors.WeakrefProxyGenerator"><code class="xref py py-class docutils literal"><span class="pre">WeakrefProxyGenerator</span></code></a> instance, this causes the input value to be garbage collected.</p>
+<p>The block diagram of a polynomial implementation, that uses <a class="reference internal" href="helper_reference.html#connectors.WeakrefProxyGenerator" title="connectors.WeakrefProxyGenerator"><code class="xref py py-class docutils literal"><span class="pre">WeakrefProxyGenerator</span></code></a>s, is shown below.
+The <a class="reference internal" href="helper_reference.html#connectors.WeakrefProxyGenerator" title="connectors.WeakrefProxyGenerator"><code class="xref py py-class docutils literal"><span class="pre">WeakrefProxyGenerator</span></code></a>s are highlighted in red.
+Note the backwards dependencies of the <a class="reference internal" href="helper_reference.html#connectors.WeakrefProxyGenerator" title="connectors.WeakrefProxyGenerator"><code class="xref py py-class docutils literal"><span class="pre">WeakrefProxyGenerator</span></code></a>s on the output of processing classes, by which they are followed.
+This is a feedback loop to tell the <a class="reference internal" href="helper_reference.html#connectors.WeakrefProxyGenerator" title="connectors.WeakrefProxyGenerator"><code class="xref py py-class docutils literal"><span class="pre">WeakrefProxyGenerator</span></code></a>s, that they can delete the strong reference to their input values.</p>
+<img src="_images/graphviz-528c343b995c0ee8013959b5efca124186b43ca1.png" alt="digraph Polynomial{
+   rankdir=LR;
+   x -&gt; x0 -&gt; wp0 -&gt; a -&gt; wm0 -&gt; sum -&gt; y;
+   a -&gt; wp0;
+   sum -&gt; wm0;
+   x -&gt; x1 -&gt; wp1 -&gt; b -&gt; wm1 -&gt; sum;
+   b -&gt; wp1;
+   sum -&gt; wm1;
+   x -&gt; x2 -&gt; wp2 -&gt; c -&gt; wm2 -&gt; sum;
+   c -&gt; wp2;
+   sum -&gt; wm2;
+   x -&gt; x3 -&gt; wp3 -&gt; d -&gt; wm3 -&gt; sum;
+   d -&gt; wp3;
+   sum -&gt; wm3;
+   x -&gt; xn -&gt; wpn -&gt; n -&gt; wmn -&gt; sum;
+   n -&gt; wpn;
+   sum -&gt; wmn;
+   x [label=&quot;x&quot;, shape=parallelogram];
+   x0 [label=&quot;1&quot;, shape=box];
+   wp0 [label=&quot;wr&quot;, shape=box, color=red];
+   a [label=&quot;a&quot;, shape=box];
+   wm0 [label=&quot;wr&quot;, shape=box, color=red];
+   x1 [label=&quot;(·)&quot;, shape=box];
+   wp1 [label=&quot;wr&quot;, shape=box, color=red];
+   b [label=&quot;·b&quot;, shape=box];
+   wm1 [label=&quot;wr&quot;, shape=box, color=red];
+   x2 [label=&quot;(·)²&quot;, shape=box];
+   wp2 [label=&quot;wr&quot;, shape=box, color=red];
+   c [label=&quot;·c&quot;, shape=box];
+   wm2 [label=&quot;wr&quot;, shape=box, color=red];
+   x3 [label=&quot;(·)³&quot;, shape=box];
+   wp3 [label=&quot;wr&quot;, shape=box, color=red];
+   d [label=&quot;·d&quot;, shape=box];
+   wm3 [label=&quot;wr&quot;, shape=box, color=red];
+   xn [label=&quot;...&quot;, shape=box];
+   wpn [label=&quot;...&quot;, shape=box, color=red];
+   n [label=&quot;...&quot;, shape=box];
+   wmn [label=&quot;...&quot;, shape=box, color=red];
+   sum [label=&quot;+&quot;];
+   y [label=&quot;y&quot;, shape=parallelogram];
+   {rank=same; x0, x1, x2, x3, xn};
+   {rank=same; wp0, wp1, wp2, wp3, wpn};
+   {rank=same; a, b, c, d, n};
+   {rank=same; wm0, wm1, wm2, wm3, wmn};
+}" />
+<p>The following class implements the computation of a polynomial, by encapsulating the required processing chain and exporting the input and output connectors via macro connectors.
+It accepts a sequence of weighting factors (<span class="math">\(a\)</span>, <span class="math">\(b\)</span>, <span class="math">\(c\)</span>, <span class="math">\(d\)</span>, … in the block diagram) and instantiates the required processing classes in the <code class="docutils literal"><span class="pre">for</span></code>-loop.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Polynomial</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">__powers</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">__sum</span> <span class="o">=</span> <span class="n">Sum</span><span class="p">()</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">coefficients</span><span class="p">):</span>
+<span class="gp">... </span>            <span class="n">power</span> <span class="o">=</span> <span class="n">Power</span><span class="p">(</span><span class="n">exponent</span><span class="o">=</span><span class="n">e</span><span class="p">)</span>
+<span class="gp">... </span>            <span class="bp">self</span><span class="o">.</span><span class="n">__powers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">power</span><span class="p">)</span>
+<span class="gp">... </span>            <span class="n">power</span><span class="o">.</span><span class="n">get_result</span><span class="o">.</span><span class="n">set_caching</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">... </span>            <span class="n">power_weakref</span> <span class="o">=</span> <span class="n">connectors</span><span class="o">.</span><span class="n">WeakrefProxyGenerator</span><span class="p">()</span><span class="o">.</span><span class="n">set_data</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">power</span><span class="o">.</span><span class="n">get_result</span><span class="p">)</span>
+<span class="gp">... </span>            <span class="n">weighting</span> <span class="o">=</span> <span class="n">Multiply</span><span class="p">(</span><span class="n">factor2</span><span class="o">=</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">set_factor1</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">power_weakref</span><span class="o">.</span><span class="n">get_weakref_proxy</span><span class="p">)</span>
+<span class="gp">... </span>            <span class="n">weighting</span><span class="o">.</span><span class="n">get_result</span><span class="o">.</span><span class="n">set_caching</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">... </span>            <span class="n">weighting</span><span class="o">.</span><span class="n">get_result</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">power_weakref</span><span class="o">.</span><span class="n">delete_reference</span><span class="p">)</span>
+<span class="gp">... </span>            <span class="n">weighting_weakref</span> <span class="o">=</span> <span class="n">connectors</span><span class="o">.</span><span class="n">WeakrefProxyGenerator</span><span class="p">()</span><span class="o">.</span><span class="n">set_data</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">weighting</span><span class="o">.</span><span class="n">get_result</span><span class="p">)</span>
+<span class="gp">... </span>            <span class="n">weighting_weakref</span><span class="o">.</span><span class="n">get_weakref_proxy</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sum</span><span class="o">.</span><span class="n">add_summand</span><span class="p">)</span>
+<span class="gp">... </span>            <span class="bp">self</span><span class="o">.</span><span class="n">__sum</span><span class="o">.</span><span class="n">get_result</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">weighting_weakref</span><span class="o">.</span><span class="n">delete_reference</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@connectors</span><span class="o">.</span><span class="n">MacroInput</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">set_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__powers</span><span class="p">:</span>
+<span class="gp">... </span>            <span class="k">yield</span> <span class="n">p</span><span class="o">.</span><span class="n">set_base</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@connectors</span><span class="o">.</span><span class="n">MacroOutput</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">get_result</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sum</span><span class="o">.</span><span class="n">get_result</span>
+</pre></div>
+</div>
+<p>Note that the methods, that are decorated to become macro connectors merely return the connectors of the internal processing chain.
+These methods will be replaced by macro connectors, that behave like setter or getter methods, so the behavior of macro connectors differs significantly from that of the methods, which they replace.</p>
+</div>
+<div class="section" id="using-the-implementation-of-the-polynomial">
+<h2>6.4. Using the implementation of the polynomial<a class="headerlink" href="#using-the-implementation-of-the-polynomial" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="xref py py-class docutils literal"><span class="pre">Polynomial</span></code> class can now be instantiated and used for computations.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">polynomial</span> <span class="o">=</span> <span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">(</span><span class="mf">5.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span>  <span class="c1"># y = 2*x**2 - 3*x + 5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">polynomial</span><span class="o">.</span><span class="n">set_variable</span><span class="p">(</span><span class="mf">4.0</span><span class="p">)</span><span class="o">.</span><span class="n">get_result</span><span class="p">()</span>               <span class="c1"># compute the polynomial for a scalar</span>
+<span class="go">25.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">polynomial</span><span class="o">.</span><span class="n">set_variable</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">get_result</span><span class="p">()</span> <span class="c1"># compute the polynomial for elements of an array</span>
+<span class="go">array([ 19.,  10.,   5.,   4.,   7.])</span>
+</pre></div>
+</div>
+<p>Note how the <code class="xref py py-meth docutils literal"><span class="pre">set_variable()</span></code> and <code class="xref py py-meth docutils literal"><span class="pre">get_result()</span></code> methods work as actual setter and getter methods, rather than returning connectors and not accepting any parameters.
+The <code class="xref py py-meth docutils literal"><span class="pre">get_result()</span></code> input connector of the polynomial basically mimics the <code class="xref py py-meth docutils literal"><span class="pre">get_result()</span></code> connector of the summation.
+Since the macro input connector represents multiple connectors, all operations on it will be performed with each of these connectors:</p>
+<ul class="simple">
+<li>setting a value of a macro input connector, passes that value to all represented connectors.</li>
+<li>changing the behavior of a macro input connector applies the same changes to all represented connectors.</li>
+<li>connecting an output connector to a macro input connector connects that output to all represented connectors.</li>
+</ul>
+<p>Also note, that macro input connectors return the instance of the processing class to which they belong, so that setting a parameter and retrieving the updated result can be programmed in one line.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="helper_reference.html"
+                        title="previous chapter">5. Reference: Helper functionalities</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="lazy_execution.html"
+                        title="next chapter">7. Information: Lazy execution</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="lazy_execution.html" title="7. Information: Lazy execution"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="helper_reference.html" title="5. Reference: Helper functionalities"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Connectors 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Jonas Schulte-Coerne.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.
+    </div>
+  </body>
+</html>
