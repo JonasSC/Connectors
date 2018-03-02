@@ -4,5 +4,8 @@
 .pydevproject
 .settings
 
+Connectors.egg-info
+dist
+
 *.pyc
 *__pycache__
