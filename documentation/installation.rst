@@ -8,13 +8,13 @@ The easiest way to install the *Connectors* package is probably through ``pip``.
 
 ::
 
-   pip install Connectors
+   pip install connectors
 
 If the package shall only be installed for the current user, rather than system wide, run the following command:
 
 ::
 
-   pip install --user Connectors
+   pip install --user connectors
 
 
 Installation from source

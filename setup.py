@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 with open("README.rst") as f:
     long_description = f.read()
 
-setup(name="Connectors",
+setup(name="connectors",
       version="1.0",
       description="A package for connecting objects to form a processing chain",
       long_description=long_description,
