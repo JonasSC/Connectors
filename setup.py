@@ -11,7 +11,7 @@ setup(name="Connectors",
       author="Jonas Schulte-Coerne",
       license="GNU Lesser General Public License v3 or later (LGPLv3+)",
       classifiers=["Development Status :: 5 - Production/Stable",
-                   "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)"
+                   "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
                    "Programming Language :: Python :: 3.6",
                    "Intended Audience :: Developers",
                    "Intended Audience :: Science/Research",
