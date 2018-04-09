@@ -39,7 +39,7 @@ Python 3.5 might work, but this is not tested.
 
 ::
 
-   pip install connectors
+   pip3 install connectors
 
 Documentation
 -------------
