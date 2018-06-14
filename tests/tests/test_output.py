@@ -20,6 +20,18 @@ import helper
 import testclasses
 
 
+def test_wrapping():
+    """Tests if the output connectors and the output connector proxies copy the
+    docstring from the original method."""
+    t = testclasses.Simple()
+    proxy_doc = t.get_value.__doc__
+    testclasses.Simple().set_value.connect(t.get_value)
+    connector_doc = t.get_value.__doc__
+    method_doc = t.get_value._method.__doc__
+    assert proxy_doc == method_doc
+    assert connector_doc == method_doc
+
+
 def test_caching():
     """Tests the caching of an output connector's return value"""
     call_logger = helper.CallLogger()

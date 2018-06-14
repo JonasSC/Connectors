@@ -16,6 +16,7 @@
 
 """Base classes for the connector classes"""
 
+import functools
 import weakref
 from .._lib import Laziness, NonLazyInputs
 
@@ -39,11 +40,11 @@ class Connector:
                          :func:`connectors.executor` function. See the :meth:`set_executor`
                          method for details
         """
-        self.__doc__ = method.__doc__           # This way the docstring of the decorated method remains the same
         self._instance = weakref.ref(instance)  # the weak reference avoids reference counting errors due to circular references
         self._method = method
         self._parallelization = parallelization
         self._executor = executor
+        functools.update_wrapper(self, method)
 
     def __call__(self, *args, **kwargs):
         """By making the object callable, it mimics the replaced method.

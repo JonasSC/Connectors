@@ -16,6 +16,7 @@
 
 """Contains classes for the multi-input proxies"""
 
+import functools
 from ..connectors import MultiInputConnector
 from .._lib import Laziness, NonLazyInputs
 from ._input import SingleInputProxy
@@ -131,6 +132,7 @@ class MultiInputAssociateProxy:
         self.__method = method
         self.__observers = observers
         self.__executor = executor
+        functools.update_wrapper(self, method)
 
     def __call__(self, *args, **kwargs):
         """Executes the replaced method and notifies the observing output connectors.

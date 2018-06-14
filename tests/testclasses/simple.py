@@ -29,12 +29,14 @@ class Simple(BaseTestClass):
         self.__value = None
 
     @connectors.Input("get_value")
-    def set_value(self, value):     # pylint: disable=missing-docstring
+    def set_value(self, value):
+        """sets the internal value"""
         self._register_call(methodname="set_value", value=value)
         self.__value = value
         return self
 
     @connectors.Output()
-    def get_value(self):            # pylint: disable=missing-docstring
+    def get_value(self):
+        """returns the internal value"""
         self._register_call(methodname="get_value", value=self.__value)
         return self.__value

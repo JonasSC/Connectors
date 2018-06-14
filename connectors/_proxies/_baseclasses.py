@@ -16,6 +16,8 @@
 
 """Contains :class:`ConnectorProxy`, the base class for connector proxies."""
 
+import functools
+
 
 class ConnectorProxy:
     """A base class for proxy objects of connectors.
@@ -44,6 +46,7 @@ class ConnectorProxy:
         self._parallelization = parallelization
         self._executor = executor
         self.__connector = None
+        functools.update_wrapper(self, method)
 
     def __call__(self, *args, **kwargs):
         """By making the object callable, it mimics the replaced method.

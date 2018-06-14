@@ -16,6 +16,7 @@
 
 """Contains the decorator and connector classes for the macro input connector."""
 
+import functools
 from ._baseclass import MacroDecorator
 
 __all__ = ("MacroInput",)
@@ -65,6 +66,7 @@ class MacroInputConnector:
         """
         self.__instance = instance
         self.__method = method
+        functools.update_wrapper(self, method)
 
     def __call__(self, *args, **kwargs):
         """Calls all input connectors, that are exported by this, with the given

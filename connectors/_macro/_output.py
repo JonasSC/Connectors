@@ -16,6 +16,7 @@
 
 """Contains the decorator and connector classes for the macro output connector."""
 
+import functools
 from ._baseclass import MacroDecorator
 
 __all__ = ("MacroOutput",)
@@ -59,6 +60,7 @@ class MacroOutputConnector:
         """
         self.__instance = instance
         self.__method = method
+        functools.update_wrapper(self, method)
 
     def __call__(self):
         """Calls the output connector, that is exported by this.

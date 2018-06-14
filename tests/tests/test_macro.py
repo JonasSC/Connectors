@@ -20,6 +20,18 @@ import connectors
 import testclasses
 
 
+def test_wrapping():
+    """Tests if the macro connectors and the input connector proxies copy the
+    docstring from the original method."""
+    t = testclasses.Macro()
+    input_macro_doc = t.set_input1.__doc__
+    input_method_doc = t.set_input1._MacroInputConnector__method.__doc__
+    output_macro_doc = t.get_output1.__doc__
+    output_method_doc = t.get_output1._MacroOutputConnector__method.__doc__
+    assert input_macro_doc == input_method_doc
+    assert output_macro_doc == output_method_doc
+
+
 def test_macro():
     """Tests the basic functionality of macro connectors"""
     macro = testclasses.Macro()

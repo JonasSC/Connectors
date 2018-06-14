@@ -37,20 +37,24 @@ class Macro:
         self.__output = testclasses.MultipleOutputs().set_value.connect(hidden2.get_values)
 
     @connectors.MacroInput()
-    def set_input1(self, *_):       # pylint: disable=missing-docstring
+    def set_input1(self, *_):
+        """sets the first input value"""
         yield self.__input1.set_value
 
     @connectors.MacroInput()
-    def set_input2and3(self, *_):   # pylint: disable=missing-docstring
+    def set_input2and3(self, *_):
+        """sets the second and third input value"""
         yield self.__input2.set_value
         yield self.__input3.set_value
 
     @connectors.MacroOutput()
-    def get_output1(self):          # pylint: disable=missing-docstring
+    def get_output1(self):
+        """returns the output value"""
         return self.__output.get_value
 
     @connectors.MacroOutput()
-    def get_output2(self):          # pylint: disable=missing-docstring
+    def get_output2(self):
+        """returns the output boolean"""
         return self.__output.get_bool
 
 

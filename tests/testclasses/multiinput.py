@@ -52,23 +52,27 @@ class ReplacingMultiInput(BaseTestClass):
         self.__data = connectors.MultiInputData()
 
     @connectors.MultiInput("get_values")
-    def add_value(self, value):                 # pylint: disable=missing-docstring
+    def add_value(self, value):
+        """adds a value to the output list"""
         self._register_call(methodname="add_value", value=value)
         return self.__data.add(value)
 
     @add_value.remove
-    def remove_value(self, data_id):            # pylint: disable=missing-docstring
+    def remove_value(self, data_id):
+        """removes a value from the output list"""
         self._register_call(methodname="remove_value", value=data_id)
         del self.__data[data_id]
         return self
 
     @add_value.replace
-    def replace_value(self, data_id, value):    # pylint: disable=missing-docstring
+    def replace_value(self, data_id, value):
+        """replaces a value in the output list"""
         self._register_call(methodname="replace_value", value=data_id)
         self.__data[data_id] = value
         return self
 
     @connectors.Output()
-    def get_values(self):                       # pylint: disable=missing-docstring
+    def get_values(self):
+        """returns the output list"""
         self._register_call(methodname="get_values", value=list(self.__data.values()))
         return list(self.__data.values())

@@ -21,6 +21,18 @@ import helper
 import testclasses
 
 
+def test_wrapping():
+    """Tests if the input connectors and the input connector proxies copy the
+    docstring from the original method."""
+    t = testclasses.Simple()
+    proxy_doc = t.set_value.__doc__
+    testclasses.Simple().get_value.connect(t.set_value)
+    connector_doc = t.set_value.__doc__
+    method_doc = t.set_value._method.__doc__
+    assert proxy_doc == method_doc
+    assert connector_doc == method_doc
+
+
 def test_simple_input_output_chain():
     """Tests of a simple chain of two processing objects, that pass through their input value"""
     call_logger = helper.CallLogger()

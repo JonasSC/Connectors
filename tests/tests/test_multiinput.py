@@ -21,6 +21,24 @@ import testclasses
 import helper
 
 
+def test_wrapping():
+    """Tests if the multi-input connectors and the multi-input connector proxies
+     copy the docstring from the original method."""
+    t = testclasses.ReplacingMultiInput()
+    add_proxy_doc = t.add_value.__doc__
+    remove_proxy_doc = t.remove_value.__doc__
+    replace_proxy_doc = t.replace_value.__doc__
+    testclasses.Simple().get_value.connect(t.add_value)
+    add_connector_doc = t.add_value.__doc__
+    add_method_doc = t.add_value._method.__doc__
+    remove_method_doc = t.remove_value._MultiInputAssociateProxy__method.__doc__
+    replace_method_doc = t.replace_value._MultiInputAssociateProxy__method.__doc__
+    assert add_proxy_doc == add_method_doc
+    assert add_connector_doc == add_method_doc
+    assert remove_proxy_doc == remove_method_doc
+    assert replace_proxy_doc == replace_method_doc
+
+
 def test_manual_method_calls():
     """Tests the behavior, when multi input connectors are called manually like
     methods, rather than through connections"""
