@@ -28,7 +28,7 @@ def test_wrapping():
     proxy_doc = t.set_value.__doc__
     testclasses.Simple().get_value.connect(t.set_value)
     connector_doc = t.set_value.__doc__
-    method_doc = t.set_value._method.__doc__
+    method_doc = t.set_value._method.__doc__    # pylint: disable=protected-access
     assert proxy_doc == method_doc
     assert connector_doc == method_doc
 

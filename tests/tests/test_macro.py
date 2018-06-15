@@ -25,9 +25,9 @@ def test_wrapping():
     docstring from the original method."""
     t = testclasses.Macro()
     input_macro_doc = t.set_input1.__doc__
-    input_method_doc = t.set_input1._MacroInputConnector__method.__doc__
+    input_method_doc = t.set_input1._MacroInputConnector__method.__doc__        # pylint: disable=protected-access
     output_macro_doc = t.get_output1.__doc__
-    output_method_doc = t.get_output1._MacroOutputConnector__method.__doc__
+    output_method_doc = t.get_output1._MacroOutputConnector__method.__doc__     # pylint: disable=protected-access
     assert input_macro_doc == input_method_doc
     assert output_macro_doc == output_method_doc
 

@@ -16,8 +16,8 @@
 
 """Tests for functionalities specific for output connectors"""
 
-import helper
-import testclasses
+from . import helper
+from . import testclasses
 
 
 def test_wrapping():
@@ -27,7 +27,7 @@ def test_wrapping():
     proxy_doc = t.get_value.__doc__
     testclasses.Simple().set_value.connect(t.get_value)
     connector_doc = t.get_value.__doc__
-    method_doc = t.get_value._method.__doc__
+    method_doc = t.get_value._method.__doc__    # pylint: disable=protected-access
     assert proxy_doc == method_doc
     assert connector_doc == method_doc
 
