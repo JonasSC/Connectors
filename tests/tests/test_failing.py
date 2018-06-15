@@ -20,7 +20,7 @@ package does not show the desired behavior.
 
 import gc
 import pytest
-import testclasses
+from . import testclasses
 
 
 def test_orphaned_connection():

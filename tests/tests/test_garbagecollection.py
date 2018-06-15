@@ -17,8 +17,8 @@
 """Tests for garbage collection related issues"""
 
 import gc
-import helper
-import testclasses
+from . import helper
+from . import testclasses
 
 
 def test_end_of_lifetime():

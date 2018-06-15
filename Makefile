@@ -6,8 +6,6 @@ test_coverage:
 
 lint:
 	pylint3 --rcfile=tests/pylintrc_connectors connectors
-	pylint3 --rcfile=tests/pylintrc_tests tests/helper
-	pylint3 --rcfile=tests/pylintrc_tests tests/testclasses
 	pylint3 --rcfile=tests/pylintrc_tests tests/tests
 
 doc:

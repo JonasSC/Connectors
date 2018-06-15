@@ -18,8 +18,6 @@
 
 import os
 import connectors
-import helper
-import testclasses
 import tests
 
 
@@ -41,8 +39,6 @@ def test_license():
               "# You should have received a copy of the GNU Lesser General Public License along\n",
               "# with this program. If not, see <http://www.gnu.org/licenses/>.\n")
     for directory in (os.path.split(connectors.__file__)[0],
-                      os.path.split(helper.__file__)[0],
-                      os.path.split(testclasses.__file__)[0],
                       os.path.split(tests.__file__)[0]):
         for dirpath, _, filenames in os.walk(directory):
             for filename in filenames:

@@ -17,8 +17,8 @@
 """Test for multi input connectors"""
 
 import connectors
-import testclasses
-import helper
+from . import testclasses
+from . import helper
 
 
 def test_wrapping():

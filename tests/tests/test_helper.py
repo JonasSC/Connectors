@@ -19,7 +19,7 @@
 import gc
 import weakref
 import connectors
-import testclasses
+from . import testclasses
 
 
 def test_multiinput_data():

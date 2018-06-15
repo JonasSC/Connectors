@@ -16,4 +16,4 @@
 
 """Contains helper objects for the unit tests"""
 
-from .call_logger import *
+from ._call_logger import *

@@ -14,32 +14,29 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""Contains a test class with non-lazy input connectors"""
+"""Contains a simple test class, that outputs its input"""
 
 import connectors
-from .baseclass import BaseTestClass
+from ._baseclass import BaseTestClass
 
-__all__ = ("NonLazyInputs",)
+__all__ = ("Simple",)
 
 
-class NonLazyInputs(BaseTestClass):
-    """Has a non-lazy input connector and a non-lazy multi input connector"""
+class Simple(BaseTestClass):
+    """Returns the input connectors parameter at the output and logs calls."""
     def _initialize(self):
         """is called in the super class's constructor"""
-        self.__data = connectors.MultiInputData()
+        self.__value = None
 
-    @connectors.Input(laziness=connectors.Laziness.ON_ANNOUNCE)
-    def set_value(self, value):         # pylint: disable=missing-docstring
+    @connectors.Input("get_value")
+    def set_value(self, value):
+        """sets the internal value"""
         self._register_call(methodname="set_value", value=value)
+        self.__value = value
         return self
 
-    @connectors.MultiInput(laziness=connectors.Laziness.ON_ANNOUNCE)
-    def add_value(self, value):         # pylint: disable=missing-docstring
-        self._register_call(methodname="add_value", value=value)
-        return self.__data.add(value)
-
-    @add_value.remove
-    def remove_value(self, data_id):    # pylint: disable=missing-docstring
-        self._register_call(methodname="remove_value", value=data_id)
-        del self.__data[data_id]
-        return self
+    @connectors.Output()
+    def get_value(self):
+        """returns the internal value"""
+        self._register_call(methodname="get_value", value=self.__value)
+        return self.__value

@@ -18,8 +18,8 @@
 which could provoke cyclic references or weak references to deleted objects."""
 
 import connectors
-from .baseclass import BaseTestClass
-from .simple import Simple
+from ._baseclass import BaseTestClass
+from ._simple import Simple
 
 __all__ = ("ConstructorMethodCall",
            "ConstructorLazinessChange",

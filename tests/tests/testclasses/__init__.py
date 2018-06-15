@@ -16,11 +16,11 @@
 
 """Contains classes with connectors, with which their functionality can be tested"""
 
-from .constructor_method_call import *
-from .macro import *
-from .multiinput import *
-from .multiple_inputs import *
-from .multiple_outputs import *
-from .non_lazy_inputs import *
-from .simple import *
-from .sleep import *
+from ._constructor_method_call import *
+from ._macro import *
+from ._multiinput import *
+from ._multiple_inputs import *
+from ._multiple_outputs import *
+from ._non_lazy_inputs import *
+from ._simple import *
+from ._sleep import *

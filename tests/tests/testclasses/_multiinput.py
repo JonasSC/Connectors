@@ -17,7 +17,7 @@
 """Contains test classes for the multi input connector"""
 
 import connectors
-from .baseclass import BaseTestClass
+from ._baseclass import BaseTestClass
 
 __all__ = ("NonReplacingMultiInput", "ReplacingMultiInput")
 

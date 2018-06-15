@@ -18,7 +18,7 @@
 
 import time
 import connectors
-import testclasses
+from . import testclasses
 
 
 def test_parallelization_and_executors():

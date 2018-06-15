@@ -17,7 +17,9 @@
 """Contains test classes for the macro connectors"""
 
 import connectors
-import testclasses
+from ._simple import Simple
+from ._multiple_inputs import MultipleInputs
+from ._multiple_outputs import MultipleOutputs
 
 __all__ = ("Macro", "MacroInMacro", "MacroPreferences")
 
@@ -25,16 +27,16 @@ __all__ = ("Macro", "MacroInMacro", "MacroPreferences")
 class Macro:
     """A test class with an internal processing network and macro connectors"""
     def __init__(self):
-        self.__input1 = testclasses.Simple()
-        self.__input2 = testclasses.Simple()
-        self.__input3 = testclasses.Simple()
-        hidden1 = testclasses.MultipleInputs()
+        self.__input1 = Simple()
+        self.__input2 = Simple()
+        self.__input3 = Simple()
+        hidden1 = MultipleInputs()
         hidden1.set_value1.connect(self.__input1.get_value)
         hidden1.set_value2.connect(self.__input2.get_value)
-        hidden2 = testclasses.MultipleInputs()
+        hidden2 = MultipleInputs()
         hidden2.set_value1.connect(hidden1.get_values)
         hidden2.set_value2.connect(self.__input3.get_value)
-        self.__output = testclasses.MultipleOutputs().set_value.connect(hidden2.get_values)
+        self.__output = MultipleOutputs().set_value.connect(hidden2.get_values)
 
     @connectors.MacroInput()
     def set_input1(self, *_):
@@ -54,7 +56,7 @@ class Macro:
 
     @connectors.MacroOutput()
     def get_output2(self):
-        """returns the output boolean"""
+        """returns the output Boolean"""
         return self.__output.get_bool
 
 

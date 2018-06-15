@@ -17,8 +17,8 @@
 """Basic functionality tests with input connectors and output connectors"""
 
 import connectors
-import helper
-import testclasses
+from . import helper
+from . import testclasses
 
 
 def test_wrapping():

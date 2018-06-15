@@ -17,7 +17,7 @@
 """Tests for the macro connectors"""
 
 import connectors
-import testclasses
+from . import testclasses
 
 
 def test_wrapping():

@@ -17,7 +17,7 @@
 """contains a test class with an output, that depends on multiple inputs"""
 
 import connectors
-from .baseclass import BaseTestClass
+from ._baseclass import BaseTestClass
 
 __all__ = ("MultipleInputs",)
 
