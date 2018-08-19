@@ -23,26 +23,28 @@ __all__ = ("MultiInputData",)
 
 class MultiInputData(collections.OrderedDict):
     # pylint: disable=wrong-spelling-in-docstring;    avoid that the spell checker complains about the code in this comment
-    """A container for data that is managed with a MultiInput connector.
+    """A container for data that is managed with a multi-input connector.
     This is basically an OrderedDict with an add method, that stores the added
     data under a unique key.
-    This facilitates the implementation of a class with a :class:`MultiInput` connector::
+    This facilitates the implementation of a class with a :class:`MultiInput` connector:
 
-        class ReplacingMultiInput(BaseTestClass):
-            def __init__(self):
-                self.__data = connectors.MultiInputData()
+    >>> import connectors
+    >>> class ReplacingMultiInput:
+    ...     def __init__(self):
+    ...         self.__data = connectors.MultiInputData()
+    ...
+    ...     @connectors.MultiInput()
+    ...     def add_value(self, value):
+    ...         return self.__data.add(value)
+    ...
+    ...     @add_value.remove
+    ...     def remove_value(self, data_id):
+    ...         del self.__data[data_id]
+    ...
+    ...     @add_value.replace
+    ...     def replace_value(self, data_id, value):
+    ...         self.__data[data_id] = value
 
-            @connectors.MultiInput()
-            def add_value(self, value):
-                return self.__data.add(value)
-
-            @add_value.remove
-            def remove_value(self, data_id):
-                del self.__data[data_id]
-
-            @add_value.replace
-            def replace_value(self, data_id, value):
-                self.__data[data_id] = value
     """
     def __init__(self, datas=()):
         """
@@ -55,6 +57,7 @@ class MultiInputData(collections.OrderedDict):
 
     def add(self, data):
         """Adds a data set to the container.
+
         :param data: the data set that shall be added
         :returns: the id under which the data is stored
         """

@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""Test for multi input connectors"""
+"""Test for multi-input connectors"""
 
 import connectors
 from . import testclasses
@@ -40,7 +40,7 @@ def test_wrapping():
 
 
 def test_manual_method_calls():
-    """Tests the behavior, when multi input connectors are called manually like
+    """Tests the behavior, when multi-input connectors are called manually like
     methods, rather than through connections"""
     # non replacing MultiInput
     t1 = testclasses.Simple()
@@ -79,7 +79,7 @@ def test_manual_method_calls():
 
 
 def test_non_replacing_multiinput():
-    """Tests the behavior of a multi input connector without a replace method"""
+    """Tests the behavior of a multi-input connector without a replace method"""
     call_logger = helper.CallLogger()
     # test without connections
     instance = testclasses.NonReplacingMultiInput(call_logger)
@@ -103,7 +103,7 @@ def test_non_replacing_multiinput():
 
 
 def test_replacing_multiinput():
-    """Tests the behavior of a multi input connector with a replace method"""
+    """Tests the behavior of a multi-input connector with a replace method"""
     call_logger = helper.CallLogger()
     # test without connections
     instance = testclasses.ReplacingMultiInput(call_logger)
@@ -129,7 +129,7 @@ def test_replacing_multiinput():
 
 
 def test_multiple_outputs():
-    """Tests the behavior of a multi input connector upon which two output connectors depend."""
+    """Tests the behavior of a multi-input connector upon which two output connectors depend."""
     call_logger = helper.CallLogger()
     # set the processing chain
     t1 = testclasses.Simple(call_logger)
@@ -148,7 +148,7 @@ def test_multiple_outputs():
 
 
 def test_disconnect():
-    """Tests the behavior when disconnecting a multi input connector"""
+    """Tests the behavior when disconnecting a multi-input connector"""
     t1 = testclasses.Simple()
     t2 = testclasses.Simple()
     t3 = testclasses.ReplacingMultiInput()
@@ -162,9 +162,9 @@ def test_disconnect():
 
 
 def test_laziness_on_connect():
-    """Tests the behavior of a non-lazy multi input connector, that requests new
+    """Tests the behavior of a non-lazy multi-input connector, that requests new
     data as soon as it becomes available and also when connecting an output connector
-    to the multi input connector"""
+    to the multi-input connector"""
     call_logger = helper.CallLogger()
     # set up a small processing chain
     t1 = testclasses.NonReplacingMultiInput(call_logger)
@@ -175,7 +175,7 @@ def test_laziness_on_connect():
     # change a value and check that the setter is called
     call_logger.clear()
     t1.add_value(1.0)
-    call_logger.compare([(t1, "add_value", 1.0), (t1, "get_values", 1.0), (t2, "remove_value"), (t2, "add_value", 1.0)])
+    call_logger.compare([(t1, "add_value", 1.0), (t1, "get_values", 1.0), (t2, "replace_value")])
     # change the input's laziness and check again
     call_logger.clear()
     t2.add_value.set_laziness(connectors.Laziness.ON_REQUEST)
@@ -184,7 +184,7 @@ def test_laziness_on_connect():
 
 
 def test_laziness_on_announce():
-    """Tests the behavior of a non-lazy multi input connector, that requests new
+    """Tests the behavior of a non-lazy multi-input connector, that requests new
     data as soon as it becomes available"""
     call_logger = helper.CallLogger()
     # set up a small processing chain
@@ -210,7 +210,7 @@ def test_laziness_on_announce():
 
 
 def test_laziness_on_notify():
-    """Tests the behavior of a non-lazy multi input connector, that requests new
+    """Tests the behavior of a non-lazy multi-input connector, that requests new
     data as soon as it has been computed"""
     call_logger = helper.CallLogger()
     # set up a small processing chain
@@ -231,3 +231,83 @@ def test_laziness_on_notify():
     call_logger.clear()
     assert t3.get_values() == [1.0]
     call_logger.compare([(t3, "get_values", (1.0,))])
+
+
+def test_condition_on_announce():
+    """Tests the conditional announcement of value changes"""
+    call_logger = helper.CallLogger()
+    t1 = testclasses.Simple(call_logger)
+    t2 = testclasses.ConditionalMultiInputAnnouncement(call_logger).add_value.connect(t1.get_value)
+    t3 = testclasses.Simple(call_logger).set_value.connect(t2.get_values)
+    # test with condition == True
+    call_logger.compare([])
+    t1.set_value(1.0)
+    assert t3.get_value() == [1.0]
+    call_logger.compare([(t1, "set_value", 1.0), (t1, "get_value", 1.0),
+                         (t2, "add_value", 1.0), (t2, "get_values", [1.0]),
+                         (t3, "set_value", [1.0]), (t3, "get_value", [1.0])])
+    # test with condition == False
+    t2.condition = False
+    call_logger.clear()
+    t1.set_value(2.0)
+    assert t3.get_value() == [1.0]
+    call_logger.compare([(t1, "set_value", 2.0)])
+    assert t2.get_values() == [1.0]
+    # test calling the method directly
+    t2.condition = False
+    call_logger.clear()
+    t2.add_value(3.0)
+    assert t3.get_value() == [1.0, 3.0]
+    call_logger.compare([(t2, "add_value", 3.0), (t2, "get_values", [1.0, 3.0]),
+                         (t3, "set_value", [1.0, 3.0]), (t3, "get_value", [1.0, 3.0])])
+    # test disconnecting
+    t2.condition = False
+    call_logger.clear()
+    t1.get_value.disconnect(t2.add_value)
+    assert t3.get_value() == [3.0]
+    call_logger.compare([(t2, "remove_value"), (t2, "get_values", [3.0]),
+                         (t3, "set_value", [3.0]), (t3, "get_value", [3.0])])
+
+
+def test_condition_on_notify():
+    """Tests the conditional notification of observing output connectors about value changes"""
+    call_logger = helper.CallLogger()
+    t1 = testclasses.Simple(call_logger)
+    t2 = testclasses.ConditionalMultiInputNotification(call_logger).add_value.connect(t1.get_value)
+    t3 = testclasses.Simple(call_logger).set_value.connect(t2.get_values)
+    call_logger.compare([])
+    # test with condition == True
+    t1.set_value(1.0)
+    assert t3.get_value() == [1.0]
+    call_logger.compare([(t1, "set_value", 1.0), (t1, "get_value", 1.0),
+                         (t2, "add_value", 1.0), (t2, "get_values", [1.0]),
+                         (t3, "set_value", [1.0]), (t3, "get_value", [1.0])])
+    # test with condition == False
+    t2.condition = False
+    call_logger.clear()
+    t1.set_value(2.0)
+    assert t3.get_value() == [1.0]
+    call_logger.compare([(t1, "set_value", 2.0), (t1, "get_value", 2.0), (t2, "replace_value", 1.0)])
+    assert t2.get_values() == [1.0]
+    # test calling the method directly
+    t2.condition = False
+    call_logger.clear()
+    t2.add_value(3.0)
+    assert t3.get_value() == [1.0]
+    call_logger.compare([(t2, "add_value", 3.0)])
+    assert t2.get_values() == [1.0]
+    # test for an implementation detail, that specifying the value as keyword argument takes a slightly more complex code path
+    data_id = t2.add_value(value=4.0)
+    t2.remove_value(data_id)
+    # test disconnecting
+    t2.condition = False
+    call_logger.clear()
+    t1.get_value.disconnect(t2.add_value)
+    assert t3.get_value() == [1.0]
+    call_logger.compare([(t2, "remove_value")])
+    # test changing the condition
+    call_logger.clear()
+    t2.set_condition(True)
+    assert t3.get_value() == [3.0]  # the value from calling the method directly
+    call_logger.compare([(t2, "set_condition", True), (t2, "get_values", [3.0]),
+                         (t3, "set_value", [3.0]), (t3, "get_value", [3.0])])

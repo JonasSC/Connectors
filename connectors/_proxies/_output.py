@@ -58,12 +58,14 @@ class OutputProxy(ConnectorProxy):
         for the computation. In this case, the getter method is only called once,
         independent of the number of connections through which the result value
         has to be passed.
+
         :param caching: True, if caching shall be enabled, False otherwise
         """
         self._get_connector().set_caching(caching)
 
     def _create_connector(self, instance, method, parallelization, executor):
         """Creates and returns the output connector.
+
         :param instance: the instance in which the method is replaced by the connector
         :param method: the unbound method that is replaced by the connector
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
@@ -79,9 +81,22 @@ class OutputProxy(ConnectorProxy):
                                parallelization=parallelization,
                                executor=executor)
 
-    def _notify(self, connector, non_lazy_inputs):
+    def _announce(self, connector, non_lazy_inputs):
+        """This method is to notify this output connector, when an observed input
+        connector (a setter from self._instance) can retrieve updated data.
+
+        :param connector: the input connector, which is about to change a value
+        :param non_lazy_inputs: a NonLazyInputs instance to which input connectors
+                                can be appended, if they request an immediate
+                                re-computation (see the InputConnector's
+                                :meth:`set_laziness` method for more about lazy execution)
+        """
+        pass    # nothing to do for a proxy
+
+    def _notify(self, connector):
         """This method is to notify this output connector, when an observed input
         connector (a setter from self._instance) has retrieved updated data.
+
         :param connector: the input connector, which has changed a value
         :param non_lazy_inputs: a NonLazyInputs instance to which input connectors
                                 can be appended, if they request an immediate

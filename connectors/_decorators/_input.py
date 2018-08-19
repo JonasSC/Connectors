@@ -23,13 +23,14 @@ __all__ = ("Input",)
 
 
 class Input(InputDecorator):
-    """A decorator that marks a method as an input for single connections.
+    """A decorator, that marks a method as an input for single connections.
     These connections can be used to automatically update a processing chain
     when a value has changed.
     The decorated method must take exactly one argument.
     """
     def __get__(self, instance, instance_type):
         """Is called, when the decorated method is accessed.
+
         :param instance: the instance of which a method shall be replaced
         :param instance_type: the type of the instance
         :returns: a :class:`~connectors.proxies.SingleInputProxy` instance, that mimics
@@ -38,6 +39,8 @@ class Input(InputDecorator):
         return SingleInputProxy(instance=instance,
                                 method=self._method,
                                 observers=self._observers,
+                                announce_condition=self._announce_condition,
+                                notify_condition=self._notify_condition,
                                 laziness=self._laziness,
                                 parallelization=self._parallelization,
                                 executor=self._executor)

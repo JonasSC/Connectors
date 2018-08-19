@@ -50,12 +50,14 @@ class ConnectorProxy:
 
     def __call__(self, *args, **kwargs):
         """By making the object callable, it mimics the replaced method.
+
         :param *args, **kwargs: possible arguments for the replaced method
         """
         return self.__method(self.__instance, *args, **kwargs)
 
     def connect(self, connector):
         """Connects this connector with another one.
+
         :param connector: the :class:`Connector` instance to which this connector shall be connected
         :returns: the instance of which this :class:`Connector` has replaced a method
         """
@@ -71,6 +73,7 @@ class ConnectorProxy:
         one will be chosen. E.g. if a connector can be parallelized in a separate
         process, but the executor only allows threads or sequential execution, the
         connector will be executed in a separate thread.
+
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum
         """
         self._get_connector().set_parallelization(parallelization)
@@ -84,6 +87,7 @@ class ConnectorProxy:
         If multiple connectors in a processing chain need to be computed, the
         executor of the connector, which started the computations, is used for
         all computations.
+
         :param executor: an :class:`Executor` instance, that can be created with
                          the :func:`connectors.executor` function
         """
@@ -92,6 +96,7 @@ class ConnectorProxy:
     def _get_instance(self):
         """A method, that is used internally by the *Connectors* package to retrieve
          the object instance of which the connector proxy has replaced a method.
+
         :returns: a Python object
         """
         return self.__instance
@@ -100,6 +105,7 @@ class ConnectorProxy:
         """Creates the actual connector, that is represented by this proxy, replaces
         the method with it and returns the connector. This proxy is no longer used
         after this.
+
         :returns: a Connector instance
         """
         self.__replace_method()
@@ -108,6 +114,7 @@ class ConnectorProxy:
     def _create_connector(self, instance, method, parallelization, executor):
         """Abstract method, in which derived classes can implement the creation
         of their connectors.
+
         :param instance: the instance in which the method is replaced by the connector
         :param method: the unbound method that is replaced by the connector
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.

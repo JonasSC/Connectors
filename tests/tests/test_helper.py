@@ -16,14 +16,11 @@
 
 """Tests for the helper functionalities"""
 
-import gc
-import weakref
 import connectors
-from . import testclasses
 
 
 def test_multiinput_data():
-    """Tests the :class:`MultiInputData` container"""
+    """Tests the :class:`MultiInputData` container."""
     data = connectors.MultiInputData([1, 2, 3, 4])
     assert list(data.values()) == [1, 2, 3, 4]
     data_id = data.add(5)
@@ -34,36 +31,3 @@ def test_multiinput_data():
     assert list(data.values()) == [1, 2, 3, 4]
     data.clear()
     assert list(data.values()) == []
-
-
-def test_weakref_proxy_generator_functionality():
-    """Tests the basic functionality of the :class:`WeakrefProxyGenerator` class"""
-    # collect garbage from imports and other tests
-    gc.collect()
-    assert gc.collect() == 0
-    # create a processing chain for testing
-    t1 = connectors.WeakrefProxyGenerator()
-    t2 = testclasses.Simple().set_value.connect(t1.get_weakref_proxy)
-    t1.delete_reference.connect(t2.get_value)
-    # create a data object and a weak reference as a handle to check if the data object has been garbage collected
-    data = testclasses.NonLazyInputs()  # just have any object, for which a weak reference can be created
-    data_ref = weakref.ref(data)
-    # pass the data into the processing chain
-    t1.set_data(data)
-    del data                        # delete the local reference
-    assert gc.collect() == 0        # make sure, the data object has been deleted by reference counting
-    assert data_ref() is not None   # the data object has been deleted, since a reference to it has been stored by the setter
-    data = data_ref()
-    # retrieve the result of the processing chain
-    assert t2.get_value() == data
-    del data                    # delete the local reference
-    assert gc.collect() == 0    # make sure, the data object has been deleted by reference counting
-    assert data_ref() is None   # the data object has been deleted, because the loopback has told the X to delete the reference, that has been stored by the setter
-
-
-def test_weakref_proxy_generator_data_types():
-    """Tests the :class:`WeakrefProxyGenerator` class with different types of input data"""
-    t = connectors.WeakrefProxyGenerator()
-    for data in (1, 2.0, (3, 4.0), [5, 6.0], None):
-        t.set_data(data)
-        assert t.get_weakref_proxy() == data

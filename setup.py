@@ -4,7 +4,7 @@ with open("README.rst") as f:
     long_description = f.read()
 
 setup(name="connectors",
-      version="1.0",
+      version="2.0",
       description="A package for connecting objects to form a processing chain",
       long_description=long_description,
       url="https://github.com/JonasSC/Connectors",
@@ -19,8 +19,9 @@ setup(name="connectors",
       keywords="parallel observer pipes-and-filters",
       packages=find_packages(exclude=["documentation", "tests", "docs"]),
       install_requires=[],
-      extras_require={"dev": ["pytest-cov", "pylint"],
-                      "test": ["pytest", "numpy"]},
+      extras_require={"dev": ["pytest-cov", "pylint", "flake8"],
+                      "test": ["pytest", "numpy"],
+                      "doc": ["sphinx_rtd_theme"]},
       project_urls={"Documentation": "https://connectors.readthedocs.io/en/latest/",
                     "Bug Reports": "https://github.com/JonasSC/Connectors/issues",
                     "Source": "https://github.com/JonasSC/Connectors"})

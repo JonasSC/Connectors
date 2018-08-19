@@ -14,9 +14,8 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""Contains classes, that are not mandatory for the functionalities of the connectors
+"""Contains classes, that are not mandatory for the functionalities of the *Connectors*
 package, but might facilitate its use.
 """
 
 from ._multiinputdata import *
-from ._weakrefproxygenerator import *

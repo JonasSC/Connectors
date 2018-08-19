@@ -16,7 +16,7 @@
 
 """Contains the :class:`Output` class for decorating getter methods"""
 
-from .._lib import Parallelization
+from connectors._common import Parallelization
 from .._proxies import OutputProxy
 from ._baseclasses import ConnectorDecorator, default_executor
 
@@ -24,7 +24,7 @@ __all__ = ("Output",)
 
 
 class Output(ConnectorDecorator):
-    """A decorator that marks a method as an output connector.
+    """A decorator, that marks a method as an output connector.
     These connections can be used to automatically update a processing chain
     when a value has changed.
     The decorated method must not take any arguments.
@@ -47,6 +47,7 @@ class Output(ConnectorDecorator):
 
     def __get__(self, instance, instance_type):
         """Is called, when the decorated method is accessed.
+
         :param instance: the instance of which a method shall be replaced
         :param instance_type: the type of the instance
         :returns: an :class:`~connectors.proxies.OutputProxy` instance, that mimics

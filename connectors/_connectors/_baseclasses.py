@@ -18,7 +18,6 @@
 
 import functools
 import weakref
-from .._lib import Laziness, NonLazyInputs
 
 __all__ = ("Connector", "InputConnector")
 
@@ -32,7 +31,7 @@ class Connector:
     """
     def __init__(self, instance, method, parallelization, executor):
         """
-        :param instance: the instance in which the method is replaced by this connector
+        :param instance: the instance of which the method is replaced by this connector
         :param method: the unbound method that is replaced by this connector
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
                                 See the :meth:`set_parallelization` method for details
@@ -52,6 +51,7 @@ class Connector:
         replaced method in the expected manner.
 
         :param *args, **kwargs: arguments for the replaced method
+        :returns: the return value of the replaced method
         """
         raise NotImplementedError("This method should have been implemented in a derived class")
 
@@ -143,11 +143,12 @@ class Connector:
 
 class InputConnector(Connector):
     """Base class for input connectors, that replace setter methods."""
-    def __init__(self, instance, method, observers, laziness, parallelization, executor):
+    # pylint: disable=abstract-method; pylint shall not complain, that the __call__ and _announce-methods are not overridden in InputConnector
+
+    def __init__(self, instance, method, laziness, parallelization, executor):
         """
-        :param instance: the instance in which the method is replaced by this connector
+        :param instance: the instance of which the method is replaced by this connector
         :param method: the unbound method that is replaced by this connector
-        :param observers: the names of output methods that are affected by passing a value to this connector
         :param laziness: a flag from the :class:`connectors.Laziness` enum. See
                          the :meth:`set_laziness` method for details
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
@@ -157,10 +158,6 @@ class InputConnector(Connector):
                          method for details
         """
         Connector.__init__(self, instance, method, parallelization, executor)
-        self._observers = []
-        for o in observers:
-            output_connector = getattr(self._instance(), o)
-            self._observers.append(output_connector._get_connector())
         self._laziness = laziness
 
     def connect(self, connector):
@@ -193,85 +190,3 @@ class InputConnector(Connector):
         :param laziness: a flag from the :class:`connectors.Laziness` enum
         """
         self._laziness = laziness
-
-    def _connect(self, connector):
-        """This method is called from an :class:`OutputConnector`, when it is  being
-        connected to this :class:`InputConnector`.
-
-        :param connector: the :class:`OutputConnector` instance to which this connector shall be connected
-        :returns: yields self (see the :class:`MacroInputConnector`, where :meth:`_connect`
-                  yields all the :class:`InputConnector`s that it exports)
-        """
-        non_lazy_inputs = NonLazyInputs(situation=Laziness.ON_CONNECT)
-        self._announce(connector, non_lazy_inputs=non_lazy_inputs)
-        non_lazy_inputs.execute(self._executor)
-        yield self
-
-    def _disconnect(self, connector):
-        """This method is called from an :class:`OutputConnector`, when it is  being
-        disconnected from this :class:`InputConnector`.
-
-        :param connector: a :class:`Connector` instance from which this connector shall be disconnected
-        :returns: yields self (see the :class:`MacroInputConnector`, where :meth:`_connect`
-                  yields all the :class:`InputConnector`s that it exports)
-        """
-        raise NotImplementedError("This method should have been implemented in a derived class")
-
-    def _announce(self, connector, non_lazy_inputs):
-        """Abstract method that defines the interface of an input connector to
-        notify it, when a connected output connector can produce updated data.
-
-        :param connector: the output connector whose value is about to change
-        :param non_lazy_inputs: a NonLazyInputs instance to which input connectors
-                                can be appended, if they request an immediate
-                                re-computation (see the InputConnector's
-                                :meth:`set_laziness` method for more about lazy execution)
-        """
-        initial_number_of_non_lazy_inputs = len(non_lazy_inputs)
-        for o in self._observers:
-            o._announce(self, non_lazy_inputs)
-        if len(non_lazy_inputs) == initial_number_of_non_lazy_inputs:  # only add self, if no methods down the processing chain requests its execution anyway
-            non_lazy_inputs.add(connector=self, laziness=self._laziness)
-
-    async def _notify(self, connector, value, executor):
-        """Abstract method that defines the interface of an input connector to
-        notify it, when a connected output connector has produced updated data.
-
-        :param connector: the output connector whose value has changed
-        :param value: the updated data from the output connector
-        :param executor: the :class:`Executor` instance, which managed the computation
-                         of the output connector, and which shall be used for the
-                         computation of this connector, in case it is not lazy.
-        """
-        raise NotImplementedError("this method should have been implemented in a derived class")
-
-    async def _execute(self, executor):
-        """Abstract method that defines the interface of an input connector for
-        retrieving the updated data from the connected output connectors and
-        recomputing itself (if necessary).
-        It is called by the output connectors, that are affected by this connector,
-        (observers) when their values have to be computed.
-
-        :param executor: the :class:`Executor` instance, that manages the current computations
-        """
-        raise NotImplementedError("this method should have been implemented in a derived class")
-
-    async def _announce_to_observers(self, executor):
-        """Announces, that this input connector will receive a new value, to the
-        observing output connectors.
-
-        :param executor: the :class:`Executor` instance, that manages the current computations
-        """
-        non_lazy_inputs = NonLazyInputs(Laziness.ON_ANNOUNCE)
-        for o in self._observers:
-            o._notify(self, non_lazy_inputs)
-        await non_lazy_inputs.execute_async(executor)
-
-    def _notify_observers(self):
-        """Notifies the observing output connectors, that the replaced setter method
-        has been called.
-        """
-        non_lazy_inputs = NonLazyInputs(Laziness.ON_ANNOUNCE)
-        for o in self._observers:
-            o._notify(self, non_lazy_inputs)
-        non_lazy_inputs.execute(self._executor)

@@ -6,6 +6,7 @@
 
 connectors.egg-info
 dist
+docs
 
 *.pyc
 *__pycache__

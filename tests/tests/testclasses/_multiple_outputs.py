@@ -47,7 +47,7 @@ class MultipleOutputs(BaseTestClass):
 
 
 class MultiInputMultipleOutputs(BaseTestClass):
-    """Has two output connectors that depend on one multi input connector"""
+    """Has two output connectors that depend on one multi-input connector"""
     def _initialize(self):
         """is called in the super class's constructor"""
         self.__data = connectors.MultiInputData()

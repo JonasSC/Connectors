@@ -23,7 +23,9 @@ The computations can also be parallelized automatically with threads and process
 
 # pylint: disable=wildcard-import;    wildcard imports shall be allowed here, since all submodules have their __all__-variables defined
 
-from ._lib import Laziness, Parallelization, executor
+from ._common import Laziness, Parallelization, executor
 from ._decorators import *
 from ._helper import *
 from ._macro import *
+
+from . import blocks

@@ -16,8 +16,8 @@
 
 """Contains the SingleInputProxy class"""
 
-from ..connectors import SingleInputConnector
-from .._lib import Laziness, NonLazyInputs
+from ..connectors import SingleInputConnector, ConditionalSingleInputConnector
+from .. import _common as common
 from ._baseclasses import ConnectorProxy
 
 __all__ = ("SingleInputProxy",)
@@ -35,11 +35,21 @@ class SingleInputProxy(ConnectorProxy):
     method is called, so that the weak reference of the connector would be expired
     during its call.
     """
-    def __init__(self, instance, method, observers, laziness, parallelization, executor):
+    def __init__(self, instance, method,
+                 observers, announce_condition, notify_condition,
+                 laziness, parallelization, executor):
         """
         :param instance: the instance in which the method is replaced by this connector proxy
         :param method: the unbound method that is replaced by this connector proxy
         :param observers: the names of output methods that are affected by passing a value to this connector proxy
+        :param announce_condition: a method, that defines the condition for the
+                                   announcements to the observing output connectors.
+                                   This method must not require any arguments apart
+                                   from ``self``
+        :param notify_condition: a method, that defines the condition for the
+                                 notifications to the observing output connectors.
+                                 This method must accept the new input value as
+                                 an argument in addition to ``self``
         :param laziness: a flag from the :class:`connectors.Laziness` enum. See
                          the :meth:`set_laziness` method for details
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
@@ -51,17 +61,26 @@ class SingleInputProxy(ConnectorProxy):
         ConnectorProxy.__init__(self, instance, method, parallelization, executor)
         self._observers = observers
         self._laziness = laziness
+        self._announce_condition = announce_condition
+        self._notify_condition = notify_condition
 
     def __call__(self, *args, **kwargs):
         """Executes the replaced method and notifies the observing output connectors.
         :param *args, **kwargs: possible arguments for the replaced method
         """
-        result = ConnectorProxy.__call__(self, *args, **kwargs)
         instance = self._get_instance()
-        non_lazy_inputs = NonLazyInputs(Laziness.ON_ANNOUNCE)
+        # announce the value change
+        non_lazy_inputs = common.NonLazyInputs(common.Laziness.ON_ANNOUNCE)
         for o in self._observers:
-            getattr(instance, o)._notify(self, non_lazy_inputs)
+            getattr(instance, o)._announce(self, non_lazy_inputs)
+        # call the replaced method
+        result = ConnectorProxy.__call__(self, *args, **kwargs)
+        # notify observers about the value change
+        for o in self._observers:
+            getattr(instance, o)._notify(self)
+        # execute the non-lazy inputs
         non_lazy_inputs.execute(self._executor)
+        # return the result of the method call
         return result
 
     def set_laziness(self, laziness):
@@ -72,6 +91,7 @@ class SingleInputProxy(ConnectorProxy):
         so that the values are updated immediately as soon as new data is available.
         There are different behaviors for the (non) lazy execution, which are
         described in the :class:`connectors.Laziness` enum.
+
         :param laziness: a flag from the :class:`connectors.Laziness` enum
         """
         self._get_connector().set_laziness(laziness)
@@ -82,12 +102,14 @@ class SingleInputProxy(ConnectorProxy):
         this proxy, to be created and the method to be replaced. This proxy is no
         longer used after this.
         This method is meant to be used internally in the *Connectors* package.
+
         :param connector: the connector to which this connector shall be connected
         """
         return self._get_connector()._connect(connector)
 
     def _create_connector(self, instance, method, parallelization, executor):
         """Creates and returns the input connector.
+
         :param instance: the instance in which the method is replaced by the connector
         :param method: the unbound method that is replaced by the connector
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
@@ -97,9 +119,21 @@ class SingleInputProxy(ConnectorProxy):
                          method for details
         :returns: an :class:`SingleInputConnector` instance
         """
-        return SingleInputConnector(instance=instance,
-                                    method=method,
-                                    observers=self._observers,
-                                    laziness=self._laziness,
-                                    parallelization=parallelization,
-                                    executor=executor)
+        if self._announce_condition is None and self._notify_condition is None:
+            return SingleInputConnector(instance=instance,
+                                        method=method,
+                                        observers=self._observers,
+                                        laziness=self._laziness,
+                                        parallelization=parallelization,
+                                        executor=executor)
+        else:
+            announce_condition, notify_condition = common.select_condition_methods(self._announce_condition,
+                                                                                   self._notify_condition)
+            return ConditionalSingleInputConnector(instance=instance,
+                                                   method=method,
+                                                   observers=self._observers,
+                                                   announce_condition=announce_condition,
+                                                   notify_condition=notify_condition,
+                                                   laziness=self._laziness,
+                                                   parallelization=parallelization,
+                                                   executor=executor)

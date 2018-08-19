@@ -19,30 +19,33 @@ which multiple values can be added.
 Also contains a descriptor class for the remove and replace methods of a multi-input.
 """
 
-from .._lib import Laziness, Parallelization
-from .._proxies import MultiInputProxy, MultiInputAssociateProxy
+from .. import _common as common
+from .._proxies import MultiInputProxy
 from ._baseclasses import InputDecorator, default_executor
 
 __all__ = ("MultiInput",)
 
 
 class MultiInput(InputDecorator):
-    """A decorator that marks a method as an input for multiple connections.
+    """A decorator, that marks a method as an input for multiple connections.
     These connections can be used to automatically update a processing chain
     when a value has changed.
+
     The decorated method must take exactly one argument and return a unique id.
     For every MultiInput-method a remove method has to be provided, which removes
     a value, that has previously been added.
+
     A replace method can be provided optionally. This method is called, when the
     value of a connected output has changed, rather than removing the old value and
     adding the new.
+
     See the :meth:`remove` and :meth:`replace` methods for documentation about how to
     define these methods for a multi-input connector.
     """
     def __init__(self,
                  observers=(),
-                 laziness=Laziness.get_default(),
-                 parallelization=Parallelization.get_default_multiinput_parallelization(),
+                 laziness=common.Laziness.get_default(),
+                 parallelization=common.Parallelization.get_default_multiinput_parallelization(),
                  executor=default_executor):
         """
         :param observers: the names of output methods that are affected by passing
@@ -67,6 +70,7 @@ class MultiInput(InputDecorator):
 
     def __get__(self, instance, instance_type):
         """Is called, when the decorated method is accessed.
+
         :param instance: the instance of which a method shall be replaced
         :param instance_type: the type of the instance
         :returns: a :class:`MultiInputProxy` instance, that mimics the decorated
@@ -77,6 +81,8 @@ class MultiInput(InputDecorator):
                                remove_method=self.__remove_method,
                                replace_method=self.__replace_method,
                                observers=self._observers,
+                               announce_condition=self._announce_condition,
+                               notify_condition=self._notify_condition,
                                laziness=self._laziness,
                                parallelization=self._parallelization,
                                executor=self._executor)
@@ -84,12 +90,18 @@ class MultiInput(InputDecorator):
     def remove(self, method):
         """A method of the decorated method to decorate the remove method, with
         which data, that has been added through the decorated method can be removed.
+
         A remove method has to take the ID, which has been returned by the multi-input
         method as a parameter, so it knows which value has to be removed.
+
         The usage is described by the following example: if `A` is the name of
-        the method, that is decorated with the :class:`MultiInput`, the remove method
+        the method, that is decorated with :class:`MultiInput`, the remove method
         has to be decorated with ``@A.remove``.
+
         :param method: the decorated remove method
+        :returns: a MultiInputAssociateDescriptor, that generates a MultiInputAssociateProxy,
+                  which enhances the decorated method with the functionality, that
+                  is required for the multi-input connector
         """
         self.__remove_method = method
         return MultiInputAssociateDescriptor(method=method,
@@ -101,17 +113,27 @@ class MultiInput(InputDecorator):
         """A method of the decorated method to decorate the replace method, with
         which data, that has been added through the decorated method, can be replaced
         with new data without changing the ID under which it is stored.
+
         A replace method has to take the id under which the old data is stored as
         first parameter and the new data as second parameter. It must store the
         new data under the same id as the old data.
+
+        Also, if no data has been stored under the given ID, yet, the replace method
+        shall simply store the data under the given ID instead of raising an error.
+
         Specifying a replace method is optional. If no method has been decorated
         to be a replace method, the :class:`MultiInput` connector falls back to removing
         the old data and adding the updated one, whenever updated data is propagated
         through its connections.
+
         The usage is described by the following example: if `A` is the name of
-        the method, that is decorated with the :class:`MultiInput`, the remove method
+        the method, that is decorated with :class:`MultiInput`, the remove method
         has to be decorated with ``@A.replace``.
+
         :param method: the decorated replace method
+        :returns: a MultiInputAssociateDescriptor, that generates a MultiInputAssociateProxy,
+                  which enhances the decorated method with the functionality, that
+                  is required for the multi-input connector
         """
         self.__replace_method = method
         return MultiInputAssociateDescriptor(method=method,
@@ -145,12 +167,13 @@ class MultiInputAssociateDescriptor:
 
     def __get__(self, instance, instance_type):
         """Is called, when the decorated method is accessed.
+
         :param instance: the instance of which a method shall be replaced
         :param instance_type: the type of the instance
         :returns: a :class:`MultiInputAssociateProxy` instance, that mimics the
                   decorated method and adds the connector functionality
         """
-        return MultiInputAssociateProxy(instance=instance,
-                                        method=self.__method,
-                                        observers=self.__observers,
-                                        executor=self.__executor)
+        return common.MultiInputAssociateProxy(instance=instance,
+                                               method=self.__method,
+                                               observers=self.__observers,
+                                               executor=self.__executor)

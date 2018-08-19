@@ -26,6 +26,7 @@ def test_end_of_lifetime():
     # collect garbage from imports and other tests
     gc.collect()
     assert gc.collect() == 0
+    gc.collect()
     # test an orphaned processing chain, where a getter at the end has been called
     def closure1():     # pylint: disable=missing-docstring
         t1 = testclasses.Simple()

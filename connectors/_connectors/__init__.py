@@ -15,6 +15,7 @@
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """Contains classes for the connectors.
+
 Connector objects replace the decorated methods in the processing classes.
 """
 

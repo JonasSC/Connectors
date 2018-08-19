@@ -23,7 +23,7 @@ __all__ = ("NonLazyInputs",)
 
 
 class NonLazyInputs(BaseTestClass):
-    """Has a non-lazy input connector and a non-lazy multi input connector"""
+    """Has a non-lazy input connector and a non-lazy multi-input connector"""
     def _initialize(self):
         """is called in the super class's constructor"""
         self.__data = connectors.MultiInputData()
@@ -42,4 +42,10 @@ class NonLazyInputs(BaseTestClass):
     def remove_value(self, data_id):    # pylint: disable=missing-docstring
         self._register_call(methodname="remove_value", value=data_id)
         del self.__data[data_id]
+        return self
+
+    @add_value.replace
+    def replace_value(self, data_id, value):    # pylint: disable=missing-docstring
+        self._register_call(methodname="replace_value", value=data_id)
+        self.__data[data_id] = value
         return self

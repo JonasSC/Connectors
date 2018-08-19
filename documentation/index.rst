@@ -1,10 +1,10 @@
-Welcome to Connectors's documentation!
+Welcome to Connectors' documentation!
 ======================================
 
 The *Connectors* package facilitates the writing of block-diagram-like processing networks.
 For this it provides decorators for the methods of processing classes, so they can be connected to each other.
 When a parameter in such a processing network is changed, the result values will also be updated automatically.
-This is similar to a pipes and filters architecture.
+This is similar to a pipes and filters architecture, the observer pattern or streams.
 
 This short example demonstrates the core functionality of the *Connectors* package by implementing a processing network of two sequential blocks, which double their input value:
 
@@ -38,7 +38,7 @@ This short example demonstrates the core functionality of the *Connectors* packa
 >>> d2.get_double()
 0
 >>> d1.set_value(2)
->>> d2.get_double()                                     # causes the new input value 2 to be processed by ``d1`` and ``d2``
+>>> d2.get_double()                                     # causes the new input value 2 to be processed by d1 and d2
 8
 
 
@@ -46,21 +46,13 @@ Contents
 --------
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :numbered:
 
-   installation
-   core_reference
-   transfer_function
-   macro_reference
-   helper_reference
-   polynomial
-   lazy_execution
-   parallelization
-   implementation_details
-   makefile
-   dependencies
-   license
+   reference/index
+   organisation/index
+   information/index
+   tutorials/index
 
 
 Indices and tables

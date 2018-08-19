@@ -76,7 +76,7 @@ def test_multiple_inputs():
                          (t2, "set_value1", 1.0), (t2, "get_values", (1.0, 1.0))])
     call_logger.clear()
     # connect both inputs of the second instance to the output of the first
-    t2.set_value2.connect(t1.get_value,)
+    t2.set_value2.connect(t1.get_value)
     assert t2.get_values() == (1.0, 1.0)
     call_logger.clear()
     t1.set_value(2)
@@ -213,3 +213,62 @@ def test_laziness_on_notify():
     call_logger.clear()
     assert t3.get_value() == 1.0
     call_logger.compare([(t3, "get_value", 1.0)])
+
+
+def test_condition_on_announce():
+    """Tests the conditional announcement of value changes"""
+    call_logger = helper.CallLogger()
+    t1 = testclasses.Simple(call_logger)
+    t2 = testclasses.ConditionalInputAnnouncement(call_logger).set_value.connect(t1.get_value)
+    t3 = testclasses.Simple(call_logger).set_value.connect(t2.get_value)
+    # test with condition == True
+    call_logger.compare([])
+    t1.set_value(1.0)
+    assert t3.get_value() == 1.0
+    call_logger.compare([(t1, "set_value", 1.0), (t1, "get_value", 1.0),
+                         (t2, "set_value", 1.0), (t2, "get_value", 1.0),
+                         (t3, "set_value", 1.0), (t3, "get_value", 1.0)])
+    # test with condition == False
+    t2.condition = False
+    call_logger.clear()
+    t1.set_value(2.0)
+    assert t3.get_value() == 1.0
+    call_logger.compare([(t1, "set_value", 2.0)])
+    assert t2.get_value() == 1.0
+    # test calling the method directly
+    t2.condition = False
+    call_logger.clear()
+    t2.set_value(3.0)
+    assert t3.get_value() == 3.0
+    call_logger.compare([(t2, "set_value", 3.0), (t2, "get_value", 3.0),
+                         (t3, "set_value", 3.0), (t3, "get_value", 3.0)])
+
+
+def test_condition_on_notify():
+    """Tests the conditional notification of observing output connectors about value changes"""
+    call_logger = helper.CallLogger()
+    t1 = testclasses.Simple(call_logger)
+    t2 = testclasses.ConditionalInputNotification(call_logger).set_value.connect(t1.get_value)
+    t3 = testclasses.Simple(call_logger).set_value.connect(t2.get_value)
+    call_logger.compare([])
+    # test with condition == True
+    t1.set_value(1.0)
+    assert t3.get_value() == 1.0
+    call_logger.compare([(t1, "set_value", 1.0), (t1, "get_value", 1.0),
+                         (t2, "set_value", 1.0), (t2, "get_value", 1.0),
+                         (t3, "set_value", 1.0), (t3, "get_value", 1.0)])
+    # test with condition == False
+    t2.condition = False
+    call_logger.clear()
+    t1.set_value(2.0)
+    assert t3.get_value() == 1.0
+    call_logger.compare([(t1, "set_value", 2.0), (t1, "get_value", 2.0), (t2, "set_value", 2.0)])
+    assert t2.get_value() == 1.0
+    # test calling the method directly
+    t2.condition = False
+    call_logger.clear()
+    t2.set_value(3.0)
+    assert t3.get_value() == 1.0
+    call_logger.compare([(t2, "set_value", 3.0)])
+    assert t2.get_value() == 1.0
+    t2.set_value(value=4.0)     # tests for an implementation detail, that specifying the value as keyword argument takes a slightly more complex code path

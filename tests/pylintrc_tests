@@ -50,7 +50,7 @@ confidence=
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
-disable=attribute-defined-outside-init,duplicate-code,invalid-name,no-else-return,no-member,too-few-public-methods,unused-variable
+disable=attribute-defined-outside-init,duplicate-code,invalid-name,no-else-return,no-member,too-few-public-methods,unsubscriptable-object,unused-variable
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

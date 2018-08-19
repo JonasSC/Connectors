@@ -5,6 +5,7 @@ coro
 coroutine
 datas
 docstring
+doctest
 enum
 getter
 getters
@@ -16,6 +17,7 @@ methodname
 parallelization
 parallelize
 parallelized
+Passthrough
 Schulte
 setter
 setters

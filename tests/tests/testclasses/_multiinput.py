@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""Contains test classes for the multi input connector"""
+"""Contains test classes for multi-input connectors"""
 
 import connectors
 from ._baseclass import BaseTestClass
@@ -23,7 +23,7 @@ __all__ = ("NonReplacingMultiInput", "ReplacingMultiInput")
 
 
 class NonReplacingMultiInput(BaseTestClass):
-    """Features a multi input connector without a replace method"""
+    """Features a multi-input connector without a replace method"""
     def _initialize(self):
         """is called in the super class's constructor"""
         self.__data = connectors.MultiInputData()
@@ -46,7 +46,7 @@ class NonReplacingMultiInput(BaseTestClass):
 
 
 class ReplacingMultiInput(BaseTestClass):
-    """Features a multi input connector with a replace method"""
+    """Features a multi-input connector with a replace method"""
     def _initialize(self):
         """is called in the super class's constructor"""
         self.__data = connectors.MultiInputData()

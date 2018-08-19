@@ -1,8 +1,8 @@
 test:
-	python3 -m pytest --doctest-glob="*.rst"
+	python3 -m pytest --doctest-glob="*.rst" --doctest-modules
 
 test_coverage:
-	python3 -m pytest --doctest-glob="*.rst" --cov="connectors" --cov-report term:skip-covered
+	python3 -m pytest --doctest-glob="*.rst" --doctest-modules --cov="connectors" --cov-report term:skip-covered
 
 lint:
 	python3 -m flake8 --config=tests/flake8 connectors
@@ -11,4 +11,4 @@ lint:
 	pylint3 --rcfile=tests/pylintrc_tests tests/tests
 
 doc:
-	sphinx-build -b html documentation docs
+	sphinx-build -a -b html documentation docs

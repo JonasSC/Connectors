@@ -62,7 +62,7 @@ class SleepInInput(BaseTestClass):
 
 
 class SleepInMultiInput(BaseTestClass):
-    """Sleeps one second, when the multi input connector is executed"""
+    """Sleeps one second, when the multi-input connector is executed"""
     def _initialize(self):
         """is called in the super class's constructor"""
         self.__data = connectors.MultiInputData()

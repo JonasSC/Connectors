@@ -17,6 +17,7 @@
 """Contains classes with connectors, with which their functionality can be tested"""
 
 from ._constructor_method_call import *
+from ._input_conditions import *
 from ._macro import *
 from ._multiinput import *
 from ._multiple_inputs import *
