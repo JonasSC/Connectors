@@ -43,11 +43,14 @@ def test_license():
         for dirpath, _, filenames in os.walk(directory):
             for filename in filenames:
                 if filename.lower().endswith(".py"):
-                    with open(os.path.join(directory, dirpath, filename)) as f:
+                    path = os.path.join(dirpath, filename)
+                    with open(path) as f:
                         line = f.readline()
                         if line == "":
-                            break   # an empty file does not need a license header
+                            continue    # an empty file does not need a license header
                         else:
                             for h in header:
-                                assert line == h
+                                if line != h:
+                                    import pytest
+                                    pytest.fail(msg=f"{path} is missing the license header", pytrace=False)
                                 line = f.readline()
