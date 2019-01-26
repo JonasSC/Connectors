@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -26,6 +26,7 @@ __all__ = ("Macro", "MacroInMacro", "MacroPreferences")
 
 class Macro:
     """A test class with an internal processing network and macro connectors"""
+
     def __init__(self):
         self.__input1 = Simple()
         self.__input2 = Simple()
@@ -62,6 +63,7 @@ class Macro:
 
 class MacroInMacro:
     """A test class whose internal processing network contains a class with macro connectors"""
+
     def __init__(self):
         self.__internal = Macro()
 
@@ -77,6 +79,7 @@ class MacroInMacro:
 
 class ConnectorPreferences:
     """A test class that can be configured like a connector"""
+
     def __init__(self):
         self.caching = True
         self.laziness = connectors.Laziness.ON_REQUEST
@@ -105,6 +108,7 @@ class MacroPreferences:
     connectors, so it can be tested how macro connectors pass on the configuration
     to the exported connectors.
     """
+
     def __init__(self):
         self.input1 = ConnectorPreferences()
         self.input2 = ConnectorPreferences()

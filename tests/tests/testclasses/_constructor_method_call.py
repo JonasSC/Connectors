@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -30,6 +30,7 @@ __all__ = ("ConstructorMethodCall",
 
 class ConstructorMethodCall(BaseTestClass):
     """Calls connectors within the constructor"""
+
     def _initialize(self):
         self.__values = connectors.MultiInputData()
         self.set_first_value(None)
@@ -72,6 +73,7 @@ class ConstructorLazinessChange(Simple):
     """Changes a connectors laziness within the constructor, which prevents calling
     other connectors from the same line as the instantiation of the object.
     """
+
     def _initialize(self):
         Simple._initialize(self)
         self.set_value.set_laziness(connectors.Laziness.ON_NOTIFY)
@@ -81,6 +83,7 @@ class ConstructorCachingChange(Simple):
     """Changes a connectors caching behavior within the constructor, which prevents
     calling other connectors from the same line as the instantiation of the object.
     """
+
     def _initialize(self):
         Simple._initialize(self)
         self.get_value.set_caching(False)
@@ -91,6 +94,7 @@ class ConstructorParallelizationChange(Simple):
     prevents calling other connectors from the same line as the instantiation of
     the object.
     """
+
     def _initialize(self):
         Simple._initialize(self)
         self.get_value.set_parallelization(connectors.Parallelization.PROCESS)
@@ -100,6 +104,7 @@ class ConstructorExecutorChange(Simple):
     """Changes a connectors executor within the constructor, which prevents calling
     other connectors from the same line as the instantiation of the object.
     """
+
     def _initialize(self):
         Simple._initialize(self)
         self.get_value.set_executor(connectors.executor(processes=None))

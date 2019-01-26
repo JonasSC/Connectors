@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -45,6 +45,7 @@ class MacroInput(MacroDecorator):
     - when a behavior (e.g. laziness) of the connector is changed, the change
       is passed on to all the exported connectors.
     """
+
     def __get__(self, instance, instance_type):
         """Is called, when the decorated method is accessed.
 
@@ -59,6 +60,7 @@ class MacroInputConnector:
     """A Connector-class that exports input connectors from an internal processing
     network to the API of the class, that encapsulates the network.
     """
+
     def __init__(self, instance, method):
         """
         :param instance: the instance in which the method is replaced by this connector

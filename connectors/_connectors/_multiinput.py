@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -30,6 +30,7 @@ class MultiInputConnector(InputConnector):
     multiple values, so they can be used to connect different objects in a processing
     chain.
     """
+
     def __init__(self, instance, method, remove_method, replace_method, observers, laziness, parallelization, executor):
         """
         :param instance: the instance of which the method is replaced by this connector
@@ -268,6 +269,7 @@ class ConditionalMultiInputConnector(MultiInputConnector):
     about the (expected) value change, or False, if the output shall be sent a
     cancellation notice.
     """
+
     def __init__(self, instance, method,                            # pylint: disable=too-many-arguments; this constructor may be complicated, since the class is instantiated through the decorators, which have a much simpler API
                  remove_method, replace_method,
                  observers, announce_condition, notify_condition,

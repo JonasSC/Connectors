@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -25,6 +25,7 @@ __all__ = ("SleepInOutput", "SleepInInput", "SleepInMultiInput")
 
 class SleepInOutput(BaseTestClass):
     """Sleeps one second, when the output connector is executed"""
+
     def _initialize(self):
         """is called in the super class's constructor"""
         self.__value = None
@@ -44,6 +45,7 @@ class SleepInOutput(BaseTestClass):
 
 class SleepInInput(BaseTestClass):
     """Sleeps one second, when the input connector is executed"""
+
     def _initialize(self):
         """is called in the super class's constructor"""
         self.__value = None
@@ -63,6 +65,7 @@ class SleepInInput(BaseTestClass):
 
 class SleepInMultiInput(BaseTestClass):
     """Sleeps one second, when the multi-input connector is executed"""
+
     def _initialize(self):
         """is called in the super class's constructor"""
         self.__data = connectors.MultiInputData()

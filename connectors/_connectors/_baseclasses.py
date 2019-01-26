@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -29,6 +29,7 @@ class Connector:
     chain will automatically cause the data at the other end of the chain to be
     updated, when that data is retrieved the next time.
     """
+
     def __init__(self, instance, method, parallelization, executor):
         """
         :param instance: the instance of which the method is replaced by this connector

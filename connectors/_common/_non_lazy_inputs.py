@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -25,6 +25,7 @@ class NonLazyInputs(set):
     """A subclass of set, that is used internally to track the non-lazy input connectors,
     that request an immediate re-computation of the processing chain.
     """
+
     def __init__(self, situation):
         """
         :param situation: a flag from the Laziness enumeration to which the laziness

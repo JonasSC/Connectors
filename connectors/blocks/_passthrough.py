@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -26,6 +26,7 @@ class Passthrough:
     Instances of this can be useful to distribute a single parameter to multiple
     inputs, if this parameter is used in several places in a processing chain.
     """
+
     def __init__(self, data=None):
         """
         :param data: the input object

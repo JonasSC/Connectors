@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -77,6 +77,7 @@ def _redeployed_method(method_name, reduced_instance, *args, **kwargs):
 
 class Executor:
     """a base class for managing the event loop and the execution in threads or processes."""
+
     def __init__(self):
         self._loop = None   # will be initialized in run_coroutine or run_until_complete
         self.__tasks = []
@@ -156,6 +157,7 @@ class Executor:
 
 class SequentialExecutor(Executor):
     """An executor class, that executes everything sequentially."""
+
     async def run_method(self, parallelization, method, instance, *args, **kwargs):
         """Executes the given method sequentially.
         :param parallelization: a flag of :class:`connectors.Parallelization`, that
@@ -170,6 +172,7 @@ class SequentialExecutor(Executor):
 
 class ThreadingExecutor(Executor):
     """An executor class, that can parallelize computations with threads."""
+
     def __init__(self, number_of_threads):
         """
         :param number_of_threads: the maximum number of threads, that shall be
@@ -220,6 +223,7 @@ class ThreadingExecutor(Executor):
 
 class MultiprocessingExecutor(Executor):
     """An executor class, that can parallelize computations with processes."""
+
     def __init__(self, number_of_processes):
         """
         :param number_of_processes: the maximum number of processes, that shall be
@@ -282,6 +286,7 @@ class MultiprocessingExecutor(Executor):
 
 class ThreadingMultiprocessingExecutor(Executor):
     """An executor class, that can parallelize computations with both threads and processes."""
+
     def __init__(self, number_of_threads, number_of_processes):
         """
         :param number_of_threads: the maximum number of threads, that shall be

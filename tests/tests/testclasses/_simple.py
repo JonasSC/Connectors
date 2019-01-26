@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -24,6 +24,7 @@ __all__ = ("Simple",)
 
 class Simple(BaseTestClass):
     """Returns the input connectors parameter at the output and logs calls."""
+
     def _initialize(self):
         """is called in the super class's constructor"""
         self.__value = None

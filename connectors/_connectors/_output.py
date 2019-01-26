@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -28,6 +28,7 @@ class OutputConnector(Connector):
     """A Connector-class that replaces getter methods, so they can be used to
     connect different objects.
     """
+
     def __init__(self, instance, method, caching, parallelization, executor):
         """
         :param instance: the instance of which the method is replaced by this connector

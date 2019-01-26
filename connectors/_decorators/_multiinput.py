@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -42,6 +42,7 @@ class MultiInput(InputDecorator):
     See the :meth:`remove` and :meth:`replace` methods for documentation about how to
     define these methods for a multi-input connector.
     """
+
     def __init__(self,
                  observers=(),
                  laziness=common.Laziness.get_default(),
@@ -148,6 +149,7 @@ class MultiInputAssociateDescriptor:
     Instances of this class are created by the decorator methods :meth:`MultiInput.remove`
     and :meth:`MultiInput.replace`.
     """
+
     def __init__(self, method, observers, parallelization, executor):
         """
         :param method: the unbound method, that is wrapped

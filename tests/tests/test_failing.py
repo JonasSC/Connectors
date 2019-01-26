@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -30,10 +30,12 @@ def test_orphaned_connection():
     # collect garbage from imports and other tests
     gc.collect()
     assert gc.collect() == 0
+
     # test garbage collection of connected instances, that are no longer reachable
     def closure():  # pylint: disable=missing-docstring
         t1 = testclasses.Simple()
         testclasses.Simple().set_value.connect(t1.get_value)
+
     closure()
     with pytest.raises(AssertionError):
         assert gc.collect() == 0    # this cannot be zero, as the value of t2 has been announced (by making the connection) but not retrieved

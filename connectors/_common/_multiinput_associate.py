@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -35,6 +35,7 @@ class MultiInputAssociateProxy:
     method is called, so that the weak reference of the connector would be expired
     during its call.
     """
+
     def __init__(self, instance, method, observers, executor):
         """
         :param instance: the instance in which the method is replaced by the multi-input connector proxy

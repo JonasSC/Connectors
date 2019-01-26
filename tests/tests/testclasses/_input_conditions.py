@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -25,6 +25,7 @@ __all__ = ("ConditionalInputAnnouncement", "ConditionalInputNotification",
 
 class ConditionalInputAnnouncement(BaseTestClass):
     """Features an input connector with a condition for the announcement of value changes"""
+
     def _initialize(self):                      # pylint: disable=missing-docstring
         self.__value = None
         self.condition = True
@@ -47,6 +48,7 @@ class ConditionalInputAnnouncement(BaseTestClass):
 
 class ConditionalInputNotification(BaseTestClass):
     """Features an input connector with a condition for the notification about value changes"""
+
     def _initialize(self):                      # pylint: disable=missing-docstring
         self.__value = None
         self.condition = True
@@ -69,6 +71,7 @@ class ConditionalInputNotification(BaseTestClass):
 
 class ConditionalMultiInputAnnouncement(BaseTestClass):
     """Features a multi-input connector with a condition for the announcement of value changes"""
+
     def _initialize(self):                      # pylint: disable=missing-docstring
         self.__data = connectors.MultiInputData()
         self.condition = True
@@ -102,6 +105,7 @@ class ConditionalMultiInputAnnouncement(BaseTestClass):
 
 class ConditionalMultiInputNotification(BaseTestClass):
     """Features a multi-input connector with a condition for the notification about value changes"""
+
     def _initialize(self):                      # pylint: disable=missing-docstring
         self.__data = connectors.MultiInputData()
         self.condition = True

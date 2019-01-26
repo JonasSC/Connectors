@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -28,6 +28,7 @@ class CallLogger:
     Many classes in the :mod:`testclasses` module allow to pass a call logger as a
     constructor parameter.
     """
+
     def __init__(self):
         self.__calls = []
 

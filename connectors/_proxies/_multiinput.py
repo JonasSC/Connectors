@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -28,6 +28,7 @@ class ReplaceMethod:
     Instances of this class will be created, when no replace method is specified
     for a multi-input connector.
     """
+
     def __init__(self, add_method, remove_method):
         """
         :param method: the unbound method, that is replaced by the multi-input connector
@@ -59,6 +60,7 @@ class MultiInputProxy(SingleInputProxy):
     method is called, so that the weak reference of the connector would be expired
     during its call.
     """
+
     def __init__(self, instance, method,                            # pylint: disable=too-many-arguments; this constructor may be complicated, since the class is instantiated through the decorators, which have a much simpler API
                  remove_method, replace_method,
                  observers, announce_condition, notify_condition,

@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -24,6 +24,7 @@ __all__ = ("MultipleOutputs", "MultiInputMultipleOutputs")
 
 class MultipleOutputs(BaseTestClass):
     """Has two output connectors that depend on one input connector"""
+
     def _initialize(self):
         """is called in the super class's constructor"""
         self.__value = None
@@ -48,6 +49,7 @@ class MultipleOutputs(BaseTestClass):
 
 class MultiInputMultipleOutputs(BaseTestClass):
     """Has two output connectors that depend on one multi-input connector"""
+
     def _initialize(self):
         """is called in the super class's constructor"""
         self.__data = connectors.MultiInputData()

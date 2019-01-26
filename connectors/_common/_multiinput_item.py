@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -28,6 +28,7 @@ class MultiinputItem:
     It simulates the behavior of a single-input connector, so it is possible to
     use a multi-input connector as arbitrarily many single-inputs.
     """
+
     def __init__(self, connector, instance, replace_method, key, observers, executor):
         """
         :param connector: the multi-input connector

@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -27,27 +27,34 @@ def test_end_of_lifetime():
     gc.collect()
     assert gc.collect() == 0
     gc.collect()
+
     # test an orphaned processing chain, where a getter at the end has been called
     def closure1():     # pylint: disable=missing-docstring
         t1 = testclasses.Simple()
         t2 = testclasses.MultipleOutputs().set_value.connect(t1.get_value)
         t2.get_value()
+
     closure1()
     assert gc.collect() == 0    # this should work, as long as all setters to which a value was announced are called, even when not all getters have been called
+
     # test an orphaned processing chain, where all connected setters have been called
     def closure2():     # pylint: disable=missing-docstring
         t1 = testclasses.Simple()
         t2 = testclasses.MultipleOutputs().set_value.connect(t1.get_value)
         t2.set_value("go away")
+
     closure2()
     assert gc.collect() == 0    # setting the value manually should have removed the announcement
+
     # test an orphaned processing chain, that has been disconnected
     def closure3():     # pylint: disable=missing-docstring
         t1 = testclasses.Simple()
         t2 = testclasses.MultipleOutputs().set_value.connect(t1.get_value)
         t2.set_value.disconnect(t1.get_value)
+
     closure3()
     assert gc.collect() == 0    # breaking the connection should have propagated the last value and therefore removed the announcement
+
     # test the same things with MultiInputs
     def closure4():     # pylint: disable=missing-docstring
         t1 = testclasses.Simple()
@@ -55,13 +62,16 @@ def test_end_of_lifetime():
         t3 = testclasses.NonReplacingMultiInput().add_value.connect(t1.get_value)
         t2.get_values()
         t3.add_value.disconnect(t1.get_value)
+
     closure4()
     assert gc.collect() == 0
+
     # test connecting and setting a value (without retrieving the result) with a non lazy input
     def closure5():     # pylint: disable=missing-docstring
         t1 = testclasses.Simple()
         testclasses.NonLazyInputs().set_value.connect(t1.get_value)
         t1.set_value(1.0)
+
     closure5()
     assert gc.collect() == 0    # this should work, because the non lazy setter gets called automatically after changing the value, thus removing the announcement
 
@@ -100,6 +110,7 @@ def test_method_calls_in_constructor():
     assert call_logger.get_number_of_calls() == 6
     assert gc.collect() == 0
     call_logger.clear()
+
     # test with connections
     def closure():  # pylint: disable=missing-docstring
         t1 = testclasses.MultipleOutputs(call_logger)
@@ -108,5 +119,6 @@ def test_method_calls_in_constructor():
         t1.set_value(12.0)
         assert t3.get_value() == [12.0, True]
         assert call_logger.get_number_of_calls() == 13
+
     closure()
     assert gc.collect() == 0

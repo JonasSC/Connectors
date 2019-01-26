@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -34,6 +34,7 @@ class WeakrefProxyGenerator:
     since this prevents, that the deleted input data is required to re-compute the
     result, when it's retrieved repeatedly.
     """
+
     def __init__(self, data=None):
         """
         :param data: the input object

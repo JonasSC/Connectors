@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -29,6 +29,7 @@ class Output(ConnectorDecorator):
     when a value has changed.
     The decorated method must not take any arguments.
     """
+
     def __init__(self,
                  caching=True,
                  parallelization=Parallelization.get_default_output_parallelization(),

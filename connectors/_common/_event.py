@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -28,6 +28,7 @@ class Event(asyncio.Event):
     This makes it possible to create instances of this event before starting the
     event loop.
     """
+
     async def wait(self, executor):     # pylint: disable=arguments-differ; the whole point of this class is, that the executor is passed to the wait method
         """waits for the Event's value to be "True"
 

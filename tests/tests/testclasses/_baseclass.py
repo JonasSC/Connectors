@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -19,6 +19,7 @@
 
 class BaseTestClass:
     """A base class, that provides basic infrastructure for the test classes"""
+
     def __init__(self, call_logger=None, identifier=None):
         """
         :param call_logger: a :class:`CallLogger` instance

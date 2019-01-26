@@ -1,5 +1,5 @@
 # This file is a part of the "Connectors" package
-# Copyright (C) 2017-2018 Jonas Schulte-Coerne
+# Copyright (C) 2017-2019 Jonas Schulte-Coerne
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -27,6 +27,7 @@ class ConnectorDecorator:
     """An abstract base class for the decoration of methods so they can be used
     as connectors.
     """
+
     def __init__(self, parallelization, executor):
         """
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
