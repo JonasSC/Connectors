@@ -65,9 +65,9 @@ def test_macro_in_macro():
     """Tests if the internal processing chain of a macro can also contain macro connectors"""
     macro = testclasses.MacroInMacro()
     # test without connectors
-    assert macro.get_output() == ((None, None), None)
+    assert macro.get_output() == ((None, None), None)   # pylint: disable=comparison-with-callable; Pylint got confused by the MacroOutput decorator
     macro.set_input(1.0)
-    assert macro.get_output() == ((1.0, 1.0), 1.0)
+    assert macro.get_output() == ((1.0, 1.0), 1.0)      # pylint: disable=comparison-with-callable; Pylint got confused by the MacroOutput decorator
     # test with connectors
     t1 = testclasses.Simple().get_value.connect(macro.set_input)
     t2 = testclasses.Simple().set_value.connect(macro.get_output)

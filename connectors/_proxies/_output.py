@@ -92,7 +92,7 @@ class OutputProxy(ConnectorProxy):
                                 re-computation (see the InputConnector's
                                 :meth:`set_laziness` method for more about lazy execution)
         """
-        pass    # nothing to do for a proxy
+        # nothing to do for a proxy
 
     def _notify(self, connector):
         """This method is to notify this output connector, when an observed input
@@ -104,4 +104,4 @@ class OutputProxy(ConnectorProxy):
                                 re-computation (see the InputConnector's
                                 :meth:`set_laziness` method for more about lazy execution)
         """
-        pass    # nothing to do for a proxy
+        # nothing to do for a proxy

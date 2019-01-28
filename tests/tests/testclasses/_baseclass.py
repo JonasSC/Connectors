@@ -46,7 +46,6 @@ class BaseTestClass:
 
     def _initialize(self):
         """This method is called in the constructor and can be overridden by derived classes"""
-        pass
 
     def _register_call(self, methodname, value=None):
         """Adds an entry to the call log.

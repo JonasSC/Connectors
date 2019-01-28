@@ -205,7 +205,7 @@ min-similarity-lines=4
 # Spelling dictionary name. Available dictionaries: en_US (myspell), de_LU
 # (myspell), de_DE (myspell), de_BE (myspell), en (aspell), en_AU (aspell),
 # en_CA (aspell), en_GB (aspell).
-spelling-dict=en
+spelling-dict=en_US
 
 # List of comma separated words that should not be checked.
 spelling-ignore-words=
@@ -225,7 +225,7 @@ expected-line-ending-format=LF
 
 # Regexp for a line that is allowed to be longer than the limit.
 ## allow long hyperlinks in comments and excessive line lengths due to comments
-ignore-long-lines=((^\s*(# )?<?https?://\S+>?$)|(^[\w\W]{0,120}\s{2,4}#[\w\W]*$))
+ignore-long-lines=((^\s*(# )?<?https?://\S+>?$)|(^[\w\W]{0,120}\s{2,4}#[\w\W]*$)|(^#*\s*logging.))
 
 # Number of spaces of indent required inside a hanging  or continued line.
 indent-after-paren=4

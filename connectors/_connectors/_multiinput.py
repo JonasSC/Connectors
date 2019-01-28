@@ -247,7 +247,6 @@ class MultiInputConnector(InputConnector):
         This method is meant to be overridden in derived classes, that implement
         a conditional notification of the observing output connectors.
         """
-        pass
 
     def _check_notification_condition(self):   # pylint: disable=no-self-use; this method is a hook for derived classes
         """A protected helper method to determine, if the observing output connectors
