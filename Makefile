@@ -1,3 +1,5 @@
+.PHONY: test test_coverage lint docs
+
 test:
 	python3 -m pytest --doctest-glob="*.rst" --doctest-modules
 
@@ -10,5 +12,5 @@ lint:
 	python3 -m flake8 --config=tests/flake8 tests/tests
 	pylint3 --rcfile=tests/pylintrc_tests tests/tests
 
-doc:
+docs:
 	sphinx-build -a -b html documentation docs
