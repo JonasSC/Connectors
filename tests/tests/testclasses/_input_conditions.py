@@ -91,7 +91,7 @@ class ConditionalMultiInputAnnouncement(BaseTestClass):
     def replace_value(self, data_id, value):    # pylint: disable=missing-docstring
         self._register_call(methodname="replace_value", value=data_id)
         self.__data[data_id] = value
-        return self
+        return data_id
 
     @add_value.announce_condition
     def __condition(self, data_id):             # pylint: disable=missing-docstring,unused-argument
@@ -131,7 +131,7 @@ class ConditionalMultiInputNotification(BaseTestClass):
     def replace_value(self, data_id, value):    # pylint: disable=missing-docstring
         self._register_call(methodname="replace_value", value=data_id)
         self.__data[data_id] = value
-        return self
+        return data_id
 
     @add_value.notify_condition
     def __condition(self, data_id, value):      # pylint: disable=missing-docstring,unused-argument

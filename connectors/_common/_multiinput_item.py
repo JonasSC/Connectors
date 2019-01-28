@@ -59,12 +59,12 @@ class MultiinputItem:
             non_lazy_inputs = NonLazyInputs(Laziness.ON_ANNOUNCE)
             for o in self.__observers:
                 o._announce(self.__connector, non_lazy_inputs)
-            result = self.__replace(self.__instance, self.__key, *args, **kwargs)
+            self.__replace(self.__instance, self.__key, *args, **kwargs)
             self.__connector._conditional_observer_notification(self.__key, *args, **kwargs)    # pylint: disable=protected-access; this is not super clean, but since it all stays within the context of a multi-input connector...
             non_lazy_inputs.execute(self.__executor)
-            return result
         else:
-            return self.__replace(self.__instance, self.__key, *args, **kwargs)
+            self.__replace(self.__instance, self.__key, *args, **kwargs)
+        return self.__instance
 
     def connect(self, connector):
         """Connects this virtual single-input to an output.

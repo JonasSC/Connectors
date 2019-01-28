@@ -107,10 +107,10 @@ class Multiplexer:
 
         :param data_id: the data_id under which the input object is stored
         :param data: the new input object
-        :returns: the Multiplexer instance
+        :returns: ``data_id``, because the ID does not change for the replaced data
         """
         self.__data[data_id] = data
-        return self
+        return data_id
 
     @input.notify_condition
     def __input_condition(self, data_id, value):   # pylint: disable=unused-argument; notify condition methods must accept the new value

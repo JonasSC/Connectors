@@ -33,7 +33,7 @@ def test_multiplexer_functionality():
     assert mux.output() == "three"
     assert mux.select(2) is mux
     assert mux.output() == "two"
-    assert mux.replace(2, "Two") is mux
+    assert mux.replace(2, "Two") == 2
     assert mux.output() == "Two"
     assert mux.input[2]("TWO") is mux
     assert mux.output() == "TWO"

@@ -212,8 +212,11 @@ class MultiInputConnector(InputConnector):
                                                                                             self._instance(),
                                                                                             value)
                         else:
-                            await executor.run_method(self._parallelization, self.__replace,
-                                                      self._instance(), data_id, value)
+                            self._connections[output_connector] = await executor.run_method(self._parallelization,
+                                                                                            self.__replace,
+                                                                                            self._instance(),
+                                                                                            data_id,
+                                                                                            value)
                         self._conditional_observer_notification(data_id, value)
                         self._add_to_notification_condition_checks(data_id, value)
                     self.__notifications.clear()

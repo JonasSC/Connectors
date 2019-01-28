@@ -43,6 +43,7 @@ class ReplaceMethod:
         :param instance: the instance in which the method has been replaced by the multi-input connector
         :param data_id: the ID under which the data, that shall be replaced, has been stored
         :param value: the new value
+        :returns: the new data ID, under which the new data is stored
         """
         self.__remove(instance, data_id)
         return self.__add(instance, value)

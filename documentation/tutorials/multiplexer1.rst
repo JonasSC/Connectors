@@ -24,12 +24,12 @@ A multiplexer is a device with many inputs and one output, which allows to selec
       output [label="Output", shape=trapezium];
 
       {rank="same"; input1; input2; inputx; inputn};
-      
+
       input2 -> output [label="selected"];
       inputx -> output [style="invis"];
       input1 -> input2 -> inputx -> inputn [style="invis"];
    }
-   
+
 A very common application for multiplexers is signal routing in electronic circuits, for which there is a huge variety of integrated circuits, such as the *74LS151* or the *CMOS 4097*.
 In some occasions, a multiplexer can also be helpful to implement a processing networs, which is why the *Connectors* package provides the :class:`~connectors.blocks.Multiplexer` class.
 
@@ -70,6 +70,7 @@ The following code shows the implementation of a multiplexer.
 ...     @connectors.Input("output")
 ...     def select(self, selector):
 ...         self.__selector = selector
+...         return self
 ...
 ...     @connectors.MultiInput("output")
 ...     def input(self, data):
@@ -78,16 +79,20 @@ The following code shows the implementation of a multiplexer.
 ...     @input.remove
 ...     def remove(self, data_id):
 ...         del self.__data[data_id]
+...         return self
 ...
 ...     @input.replace
 ...     def replace(self, data_id, data):
 ...         self.__data[data_id] = data
+...         return data_id
 
-This implementation is straight forward.
+Note, that it is required, that the :meth:`~Multiplexer.replace` method returns the ID, under which the new input value is stored.
+Apart from this, the implementation is straight forward.
 
 * The :meth:`~Multiplexer.input`, :meth:`~Multiplexer.remove` and :meth:`~Multiplexer.replace` methods implement a very common pattern for multi-input connectors, in which the input values are stored in a :class:`~connectors.MultiInputData` instance.
 * The :meth:`~Multiplexer.select` method is an input connector, through which the key for selecting the input, that is routed to the output.
 * The :meth:`~Multiplexer.output` method returns the value from the selected input or ``None``, if the selector key is invalid.
+* The :meth:`~Multiplexer.select` and :meth:`~Multiplexer.remove` methods return ``self`` to allow method chaining.
 
 Usage of the multiplexer
 ------------------------
@@ -99,17 +104,30 @@ Instantiating the multiplexer is done the usual way.
 When calling the input, it can be accessed with the ``[]`` operator to specify the selector key.
 
 >>> multiplexer.input["key 1"]("value 1")
+<__main__.Multiplexer object at 0x...>
 >>> multiplexer.input["key 2"]("value 2")
+<__main__.Multiplexer object at 0x...>
 >>> multiplexer.select("key 2")
+<__main__.Multiplexer object at 0x...>
 >>> multiplexer.output()
+'value 2'
+
+Note, that the call of the virtual single-input method returns the multiplexer instance.
+This is an implementation choice of the *Connectors* package and cannot be influenced by how the decorated method is implemented.
+The idea behind this choice is, that it allows chaining the calls of the input method.
+Theoretically, all of the above can be written in one line:
+
+>>> Multiplexer().input["key 1"]("value 1").input["key 2"]("value 2").select("key 2").output()
 'value 2'
 
 Under the hood, the virtual single-inputs, that are created with the ``[]`` operator, call the :meth:`~Multiplexer.replace` method.
 So the above script is equivalent to the following.
 
 >>> multiplexer.replace("key 1", "value 1")
+'key 1'
 >>> multiplexer.replace("key 2", "value 2")
->>> multiplexer.select("key 2")
+'key 2'
+>>> _ = multiplexer.select("key 2")
 >>> multiplexer.output()
 'value 2'
 
@@ -118,7 +136,7 @@ In this case, the returned data ID must be stored in a variable, so it can be us
 
 >>> key1 = multiplexer.input("value 1")
 >>> key2 = multiplexer.input("value 2")
->>> multiplexer.select(key2)
+>>> _ = multiplexer.select(key2)
 >>> multiplexer.output()
 'value 2'
 
@@ -128,7 +146,7 @@ Therefore, connections to the multiplexer have to use the virtual single-inputs 
 
 >>> data_source = connectors.blocks.Passthrough("value 3 (value from the data source)")
 >>> _ = data_source.output.connect(multiplexer.input["key 3"])
->>> multiplexer.select("key 3")
+>>> _ = multiplexer.select("key 3")
 >>> multiplexer.output()
 'value 3 (value from the data source)'
 

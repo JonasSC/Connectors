@@ -71,7 +71,7 @@ class ReplacingMultiInput(BaseTestClass):
         """replaces a value in the output list"""
         self._register_call(methodname="replace_value", value=data_id)
         self.__data[data_id] = value
-        return self
+        return data_id
 
     @connectors.Output()
     def get_values(self):

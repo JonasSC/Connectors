@@ -115,9 +115,11 @@ class MultiInput(InputDecorator):
         which data, that has been added through the decorated method, can be replaced
         with new data without changing the ID under which it is stored.
 
-        A replace method has to take the id under which the old data is stored as
-        first parameter and the new data as second parameter. It must store the
-        new data under the same id as the old data.
+        A replace method has to take the ID, under which the old data is stored,
+        as first parameter and the new data as second parameter. It is strongly
+        recommended, that this method stores the new data under the same ID as
+        the old data. And this method must return the ID, under which the new
+        data is stored.
 
         Also, if no data has been stored under the given ID, yet, the replace method
         shall simply store the data under the given ID instead of raising an error.
