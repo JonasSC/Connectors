@@ -52,7 +52,7 @@ class MultiinputItem:
     def __call__(self, *args, **kwargs):
         """Calls the given replace-method
 
-        :param *args, **kwargs: arguments for the replace-method
+        :param `*args,**kwargs`: arguments for the replace-method
         :returns: the instance of which the method was replaced by the multi-input connector
         """
         if self.__observers:

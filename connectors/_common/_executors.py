@@ -66,7 +66,7 @@ def _redeployed_method(method_name, reduced_instance, *args, **kwargs):
     :param reduced_instance: a tuple with the class, in which the method is defined
                              and the ``__dict__`` of the instance of which the
                              method shall be executed
-    :param *args, **kwargs: arguments for the method
+    :param `*args,**kwargs`: arguments for the method
     """
     class_, state = reduced_instance
     instance = class_.__new__(class_)
@@ -89,7 +89,7 @@ class Executor:
                                 specifies how the given method can be parallelized
         :param method: the unbound method, that shall be executed
         :param instance: the instance of which the method shall be executed
-        :param *args, **kwargs: arguments for the method
+        :param `*args,**kwargs`: arguments for the method
         :returns: the return value of the method
         """
         raise NotImplementedError("this method should have been overridden in a derived class")
@@ -164,7 +164,7 @@ class SequentialExecutor(Executor):
                                 specifies how the given method can be parallelized
         :param method: the unbound method, that shall be executed
         :param instance: the instance of which the method shall be executed
-        :param *args, **kwargs: arguments for the method
+        :param `*args,**kwargs`: arguments for the method
         :returns: the return value of the method
         """
         return method(instance, *args, **kwargs)
@@ -190,7 +190,7 @@ class ThreadingExecutor(Executor):
                                 specifies how the given method can be parallelized
         :param method: the unbound method, that shall be executed
         :param instance: the instance of which the method shall be executed
-        :param *args, **kwargs: arguments for the method
+        :param `*args,**kwargs`: arguments for the method
         :returns: the return value of the method
         """
         if parallelization == Parallelization.SEQUENTIAL:
@@ -242,7 +242,7 @@ class MultiprocessingExecutor(Executor):
                                 specifies how the given method can be parallelized
         :param method: the unbound method, that shall be executed
         :param instance: the instance of which the method shall be executed
-        :param *args, **kwargs: arguments for the method
+        :param `*args,**kwargs`: arguments for the method
         :returns: the return value of the method
         """
         if parallelization == Parallelization.PROCESS:
@@ -310,7 +310,7 @@ class ThreadingMultiprocessingExecutor(Executor):
                                 specifies how the given method can be parallelized
         :param method: the unbound method, that shall be executed
         :param instance: the instance of which the method shall be executed
-        :param *args, **kwargs: arguments for the method
+        :param `*args,**kwargs`: arguments for the method
         :returns: the return value of the method
         """
         if parallelization == Parallelization.SEQUENTIAL:

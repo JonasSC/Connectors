@@ -52,7 +52,7 @@ class SingleInputConnector(InputConnector):
         """By making the object callable, it mimics the replaced method.
         This method also notifies the output method that are affected by this call (observers).
 
-        :param args, kwargs: parameters with which the replaced method shall be called
+        :param `*args,**kwargs`: parameters with which the replaced method shall be called
         :returns: the return value of the replaced method
         """
         # announce the value change
@@ -177,7 +177,7 @@ class SingleInputConnector(InputConnector):
         This method can be overridden by derived classes, for example to implement
         a conditional notification of the outputs.
 
-        :param *args, **kwargs: the parameters, with which the replaced setter
+        :param `*args,**kwargs`: the parameters, with which the replaced setter
                                 method has been called (excluding ``self``)
         """
         for o in self.__observers:
@@ -241,7 +241,7 @@ class ConditionalSingleInputConnector(SingleInputConnector):
         """Notifies the observing output connectors, that this input has changed
         the instance's state, if the condition is met.
 
-        :param *args, **kwargs: the parameters, with which the replaced setter
+        :param `*args,**kwargs`: the parameters, with which the replaced setter
                                 method has been called (excluding **self**)
         """
         value = common.get_first_argument(self._method, *args, **kwargs)

@@ -54,7 +54,7 @@ class MultiInputAssociateProxy:
 
     def __call__(self, *args, **kwargs):
         """Executes the replaced method and notifies the observing output connectors.
-        :param *args, **kwargs: possible arguments for the replaced method
+        :param `*args,**kwargs`: possible arguments for the replaced method
         :returns: the return value of the method, that has been replaced by this
         """
         instance = self.__instance

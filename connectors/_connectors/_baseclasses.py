@@ -51,7 +51,7 @@ class Connector:
         This is a virtual method which shall be overridden so it calls the
         replaced method in the expected manner.
 
-        :param *args, **kwargs: arguments for the replaced method
+        :param `*args,**kwargs`: arguments for the replaced method
         :returns: the return value of the replaced method
         """
         raise NotImplementedError("This method should have been implemented in a derived class")

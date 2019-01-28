@@ -52,7 +52,7 @@ class ConnectorProxy:
     def __call__(self, *args, **kwargs):
         """By making the object callable, it mimics the replaced method.
 
-        :param *args, **kwargs: possible arguments for the replaced method
+        :param `*args,**kwargs`: possible arguments for the replaced method
         """
         return self.__method(self.__instance, *args, **kwargs)
 

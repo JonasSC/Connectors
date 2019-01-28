@@ -63,7 +63,7 @@ class MultiInputConnector(InputConnector):
         """By making the object callable, it mimics the replaced method.
         This method also notifies the output method that are affected by this call (observers).
 
-        :param args, kwargs: parameters with which the replaced method has been called
+        :param `*args,**kwargs`: parameters with which the replaced method has been called
         :returns: the return value of the replaced method
         """
         # announce the value change
@@ -230,7 +230,7 @@ class MultiInputConnector(InputConnector):
         This method can be overridden by derived classes, for example to implement
         a conditional notification of the outputs.
 
-        :param *args, **kwargs: the parameters, with which the replaced setter
+        :param `*args,**kwargs`: the parameters, with which the replaced setter
                                 method has been called (excluding ``self``)
         """
         for o in self.__observers:
@@ -327,7 +327,7 @@ class ConditionalMultiInputConnector(MultiInputConnector):
         This method can be overridden by derived classes, for example to implement
         a conditional notification of the outputs.
 
-        :param *args, **kwargs: the parameters, with which the replaced setter
+        :param `*args,**kwargs`: the parameters, with which the replaced setter
                                 method has been called (excluding ``self``)
         """
         value = common.get_first_argument(self._method, *args, **kwargs)

@@ -74,8 +74,8 @@ class WeakrefProxyGenerator:
         it is notified, when the result has been computed and the input object is
         no longer required.
 
-        :param args, kwargs: these parameters just there fore compatibility with
-                             other input connectors and are not used in this method
+        :param `*args,**kwargs`: these parameters just there fore compatibility with
+                                 other input connectors and are not used in this method
         :returns: the WeakrefProxyGenerator instance
         """
         self.__data = None

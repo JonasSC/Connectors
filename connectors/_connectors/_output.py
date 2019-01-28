@@ -57,7 +57,7 @@ class OutputConnector(Connector):
         This method also notifies the input connectors, that are connected to
         this output.
 
-        :param args, kwargs: parameters with which the replaced method has been called
+        :param `*args,**kwargs`: parameters with which the replaced method has been called
         :returns: the return value of the replaced method
         """
         if self.__result_is_valid:

@@ -80,7 +80,7 @@ def get_first_argument(method, *args, **kwargs):
     returned.
 
     :param method: the method, of whose call, the first parameter shall be determined
-    :param *args, **kwargs: the parameters, that have been passed to the method
+    :param `*args,**kwargs`: the parameters, that have been passed to the method
     :returns: the first argument, that has been passed to the method, or None if no argument has been passed
     """
     if args:

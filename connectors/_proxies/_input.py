@@ -67,7 +67,7 @@ class SingleInputProxy(ConnectorProxy):
 
     def __call__(self, *args, **kwargs):
         """Executes the replaced method and notifies the observing output connectors.
-        :param *args, **kwargs: possible arguments for the replaced method
+        :param `*args,**kwargs`: possible arguments for the replaced method
         """
         instance = self._get_instance()
         # announce the value change

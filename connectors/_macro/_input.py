@@ -74,7 +74,7 @@ class MacroInputConnector:
         """Calls all input connectors, that are exported by this, with the given
         parameters.
 
-        :param args, kwargs: parameters with which the exported input connectors shall be called
+        :param `*args,**kwargs`: parameters with which the exported input connectors shall be called
         :returns: the instance of which this connector has replaced a method
         """
         for connector in self.__method(self.__instance):
