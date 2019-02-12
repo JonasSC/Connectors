@@ -38,8 +38,9 @@ class ConnectorProxy:
         :param method: the unbound method that is replaced by this connector proxy
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
                                 See the :meth:`set_parallelization` method for details
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the :meth:`set_executor`
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function. See the :meth:`~connectors._proxies._baseclasses.ConnectorProxy.set_executor`
                          method for details
         """
         self.__instance = instance
@@ -59,8 +60,10 @@ class ConnectorProxy:
     def connect(self, connector):
         """Connects this connector with another one.
 
-        :param connector: the :class:`Connector` instance to which this connector shall be connected
-        :returns: the instance of which this :class:`Connector` has replaced a method
+        :param connector: the :class:`~connectors.connectors.Connector` instance
+                          to which this connector shall be connected
+        :returns: the instance of which this :class:`~connectors.connectors.Connector`
+                  has replaced a method
         """
         return self._get_connector().connect(connector)
 
@@ -89,8 +92,9 @@ class ConnectorProxy:
         executor of the connector, which started the computations, is used for
         all computations.
 
-        :param executor: an :class:`Executor` instance, that can be created with
-                         the :func:`connectors.executor` function
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function
         """
         self._get_connector().set_executor(executor)
 
@@ -120,10 +124,11 @@ class ConnectorProxy:
         :param method: the unbound method that is replaced by the connector
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
                                 See the :meth:`set_parallelization` method for details
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the :meth:`set_executor`
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function. See the :meth:`~connectors._proxies._baseclasses.ConnectorProxy.set_executor`
                          method for details
-        :returns: a :class:`Connector` instance
+        :returns: a :class:`~connectors.connectors.Connector` instance
         """
         raise NotImplementedError("This method should have been implemented in a derived class")
 

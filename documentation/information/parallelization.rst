@@ -20,7 +20,7 @@ The *parallelization* parameter
 
 The *parallelization* parameter defines, which methods of parallelization are allowed for the given connector.
 
-The *parallelization* parameter is meant to be configured in the decorator, when implementing processing classes, but connectors also provide a :meth:`set_parallelization` method to configure the parallelization of individual instances.
+The *parallelization* parameter is meant to be configured in the decorator, when implementing processing classes, but connectors also provide a :meth:`~connectors.connectors.OutputConnector.set_parallelization` method to configure the parallelization of individual instances.
 It must be set to a flag of the :class:`connectors.Parallelization` enum.
 
 * Enforcing a sequential execution is useful for reducing the overhead, when doing short operations.

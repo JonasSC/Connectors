@@ -1,5 +1,5 @@
-Infrastructure: Makefile targets
-================================
+Makefile targets
+================
 
 The Makefile in the source code repository of the *Connectors* package has the following targets:
 

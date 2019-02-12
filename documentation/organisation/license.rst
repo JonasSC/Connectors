@@ -1,5 +1,5 @@
-Infrastructure: Licenses
-========================
+Licenses
+========
 
 LGPLv3+ for the source code
 ---------------------------

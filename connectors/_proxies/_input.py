@@ -55,8 +55,10 @@ class SingleInputProxy(ConnectorProxy):
                          the :meth:`set_laziness` method for details
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
                                 See the :meth:`set_parallelization` method for details
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the :meth:`set_executor`
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function. See the :class:`~connectors.connectors.SingleInputConnector`'s
+                         :meth:`~connectors.connectors.SingleInputConnector.set_executor`
                          method for details
         """
         ConnectorProxy.__init__(self, instance, method, parallelization, executor)
@@ -115,8 +117,10 @@ class SingleInputProxy(ConnectorProxy):
         :param method: the unbound method that is replaced by the connector
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
                                 See the :meth:`set_parallelization` method for details
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the :meth:`set_executor`
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function. See the :class:`~connectors.connectors.SingleInputConnector`'s
+                         :meth:`~connectors.connectors.SingleInputConnector.set_executor`
                          method for details
         :returns: an :class:`SingleInputConnector` instance
         """

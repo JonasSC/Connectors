@@ -110,8 +110,9 @@ class MacroOutputConnector:
         executor of the connector, which started the computations, is used for
         all computations.
 
-        :param executor: an :class:`Executor` instance, that can be created with
-                         the :func:`connectors.executor` function
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function
         """
         self.__method(self.__instance).set_executor(executor)
 

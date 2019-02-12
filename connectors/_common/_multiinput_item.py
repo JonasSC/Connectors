@@ -39,8 +39,8 @@ class MultiinputItem:
         :param key: the key with which the multi-input has been accessed.
         :param observers: a sequence of output connectors, that observe the
                           multi-input connector's value changes.
-        :param executor: an :class:`Executor` instance, that is used, when calling
-                         the instance of this class.
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that is used, when calling the instance of this class.
         """
         self.__connector = connector
         self.__instance = instance

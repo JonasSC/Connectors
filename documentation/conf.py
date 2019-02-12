@@ -20,7 +20,6 @@ import os
 import sys
 sys.path.append(os.path.abspath(".."))
 
-
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -37,7 +36,15 @@ extensions = ["sphinx.ext.autodoc",
               "sphinx.ext.intersphinx",
               "sphinx.ext.mathjax"]
 autoclass_content = "both"
-intersphinx_mapping = {"python": ("https://docs.python.org/3.6", None)}
+intersphinx_mapping = {"python": ("https://docs.python.org/3", None),
+                       "setuptools": ("https://setuptools.readthedocs.io/en/latest", None),
+                       "pytest": ("https://docs.pytest.org/en/latest", None),
+                       "pytest-cov": ("https://pytest-cov.readthedocs.io/en/latest", None),
+                       "flake8": ("http://flake8.pycqa.org/en/latest/", None),
+                       "sphinx": ("http://www.sphinx-doc.org/en/master", None),
+                       "sphinx_rtd_theme": ("https://sphinx-rtd-theme.readthedocs.io/en/latest", None),
+                       "numpy": ("https://docs.scipy.org/doc/numpy", None),
+                       "matplotlib": ("https://matplotlib.org", None)}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -81,6 +88,8 @@ pygments_style = "sphinx"
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
+# If true, the references in the documentation are checked
+nitpicky = True
 
 # -- Options for HTML output ----------------------------------------------
 
@@ -100,12 +109,10 @@ html_theme = "sphinx_rtd_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ["_static"]
 
-
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = "ConnectorsDoc"
-
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -135,7 +142,6 @@ latex_documents = [
      u"Jonas Schulte-Coerne", "manual"),
 ]
 
-
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
@@ -144,7 +150,6 @@ man_pages = [
     (master_doc, "Connectors", u"Connectors Documentation",
      [author], 1)
 ]
-
 
 # -- Options for Texinfo output -------------------------------------------
 

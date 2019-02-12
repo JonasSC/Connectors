@@ -36,8 +36,9 @@ class Connector:
         :param method: the unbound method that is replaced by this connector
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
                                 See the :meth:`set_parallelization` method for details
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the :meth:`set_executor`
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function. See the :meth:`~connectors.connectors.Connector.set_executor`
                          method for details
         """
         self._instance = weakref.ref(instance)  # the weak reference avoids reference counting errors due to circular references
@@ -57,20 +58,24 @@ class Connector:
         raise NotImplementedError("This method should have been implemented in a derived class")
 
     def connect(self, connector):
-        """Abstract method that defines the interface of a :class:`Connector` for
-        connecting it with other connectors.
+        """Abstract method that defines the interface of a :class:`~connectors.connectors.Connector`
+        for connecting it with other connectors.
 
-        :param connector: the :class:`Connector` instance to which this connector shall be connected
-        :returns: the instance of which this :class:`Connector` has replaced a method
+        :param connector: the :class:`~connectors.connectors.Connector` instance
+                          to which this connector shall be connected
+        :returns: the instance of which this :class:`~connectors.connectors.Connector`
+                  has replaced a method
         """
         raise NotImplementedError("This method should have been implemented in a derived class")
 
     def disconnect(self, connector):
-        """Abstract method that defines the interface of a :class:`Connector` for
-        disconnecting it from a connector, to which it is currently connected.
+        """Abstract method that defines the interface of a :class:`~connectors.connectors.Connector`
+        for disconnecting it from a connector, to which it is currently connected.
 
-        :param connector: a :class:`Connector` instance from which this connector shall be disconnected
-        :returns: the instance of which this :class:`Connector` has replaced a method
+        :param connector: a :class:`~connectors.connectors.Connector` instance
+                          from which this connector shall be disconnected
+        :returns: the instance of which this :class:`~connectors.connectors.Connector`
+                  has replaced a method
         """
         raise NotImplementedError("This method should have been implemented in a derived class")
 
@@ -99,8 +104,9 @@ class Connector:
         executor of the connector, which started the computations, is used for
         all computations.
 
-        :param executor: an :class:`Executor` instance, that can be created with
-                         the :func:`connectors.executor` function
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function
         """
         self._executor = executor
 
@@ -111,10 +117,12 @@ class Connector:
         given connector and recompute its own value, when that value is requested.
 
         :param connector: a connector on whose value change this connector's value depends
-        :param non_lazy_inputs: a NonLazyInputs instance to which input connectors
-                                can be appended, if they request an immediate
-                                re-computation (see the InputConnector's
-                                :meth:`set_laziness` method for more about lazy execution)
+        :param non_lazy_inputs: a :class:`~connectors._common._non_lazy_inputs.NonLazyInputs`
+                                instance to which input connectors can be appended,
+                                if they request an immediate re-computation (see
+                                the :class:`~connectors._connectors._baseclasses.InputConnector`'s
+                                :meth:`~connectors._connectors._baseclasses.InputConnector.set_laziness`
+                                method for more about lazy execution)
         """
         raise NotImplementedError("This method should have been implemented in a derived class")
 
@@ -130,12 +138,14 @@ class Connector:
 
     def _get_connector(self):
         """A method, that is used internally by the *Connectors* package for
-        compatibility with :class:`ConnectorProxy` instances.
-        In a :class:`ConnectorProxy`, this method creates the connector for the corresponding
-        method, replaces that method with it and returns the connector. With this
-        method, a Connector mimics this behavior, so it is not necessary to check,
-        whether a method has already been replaced by its connector, or if it is
-        still managed by a :class:`ConnectorProxy`.
+        compatibility with :class:`~connectors._proxies._baseclasses.ConnectorProxy`
+        instances.
+        In a :class:`~connectors._proxies._baseclasses.ConnectorProxy`, this method
+        creates the connector for the corresponding method, replaces that method
+        with it and returns the connector. With this method, a Connector mimics
+        this behavior, so it is not necessary to check, whether a method has
+        already been replaced by its connector, or if it is still managed by a
+        :class:`~connectors._proxies._baseclasses.ConnectorProxy`.
 
         :returns: ``self``
         """
@@ -152,29 +162,33 @@ class InputConnector(Connector):
         :param method: the unbound method that is replaced by this connector
         :param laziness: a flag from the :class:`connectors.Laziness` enum. See
                          the :meth:`set_laziness` method for details
-        :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
-                                See the :meth:`set_parallelization` method for details
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the :meth:`set_executor`
+        :param parallelization: a flag from the :class:`~connectors.Parallelization` enum.
+                                See the :meth:`~connectors._connectors._baseclasses.InputConnector.set_parallelization`
+                                method for details
+        :param executor: an :class:`~connectors._common._executors.Executor`
+                         instance, that can be created with the :func:`connectors.executor`
+                         function. See the :meth:`~connectors._connectors._baseclasses.InputConnector.set_executor`
                          method for details
         """
         Connector.__init__(self, instance, method, parallelization, executor)
         self._laziness = laziness
 
     def connect(self, connector):
-        """Connects this :class:`InputConnector` to an output.
+        """Connects this :class:`~connectors._connectors._baseclasses.InputConnector` to an output.
 
-        :param connector: the :class:`Connector` instance to which this connector shall be connected
-        :returns: the instance of which this :class:`InputConnector` has replaced a method
+        :param connector: the :class:`~connectors.connectors.Connector` instance to which this connector shall be connected
+        :returns: the instance of which this :class:`~connectors._connectors._baseclasses.InputConnector`
+                  has replaced a method
         """
         connector.connect(self)
         return self._instance()
 
     def disconnect(self, connector):
-        """Disconnects this :class:`InputConnector` from an output, to which is has been connected.
+        """Disconnects this :class:`~connectors._connectors._baseclasses.InputConnector`
+        from an output, to which is has been connected.
 
-        :param connector: a :class:`Connector` instance from which this connector shall be disconnected
-        :returns: the instance of which this :class:`Connector` has replaced a method
+        :param connector: a :class:`~connectors.connectors.Connector` instance from which this connector shall be disconnected
+        :returns: the instance of which this :class:`~connectors.connectors.Connector` has replaced a method
         """
         connector.disconnect(self)
         return self._instance()

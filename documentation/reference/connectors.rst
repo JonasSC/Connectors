@@ -1,3 +1,5 @@
+.. _connectorsReference:
+
 Connectors
 ==========
 
@@ -21,6 +23,8 @@ These classes are not instantiated by code outside the *Connectors* package.
    :members:
    :inherited-members:
 
+   .. automethod:: __getitem__
+
 
 Automated parallelization
 -------------------------
@@ -35,6 +39,6 @@ The following functionalities are for configuring the automated parallelization 
 Configuring the laziness
 ------------------------
 
-Flags of the following enumeration can be passed to an input connectors :meth:`set_laziness` method.
+Flags of the following enumeration can be passed to an input connectors :meth:`~connectors._connectors._baseclasses.InputConnector.set_laziness` method.
 
 .. autoclass:: connectors.Laziness

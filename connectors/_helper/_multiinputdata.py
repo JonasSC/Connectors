@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""Contains the :class:`MultiInputData` class"""
+"""Contains the :class:`~connectors.MultiInputData` class"""
 
 import collections
 
@@ -24,9 +24,9 @@ __all__ = ("MultiInputData",)
 class MultiInputData(collections.OrderedDict):
     # pylint: disable=wrong-spelling-in-docstring;    avoid that the spell checker complains about the code in this comment
     """A container for data that is managed with a multi-input connector.
-    This is basically an OrderedDict with an add method, that stores the added
-    data under a unique key.
-    This facilitates the implementation of a class with a :class:`MultiInput` connector:
+    This is basically an :class:`~collections.OrderedDict` with an add method,
+    that stores the added data under a unique key.
+    This facilitates the implementation of a class with a :class:`~connectors.MultiInput` connector:
 
     >>> import connectors
     >>> class ReplacingMultiInput:

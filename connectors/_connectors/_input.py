@@ -32,11 +32,14 @@ class SingleInputConnector(InputConnector):
         :param method: the unbound method, that is replaced by this connector
         :param observers: the names of output methods that are affected by passing a value to this connector
         :param laziness: a flag from the :class:`connectors.Laziness` enum. See
-                         the :meth:`set_laziness` method for details
+                         the :meth:`~connectors.connectors.SingleInputConnector.set_laziness`
+                         method for details
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
-                                See the :meth:`set_parallelization` method for details
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the :meth:`set_executor`
+                                See the :meth:`~connectors.connectors.SingleInputConnector.set_parallelization`
+                                method for details
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function. See the :meth:`~connectors.connectors.SingleInputConnector.set_executor`
                          method for details
         """
         InputConnector.__init__(self, instance, method, laziness, parallelization, executor)
@@ -72,13 +75,15 @@ class SingleInputConnector(InputConnector):
         return result
 
     def _connect(self, connector):
-        """This method is called from an :class:`~connectors.OutputConnector`,
-        when it is  being connected to this :class:`~connectors.SingleInputConnector`.
+        """This method is called from an :class:`~connectors.connectors.OutputConnector`,
+        when it is  being connected to this :class:`~connectors.connectors.SingleInputConnector`.
 
-        :param connector: the :class:`OutputConnector` instance to which this connector shall be connected
-        :returns: yields self (see the :class:`~connectors.MacroInputConnector`,
-                  where :meth:`~connectors.MacroInputConnector._connect` yields
-                  all the :class:`~connectors.SingleInputConnector`s that it exports)
+        :param connector: the :class:`~connectors.connectors.OutputConnector` instance
+                          to which this connector shall be connected
+        :returns: yields ``self`` (see the :class:`~connectors.connectors.MacroInputConnector`,
+                  where :meth:`~connectors.connectors.MacroInputConnector._connect`
+                  yields all the :class:`~connectors.connectors.SingleInputConnector`
+                  instances that it exports)
         """
         yield self
         non_lazy_inputs = common.NonLazyInputs(situation=common.Laziness.ON_CONNECT)
@@ -102,10 +107,11 @@ class SingleInputConnector(InputConnector):
         connector can produce updated data.
 
         :param connector: the output connector whose value is about to change
-        :param non_lazy_inputs: a NonLazyInputs instance to which input connectors
-                                can be appended, if they request an immediate
-                                re-computation (see the InputConnector's
-                                :meth:`set_laziness` method for more about lazy execution)
+        :param non_lazy_inputs: a :class:`~connectors._common._non_lazy_inputs.NonLazyInputs`
+                                instance to which input connectors can be appended,
+                                if they request an immediate re-computation (see
+                                the :meth:`~connectors.connectors.SingleInputConnector.set_laziness`
+                                method for more about lazy execution)
         """
         self.__announcement = connector
         self.__notification = None
@@ -122,9 +128,10 @@ class SingleInputConnector(InputConnector):
 
         :param connector: the output connector whose value has changed
         :param value: the updated data from the output connector
-        :param executor: the :class:`Executor` instance, which managed the computation
-                         of the output connector, and which shall be used for the
-                         computation of this connector, in case it is not lazy.
+        :param executor: the :class:`~connectors._common._executors.Executor`
+                         instance, which managed the computation of the output
+                         connector, and which shall be used for the computation
+                         of this connector, in case it is not lazy.
         """
         self.__notification = value
         self.__notification_is_valid = True
@@ -150,7 +157,8 @@ class SingleInputConnector(InputConnector):
         It is called by the output connectors, that are affected by this connector,
         (observers) when their values have to be computed.
 
-        :param executor: the :class:`Executor` instance, that manages the current computations
+        :param executor: the :class:`~connectors._common._executors.Executor`
+                         instance, that manages the current computations
         """
         if not self.__running:
             self.__running = True
@@ -216,8 +224,9 @@ class ConditionalSingleInputConnector(SingleInputConnector):
                          the :meth:`set_laziness` method for details
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
                                 See the :meth:`set_parallelization` method for details
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the :meth:`set_executor`
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function. See the :meth:`~connectors.connectors.SingleInputConnector.set_executor`
                          method for details
         """
         SingleInputConnector.__init__(self, instance, method, observers, laziness, parallelization, executor)
@@ -229,10 +238,11 @@ class ConditionalSingleInputConnector(SingleInputConnector):
         connector can produce updated data.
 
         :param connector: the output connector whose value is about to change
-        :param non_lazy_inputs: a NonLazyInputs instance to which input connectors
-                                can be appended, if they request an immediate
-                                re-computation (see the InputConnector's
-                                :meth:`set_laziness` method for more about lazy execution)
+        :param non_lazy_inputs: a :class:`~connectors._common._non_lazy_inputs.NonLazyInputs`
+                                instance to which input connectors can be appended,
+                                if they request an immediate re-computation (see
+                                the :meth:`~connectors.connectors.SingleInputConnector.set_laziness`
+                                method for more about lazy execution)
         """
         if self.__announce_condition(self._instance()):
             super()._announce(connector, non_lazy_inputs)

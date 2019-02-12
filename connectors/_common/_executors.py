@@ -14,9 +14,11 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""Contains the :class:`Executor` classes, that implement the parallelization of
-computations in separate threads or processes.
-Only the factory function for creating :class:`Executor` instances is exported.
+"""Contains the :class:`~connectors._common._executors.Executor` classes, that
+implement the parallelization of computations in separate threads or processes.
+
+Only the factory function for creating :class:`~connectors._common._executors.Executor`
+instances is exported.
 """
 
 # pylint: disable=wrong-spelling-in-comment,wrong-spelling-in-docstring;    for some reason the spell checker does not recognize the word "CPU"
@@ -31,17 +33,17 @@ __all__ = ("executor",)
 
 
 def executor(threads=None, processes=0):
-    """A factory function for creating :class:`Executor` objects.
-    Executors define how the computations of a processing chain are parallelized
-    by executing them in separate threads or processes. This function creates an
-    executor and configures it to use at maximum the given number of threads or
-    processes.
+    """A factory function for creating :class:`~connectors._common._executors.Executor`
+    objects. Executors define how the computations of a processing chain are
+    parallelized by executing them in separate threads or processes. This function
+    creates an executor and configures it to use at maximum the given number of
+    threads or processes.
 
-    :param threads: an integer number of threads or None to determine the number
+    :param threads: an integer number of threads or ``None`` to determine the number
                     automatically. 0 disables the thread based parallelization.
-    :param processes: an integer number of processes or None to determine the number
-                      automatically (in this case, the number of CPU cores will
-                      be taken). 0 disables the process based parallelization.
+    :param processes: an integer number of processes or ``None`` to determine the
+                      number automatically (in this case, the number of CPU cores
+                      will be taken). 0 disables the process based parallelization.
     """
     if threads == 0:
         if processes == 0:
@@ -85,6 +87,7 @@ class Executor:
     async def run_method(self, parallelization, method, instance, *args, **kwargs):
         """Abstract method, whose overrides shall execute the given method.
         The parallelization shall be implemented in this method.
+
         :param parallelization: a flag of :class:`connectors.Parallelization`, that
                                 specifies how the given method can be parallelized
         :param method: the unbound method, that shall be executed
@@ -109,7 +112,7 @@ class Executor:
 
     def run_until_complete(self, future):
         """Takes a future or a task and runs it in a newly created event loop.
-        This is a wrapper for the event loop's :meth:`~asyncio.AbstractEventLoop.run_until_complete`
+        This is a wrapper for the event loop's :meth:`~asyncio.loop.run_until_complete`
         method.
 
         :param future: the future or the task
@@ -160,6 +163,7 @@ class SequentialExecutor(Executor):
 
     async def run_method(self, parallelization, method, instance, *args, **kwargs):
         """Executes the given method sequentially.
+
         :param parallelization: a flag of :class:`connectors.Parallelization`, that
                                 specifies how the given method can be parallelized
         :param method: the unbound method, that shall be executed
@@ -186,6 +190,7 @@ class ThreadingExecutor(Executor):
     async def run_method(self, parallelization, method, instance, *args, **kwargs):
         """Executes the given method in a thread if possible and falls back to
         sequential execution if not.
+
         :param parallelization: a flag of :class:`connectors.Parallelization`, that
                                 specifies how the given method can be parallelized
         :param method: the unbound method, that shall be executed
@@ -238,6 +243,7 @@ class MultiprocessingExecutor(Executor):
     async def run_method(self, parallelization, method, instance, *args, **kwargs):
         """Executes the given method in a process if possible and falls back to
         sequential execution if not.
+
         :param parallelization: a flag of :class:`connectors.Parallelization`, that
                                 specifies how the given method can be parallelized
         :param method: the unbound method, that shall be executed
@@ -306,6 +312,7 @@ class ThreadingMultiprocessingExecutor(Executor):
     async def run_method(self, parallelization, method, instance, *args, **kwargs):
         """Executes the given method in a process if possible and falls back to
         threaded and then sequential execution if not.
+
         :param parallelization: a flag of :class:`connectors.Parallelization`, that
                                 specifies how the given method can be parallelized
         :param method: the unbound method, that shall be executed

@@ -41,11 +41,14 @@ class MultiInputConnector(InputConnector):
                                that has been added through this connector
         :param observers: the names of output methods that are affected by passing a value to this connector
         :param laziness: a flag from the :class:`connectors.Laziness` enum. See
-                         the :meth:`set_laziness` method for details
+                         the :meth:`~connectors.connectors.MultiInputConnector.set_laziness`
+                         method for details
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
-                                See the :meth:`set_parallelization` method for details
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the :meth:`set_executor`
+                                See the :meth:`~connectors.connectors.MultiInputConnector.set_parallelization`
+                                method for details
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function. See the :meth:`~connectors.connectors.MultiInputConnector.set_executor`
                          method for details
         """
         InputConnector.__init__(self, instance, method, laziness, parallelization, executor)
@@ -145,10 +148,11 @@ class MultiInputConnector(InputConnector):
         connector can produce updated data.
 
         :param connector: the output connector whose value is about to change
-        :param non_lazy_inputs: a NonLazyInputs instance to which input connectors
-                                can be appended, if they request an immediate
-                                re-computation (see the InputConnector's
-                                :meth:`set_laziness` method for more about lazy execution)
+        :param non_lazy_inputs: a :class:`~connectors._common._non_lazy_inputs.NonLazyInputs`
+                                instance to which input connectors can be appended,
+                                if they request an immediate re-computation (see
+                                the :meth:`~connectors.connectors.MultiInputConnector.set_laziness`
+                                method for more about lazy execution)
         """
         self.__computable.clear()
         self.__announcements.add(connector)
@@ -163,9 +167,10 @@ class MultiInputConnector(InputConnector):
 
         :param connector: the output connector whose value has changed
         :param value: the updated data from the output connector
-        :param executor: the :class:`Executor` instance, which managed the computation
-                         of the output connector, and which shall be used for the
-                         computation of this connector, in case it is not lazy.
+        :param executor: the :class:`~connectors._common._executors.Executor`
+                         instance, which managed the computation of the output
+                         connector, and which shall be used for the computation
+                         of this connector, in case it is not lazy.
         """
         self.__notifications[connector] = value
         self.__announcements.discard(connector)
@@ -192,7 +197,8 @@ class MultiInputConnector(InputConnector):
         It is called by the output connectors, that are affected by this connector,
         (observers) when their values have to be computed.
 
-        :param executor: the :class:`Executor` instance, that manages the current computations
+        :param executor: the :class:`~connectors._common._executors.Executor` instance,
+                         that manages the current computations
         """
         if not self.__running:
             self.__running = True
@@ -297,8 +303,9 @@ class ConditionalMultiInputConnector(MultiInputConnector):
                          the :meth:`set_laziness` method for details
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
                                 See the :meth:`set_parallelization` method for details
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the :meth:`set_executor`
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function. See the :meth:`~connectors.connectors.MultiInputConnector.set_executor`
                          method for details
         """
         MultiInputConnector.__init__(self, instance, method,
@@ -314,10 +321,11 @@ class ConditionalMultiInputConnector(MultiInputConnector):
         connector can produce updated data.
 
         :param connector: the output connector whose value is about to change
-        :param non_lazy_inputs: a NonLazyInputs instance to which input connectors
-                                can be appended, if they request an immediate
-                                re-computation (see the InputConnector's
-                                :meth:`set_laziness` method for more about lazy execution)
+        :param non_lazy_inputs: a :class:`~connectors._common._non_lazy_inputs.NonLazyInputs`
+                                instance to which input connectors can be appended,
+                                if they request an immediate re-computation (see
+                                the :meth:`~connectors.connectors.MultiInputConnector.set_laziness`
+                                method for more about lazy execution)
         """
         if self.__announce_condition(self._instance(), self._connections[connector]):
             super()._announce(connector, non_lazy_inputs)

@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""Contains the OutputConnector class"""
+"""Contains the :class:`~connectors.connectors.OutputConnector` class"""
 
 import asyncio
 import weakref
@@ -34,11 +34,14 @@ class OutputConnector(Connector):
         :param instance: the instance of which the method is replaced by this connector
         :param method: the unbound method that is replaced by this connector
         :param caching: True, if caching shall be enabled, False otherwise. See
-                        the :meth:`set_caching` method for details
+                        the :meth:`~connectors.connectors.OutputConnector.set_caching`
+                        method for details
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
-                                See the :meth:`set_parallelization` method for details
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the :meth:`set_executor`
+                                See the :meth:`~connectors.connectors.OutputConnector.set_parallelization`
+                                method for details
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function. See the :meth:`~connectors.connectors.OutputConnector.set_executor`
                          method for details
         """
         Connector.__init__(self, instance, method, parallelization, executor)
@@ -107,10 +110,12 @@ class OutputConnector(Connector):
         connector (a setter from self._instance) can retrieve updated data.
 
         :param connector: the input connector, which is about to change a value
-        :param non_lazy_inputs: a NonLazyInputs instance to which input connectors
-                                can be appended, if they request an immediate
-                                re-computation (see the InputConnector's
-                                :meth:`set_laziness` method for more about lazy execution)
+        :param non_lazy_inputs: a :class:`~connectors._common._non_lazy_inputs.NonLazyInputs`
+                                instance to which input connectors can be appended,
+                                if they request an immediate re-computation (see
+                                the :class:`~connectors._connectors._base_classes.InputConnector`'s
+                                :meth:`~connectors._connectors._base_classes.InputConnector.set_laziness`
+                                method for more about lazy execution)
         """
         self.__announcements.add(connector)
         self.__result_is_valid = False
@@ -123,10 +128,12 @@ class OutputConnector(Connector):
         connector (a setter from self._instance) has retrieved updated data.
 
         :param connector: the input connector, which has changed a value
-        :param non_lazy_inputs: a NonLazyInputs instance to which input connectors
-                                can be appended, if they request an immediate
-                                re-computation (see the InputConnector's
-                                :meth:`set_laziness` method for more about lazy execution)
+        :param non_lazy_inputs: a :class:`~connectors._common._non_lazy_inputs.NonLazyInputs`
+                                instance to which input connectors can be appended,
+                                if they request an immediate re-computation (see
+                                the :class:`~connectors._connectors._base_classes.InputConnector`'s
+                                :meth:`~connectors._connectors._base_classes.InputConnector.set_laziness`
+                                method for more about lazy execution)
         """
         self.__result_is_valid = False
         self.__observed_has_changed = True
@@ -155,7 +162,8 @@ class OutputConnector(Connector):
         result value of this output connector.
 
         :param connector: the input connector, from which the request is issued
-        :param executor: the :class:`Executor` instance, that manages the current computations
+        :param executor: the :class:`~connectors._common._executors.Executor` instance,
+                         that manages the current computations
         :returns: the result value of the output connector
         """
         if not self.__running:

@@ -7,12 +7,13 @@ Implementation details
 The *Connectors* package uses :mod:`asyncio` to model the dependencies between the connectors and schedule their execution.
 The event loop is started by the connector, which triggers the computations and ends, when that connector's computation has finished.
 
+.. _avoidingCircularReferences:
 
 Connector proxies - avoiding circular references
 ------------------------------------------------
 
 .. note::
-   
+
    Circular references occur, when objects have references to each other, so that their reference count never reaches zero, even when there is no reference to the objects in the active code.
    In such a case, the objects are not automatically deleted by Python's reference counting mechanism.
 
@@ -32,12 +33,12 @@ This alone is not sufficient though, since this would break the functionality to
 
    result = ExampleClass().connector()
 
-In the above example, an object of :class:`ExampleClass` is created and and its connector :meth:`connector` is accessed.
+In the above example, an object of :class:`ExampleClass` is created and and its connector :meth:`~ExampleClass.connector` is accessed.
 Since no reference of the object is stored, except for the weak reference of the connector, the object will be garbage collected after accessing the connector, but before executing it.
 So the connector cannot be executed.
 
 To prevent objects from being garbage collected prematurely, the *Connectors* package uses a mechanism similar to the bound and unbound methods from Python.
 As long as no individual information has to be stored in the connector, the method is not replaced by a connector object.
-Instead a :class:`~connectors.proxies.ConnectorProxy` object is created each time, when the connector is accessed.
+Instead a :class:`~connectors._proxies._baseclasses.ConnectorProxy` object is created each time, when the connector is accessed.
 Similar to bound methods, the connector proxy has a reference to the object, but not vice versa.
 Only when establishing a connection or when changing the configuration, the method is replaced by a connector.

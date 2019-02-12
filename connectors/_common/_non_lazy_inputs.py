@@ -22,15 +22,16 @@ __all__ = ("NonLazyInputs",)
 
 
 class NonLazyInputs(set):
-    """A subclass of set, that is used internally to track the non-lazy input connectors,
-    that request an immediate re-computation of the processing chain.
+    """A subclass of :class:`set`, that is used internally to track the non-lazy
+    input connectors, that request an immediate re-computation of the processing
+    chain.
     """
 
     def __init__(self, situation):
         """
-        :param situation: a flag from the Laziness enumeration to which the laziness
-                          of the connectors is compared in order to decide, if it
-                          shall be added to this set.
+        :param situation: a flag from the :class:`~connectors.Laziness` enumeration
+                          to which the laziness of the connectors is compared in
+                          order to decide, if it shall be added to this :class:`set`.
         """
         set.__init__(self)
         self.__situation = situation
@@ -39,8 +40,10 @@ class NonLazyInputs(set):
         """Adds a connector to this container, if its laziness is low enough to
         cause immediate execution.
 
-        :param connector: the InputConnector instance, that shall be added
-        :param laziness: the laziness setting of that connector as a flag from the Laziness enumeration
+        :param connector: the :class:`~connectors._connectors._baseclasses.InputConnector`
+                          instance, that shall be added
+        :param laziness: the laziness setting of that connector as a flag from the
+                         :class:`~connectors.Laziness` enumeration
         """
         if laziness >= self.__situation:
             set.add(self, connector)
@@ -49,7 +52,8 @@ class NonLazyInputs(set):
         """Executes the necessary computations, that are requested by the non-lazy
         input connectors.
 
-        :param executor: the Executor instance, that manages the executions
+        :param executor: the :class:`connectors._common._executors.Executor` instance,
+                         that manages the executions
         """
         if self:
             tasks = asyncio.wait([i._request(executor) for i in self])

@@ -31,10 +31,13 @@ class ConnectorDecorator:
     def __init__(self, parallelization, executor):
         """
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
-                                See the Connector's :meth:`set_parallelization` method for details
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the Connector's
-                         :meth:`set_executor` method for details
+                                See the :class:`~connectors.connectors.Connector`'s
+                                :meth:`~connectors.connectors.Connector.set_parallelization` method for details
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function. See the :class:`~connectors.connectors.Connector`'s
+                         :meth:`~connectors.connectors.Connector.set_executor` method
+                         for details
         """
         self._method = None     # Will be set in __call__
         self._parallelization = parallelization
@@ -54,8 +57,8 @@ class ConnectorDecorator:
 
         :param instance: the instance of which a method shall be replaced
         :param instance_type: the type of the instance
-        :returns: a :class:`ConnectorProxy` instance, that mimics the decorated
-                  method and adds the connector functionality
+        :returns: a :class:`connectors._proxies._baseclasses.ConnectorProxy` instance,
+                  that mimics the decorated method and adds the connector functionality
         """
         raise NotImplementedError("This method should have been overridden in a derived class")
 
@@ -78,12 +81,18 @@ class InputDecorator(ConnectorDecorator):
                           possible to pass a string here, if only one output
                           connector depends on this input.
         :param laziness: a flag from the :class:`connectors.Laziness` enum. See the
-                         Connector's :meth:`set_laziness` method for details
+                         :class:`~connectors.connectors.SingleInputConnector`'s
+                         :meth:`~connectors.connectors.SingleInputConnector.set_laziness`
+                         method for details
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
-                                See the Connector's :meth:`set_parallelization` method for details
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the Connector's
-                         :meth:`set_executor` method for details
+                                See the :class:`~connectors.connectors.MultiInputConnector`'s
+                                :meth:`~connectors.connectors.SingleInputConnector.set_parallelization`
+                                method for details
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function. See the :class:`~connectors._connectors._baseclasses.InputConnector`'s
+                         :meth:`~connectors._connectors._baseclasses.InputConnector.set_executor` method
+                         for details
         """
         ConnectorDecorator.__init__(self, parallelization=parallelization, executor=executor)
         if isinstance(observers, str):

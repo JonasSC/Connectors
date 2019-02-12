@@ -36,12 +36,18 @@ class Output(ConnectorDecorator):
                  executor=default_executor):
         """
         :param caching: True, if caching shall be enabled, False otherwise. See
-                        the OutputConnector's :meth:`set_caching` method for details
+                        the :class:`~connectors.connectors.OutputConnector`'s
+                        :meth:`~connectors.connectors.OutputConnector.set_caching`
+                        method for details
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
-                                See the Connector's :meth:`set_parallelization` method for details
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the Connector's
-                         :meth:`set_executor` method for details
+                                See the :class:`~connectors.connectors.OutputConnector`'s
+                                :meth:`~connectors.connectors.OutputConnector.set_parallelization`
+                                method for details
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function. See the :class:`~connectors.connectors.OutputConnector`'s
+                         :meth:`~connectors.connectors.OutputConnector.set_executor`
+                         method for details
         """
         ConnectorDecorator.__init__(self, parallelization, executor)
         self.__caching = caching

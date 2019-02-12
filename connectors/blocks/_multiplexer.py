@@ -79,7 +79,7 @@ class Multiplexer:
     def input(self, data):
         """Specifies an input object, that can be selected to be routed to the output.
         When connecting to this method, the selector, by which the given connection
-        can be selected, can be specified with the :meth:`~connectors.MultiInputConnector.__getitem__`
+        can be selected, can be specified with the :meth:`~connectors.connectors.MultiInputConnector.__getitem__`
         overload::
 
            multiplexer.input[selector].connect(generator.output())

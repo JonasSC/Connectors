@@ -43,8 +43,10 @@ class OutputProxy(ConnectorProxy):
                         the :meth:`set_caching` method for details
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
                                 See the :meth:`set_parallelization` method for details
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the :meth:`set_executor`
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function. See the :class:`~connectors.connectors.OutputConnector`'s
+                         :meth:`~connectors.connectors.OutputConnector.set_executor`
                          method for details
         """
         ConnectorProxy.__init__(self, instance, method, parallelization, executor)
@@ -71,10 +73,12 @@ class OutputProxy(ConnectorProxy):
         :param method: the unbound method that is replaced by the connector
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
                                 See the :meth:`set_parallelization` method for details
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the :meth:`set_executor`
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function. See the :class:`~connectors.connectors.OutputConnector`'s
+                         :meth:`~connectors.connectors.OutputConnector.set_executor`
                          method for details
-        :returns: an :class:`OutputConnector` instance
+        :returns: an :class:`~connectors.connectors.OutputConnector` instance
         """
         return OutputConnector(instance=instance,
                                method=method,
@@ -87,10 +91,12 @@ class OutputProxy(ConnectorProxy):
         connector (a setter from self._instance) can retrieve updated data.
 
         :param connector: the input connector, which is about to change a value
-        :param non_lazy_inputs: a NonLazyInputs instance to which input connectors
-                                can be appended, if they request an immediate
-                                re-computation (see the InputConnector's
-                                :meth:`set_laziness` method for more about lazy execution)
+        :param non_lazy_inputs: a :class:`~connectors._common._non_lazy_inputs.NonLazyInputs`
+                                instance to which input connectors can be appended,
+                                if they request an immediate re-computation (see
+                                the :class:`~connectors._connectors._base_classes.InputConnector`'s
+                                :meth:`~connectors._connectors._base_classes.InputConnector.set_laziness`
+                                method for more about lazy execution)
         """
         # nothing to do for a proxy
 
@@ -99,9 +105,11 @@ class OutputProxy(ConnectorProxy):
         connector (a setter from self._instance) has retrieved updated data.
 
         :param connector: the input connector, which has changed a value
-        :param non_lazy_inputs: a NonLazyInputs instance to which input connectors
-                                can be appended, if they request an immediate
-                                re-computation (see the InputConnector's
-                                :meth:`set_laziness` method for more about lazy execution)
+        :param non_lazy_inputs: a :class:`~connectors._common._non_lazy_inputs.NonLazyInputs`
+                                instance to which input connectors can be appended,
+                                if they request an immediate re-computation (see
+                                the :class:`~connectors._connectors._base_classes.InputConnector`'s
+                                :meth:`~connectors._connectors._base_classes.InputConnector.set_laziness`
+                                method for more about lazy execution)
         """
         # nothing to do for a proxy

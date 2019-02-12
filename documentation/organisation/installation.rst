@@ -1,5 +1,5 @@
-Infrastructure: Installation
-============================
+Installation
+============
 
 pip
 ---

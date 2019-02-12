@@ -14,13 +14,57 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""Contains the :class:`MultiInputAssociateProxy` class"""
+"""Contains supplementary classes for the implementation of the remove and replace
+methods of multi-input connectors.
+"""
 
 import functools
 from ._flags import Laziness
 from ._non_lazy_inputs import NonLazyInputs
 
-__all__ = ("MultiInputAssociateProxy",)
+__all__ = ("MultiInputAssociateDescriptor", "MultiInputAssociateProxy",)
+
+
+class MultiInputAssociateDescriptor:
+    """A descriptor class for associating remove and replace methods with their
+    multi-input.
+    Instances of this class are created by the decorator methods :meth:`~connectors.MultiInput.remove`
+    and :meth:`~connectors.MultiInput.replace`.
+    """
+
+    def __init__(self, method, observers, parallelization, executor):
+        """
+        :param method: the unbound method, that is wrapped
+        :param observers: the names of output methods that are affected by passing
+                          a value to the multi-input connector.
+        :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
+                                See the :class:`~connectors.connectors.MultiInputConnector`'s
+                                :meth:`~connectors.connectors.MultiInputConnector.set_parallelization`
+                                method for details
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function. See the :class:`~connectors.connectors.MultiInputConnector`'s
+                         :meth:`~connectors.connectors.MultiInputConnector.set_executor`
+                         method for details
+        """
+        self.__method = method
+        self.__observers = observers
+        self.__parallelization = parallelization
+        self.__executor = executor
+
+    def __get__(self, instance, instance_type):
+        """Is called, when the decorated method is accessed.
+
+        :param instance: the instance of which a method shall be replaced
+        :param instance_type: the type of the instance
+        :returns: a :class:`connectors._common._multiinput_associate.MultiInputAssociateProxy`
+                  instance, that mimics the decorated method and adds the connector
+                  functionality
+        """
+        return MultiInputAssociateProxy(instance=instance,
+                                        method=self.__method,
+                                        observers=self.__observers,
+                                        executor=self.__executor)
 
 
 class MultiInputAssociateProxy:
@@ -42,8 +86,9 @@ class MultiInputAssociateProxy:
         :param method: the unbound method, that is replaced by this proxy (the remove or replace method)
         :param observers: the names of output methods that are affected by passing
                           a value to the multi-input connector proxy
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the :meth:`set_executor`
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function. See the :meth:`~connectors.connectors.MultiInputConnector.set_executor`
                          method for details
         """
         self.__instance = instance

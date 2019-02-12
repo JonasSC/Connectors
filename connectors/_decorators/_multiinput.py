@@ -39,8 +39,8 @@ class MultiInput(InputDecorator):
     value of a connected output has changed, rather than removing the old value and
     adding the new.
 
-    See the :meth:`remove` and :meth:`replace` methods for documentation about how to
-    define these methods for a multi-input connector.
+    See the :meth:`~connectors.MultiInput.remove` and :meth:`~connectors.MultiInput.replace`
+    methods for documentation about how to define these methods for a multi-input connector.
     """
 
     def __init__(self,
@@ -54,12 +54,18 @@ class MultiInput(InputDecorator):
                           possible to pass a string here, if only one output
                           connector depends on this input.
         :param laziness: a flag from the :class:`connectors.Laziness` enum. See the
-                         Connector's :meth:`set_laziness` method for details
+                         :class:`~connectors.connectors.MultiInputConnector`'s
+                         :meth:`~connectors.connectors.MultiInputConnector.set_laziness`
+                         method for details
         :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
-                                See the Connector's :meth:`set_parallelization` method for details
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the Connector's
-                         :meth:`set_executor` method for details
+                                See the :class:`~connectors.connectors.MultiInputConnector`'s
+                                :meth:`~connectors.connectors.MultiInputConnector.set_parallelization`
+                                method for details
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function. See the :class:`~connectors.connectors.MultiInputConnector`'s
+                         :meth:`~connectors.connectors.MultiInputConnector.set_executor`
+                         method for details
         """
         InputDecorator.__init__(self,
                                 observers=observers,
@@ -105,10 +111,10 @@ class MultiInput(InputDecorator):
                   is required for the multi-input connector
         """
         self.__remove_method = method
-        return MultiInputAssociateDescriptor(method=method,
-                                             observers=self._observers,
-                                             parallelization=self._parallelization,
-                                             executor=self._executor)
+        return common.MultiInputAssociateDescriptor(method=method,
+                                                    observers=self._observers,
+                                                    parallelization=self._parallelization,
+                                                    executor=self._executor)
 
     def replace(self, method):
         """A method of the decorated method to decorate the replace method, with
@@ -139,45 +145,7 @@ class MultiInput(InputDecorator):
                   is required for the multi-input connector
         """
         self.__replace_method = method
-        return MultiInputAssociateDescriptor(method=method,
-                                             observers=self._observers,
-                                             parallelization=self._parallelization,
-                                             executor=self._executor)
-
-
-class MultiInputAssociateDescriptor:
-    """A descriptor class for associating remove and replace methods with their
-    multi-input.
-    Instances of this class are created by the decorator methods :meth:`MultiInput.remove`
-    and :meth:`MultiInput.replace`.
-    """
-
-    def __init__(self, method, observers, parallelization, executor):
-        """
-        :param method: the unbound method, that is wrapped
-        :param observers: the names of output methods that are affected by passing
-                          a value to the multi-input connector.
-        :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
-                                See the Connector's :meth:`set_parallelization` method
-                                for details
-        :param executor: an :class:`Executor` instance, that can be created with the
-                         :func:`connectors.executor` function. See the Connector's
-                         :meth:`set_executor` method for details
-        """
-        self.__method = method
-        self.__observers = observers
-        self.__parallelization = parallelization
-        self.__executor = executor
-
-    def __get__(self, instance, instance_type):
-        """Is called, when the decorated method is accessed.
-
-        :param instance: the instance of which a method shall be replaced
-        :param instance_type: the type of the instance
-        :returns: a :class:`MultiInputAssociateProxy` instance, that mimics the
-                  decorated method and adds the connector functionality
-        """
-        return common.MultiInputAssociateProxy(instance=instance,
-                                               method=self.__method,
-                                               observers=self.__observers,
-                                               executor=self.__executor)
+        return common.MultiInputAssociateDescriptor(method=method,
+                                                    observers=self._observers,
+                                                    parallelization=self._parallelization,
+                                                    executor=self._executor)

@@ -58,10 +58,12 @@ def forward_announcement(connector, observers, non_lazy_inputs, laziness):
     :param connector: the input connector, that has received the announcement
     :param observers: a sequence of observing output connectors, to which the
                       announcement shall be forwarded
-    :param non_lazy_inputs: a NonLazyInputs instance to which input connectors
-                            can be appended, if they request an immediate
-                            re-computation (see the InputConnector's
-                            :meth:`set_laziness` method for more about lazy execution)
+    :param non_lazy_inputs: a :class:`~connectors._common._non_lazy_inputs.NonLazyInputs`
+                            instance to which input connectors can be appended,
+                            if they request an immediate re-computation (see the
+                            :class:`~connectors._connectors._base_classes.InputConnector`'s
+                            :meth:`~connectors._connectors._base_classes.InputConnector.set_laziness`
+                            method for more about lazy execution)
     :param laziness: the laziness setting of the input connector
     """
     initial_number_of_non_lazy_inputs = len(non_lazy_inputs)

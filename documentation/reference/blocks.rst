@@ -1,5 +1,5 @@
-Reference: Processing blocks for common tasks
-=============================================
+Processing blocks for common tasks
+==================================
 
 This is the API reference for processing blocks, that help with common tasks, when
 constructing a processing network.

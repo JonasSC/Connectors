@@ -1,3 +1,5 @@
+.. module:: connectors
+
 Welcome to Connectors' documentation!
 ======================================
 

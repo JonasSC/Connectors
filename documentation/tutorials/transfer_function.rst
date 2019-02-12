@@ -161,7 +161,7 @@ This is basically an :class:`~collections.OrderedDict`, that has been extended w
 The :meth:`show` method is decorated to become an output connector, despite the fact that it does not return any result value.
 Nevertheless, this allows to model, that showing the plot depends on the input data for the plot.
 
-Note that the automated parallelization is disabled for this method by passing the flag :const:`~connectors.Parallelization.SEQUENTIAL` as the *parallelization* parameter for the output decorator.
+Note that the automated parallelization is disabled for this method by passing the flag :class:`~connectors.Parallelization`. ``SEQUENTIAL`` as the *parallelization* parameter for the output decorator.
 By default, the *Connectors* package parallelizes independent computations in separate threads.
 Process-based parallelization is also available, but this requires the data, that is passed through the connections, to be pickle-able and the pickling introduces additional overhead.
 GUI functionalities often require, that all updates of the GUI are done by the same thread, which is why this example script will raise errors if the parallelization of the :meth:`show` method is not disabled.

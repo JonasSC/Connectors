@@ -121,8 +121,9 @@ class MacroInputConnector:
         executor of the connector, which started the computations, is used for
         all computations.
 
-        :param executor: an :class:`Executor` instance, that can be created with
-                         the :func:`connectors.executor` function
+        :param executor: an :class:`~connectors._common._executors.Executor` instance,
+                         that can be created with the :func:`connectors.executor`
+                         function
         """
         for connector in self.__method(self.__instance):
             connector.set_executor(executor)
