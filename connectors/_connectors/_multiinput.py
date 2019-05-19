@@ -17,7 +17,6 @@
 """Contains the MultiInputConnector class"""
 
 import asyncio
-import collections
 import weakref
 from .. import _common as common
 from ._baseclasses import InputConnector
@@ -57,7 +56,7 @@ class MultiInputConnector(InputConnector):
         self.__observers = common.resolve_observers(instance=instance, observers=observers)
         self._connections = weakref.WeakKeyDictionary()
         self.__announcements = set()
-        self.__notifications = collections.OrderedDict()
+        self.__notifications = {}
         self.__running = False              # is used to prevent, that the setter is executed multiple times for the same changes
         self.__computable = common.Event()  # is set, when there is no pending announcement
         self.__computable.set()

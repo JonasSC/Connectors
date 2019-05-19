@@ -6,8 +6,7 @@ Python version
 
 The *Connectors* package is currently developed and tested with Python 3.7.
 Python 3.6 is very likely to work as well.
-Python 3.5 might work, but this is not tested.
-The package uses the ``await`` statement, which has been introduced in Python version 3.5, so earlier versions of Python are not able to run the *Connectors* package.
+Earlier versions are not compatible with the *Connectors* package.
 
 
 Other packages and tools
