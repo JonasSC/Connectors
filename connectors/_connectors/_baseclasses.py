@@ -176,7 +176,8 @@ class InputConnector(Connector):
     def connect(self, connector):
         """Connects this :class:`~connectors._connectors._baseclasses.InputConnector` to an output.
 
-        :param connector: the :class:`~connectors.connectors.Connector` instance to which this connector shall be connected
+        :param connector: the :class:`~connectors.connectors.Connector` instance
+                          to which this connector shall be connected
         :returns: the instance of which this :class:`~connectors._connectors._baseclasses.InputConnector`
                   has replaced a method
         """
@@ -187,8 +188,10 @@ class InputConnector(Connector):
         """Disconnects this :class:`~connectors._connectors._baseclasses.InputConnector`
         from an output, to which is has been connected.
 
-        :param connector: a :class:`~connectors.connectors.Connector` instance from which this connector shall be disconnected
-        :returns: the instance of which this :class:`~connectors.connectors.Connector` has replaced a method
+        :param connector: a :class:`~connectors.connectors.Connector` instance
+                          from which this connector shall be disconnected
+        :returns: the instance of which this :class:`~connectors.connectors.Connector`
+                  has replaced a method
         """
         connector.disconnect(self)
         return self._instance()

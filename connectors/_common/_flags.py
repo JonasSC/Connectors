@@ -63,7 +63,8 @@ class Laziness(enum.IntEnum):
 
 @enum.unique
 class Parallelization(enum.Enum):
-    """An enumeration type for the parallelization parameter of an executor's :meth:`~connectors._common._executors.Executor.run_method` method:
+    """An enumeration type for the parallelization parameter of an executor's
+    :meth:`~connectors._common._executors.Executor.run_method` method:
 
     * SEQUENTIAL
         the method can only be executed sequentially.
