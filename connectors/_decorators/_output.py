@@ -32,7 +32,7 @@ class Output(ConnectorDecorator):
 
     def __init__(self,
                  caching=True,
-                 parallelization=Parallelization.get_default_output_parallelization(),
+                 parallelization=Parallelization.default_output_parallelization(),
                  executor=default_executor):
         """
         :param caching: True, if caching shall be enabled, False otherwise. See

@@ -53,7 +53,7 @@ class Laziness(enum.IntEnum):
     ON_CONNECT = 4
 
     @staticmethod
-    def get_default():
+    def default():
         """returns the default laziness setting for input connectors.
 
         :returns: a constant from this enumeration
@@ -80,7 +80,7 @@ class Parallelization(enum.Enum):
     PROCESS = enum.auto()
 
     @staticmethod
-    def get_default_output_parallelization():
+    def default_output_parallelization():
         """returns the default parallelization setting for output connectors.
 
         :returns: a constant from this enumeration
@@ -88,7 +88,7 @@ class Parallelization(enum.Enum):
         return Parallelization.THREAD
 
     @staticmethod
-    def get_default_input_parallelization():
+    def default_input_parallelization():
         """returns the default parallelization setting for input connectors.
 
         :returns: a constant from this enumeration
@@ -96,7 +96,7 @@ class Parallelization(enum.Enum):
         return Parallelization.SEQUENTIAL
 
     @staticmethod
-    def get_default_multiinput_parallelization():
+    def default_multiinput_parallelization():
         """returns the default parallelization setting for multi-input connectors.
 
         :returns: a constant from this enumeration

@@ -45,8 +45,8 @@ class MultiInput(InputDecorator):
 
     def __init__(self,
                  observers=(),
-                 laziness=common.Laziness.get_default(),
-                 parallelization=common.Parallelization.get_default_multiinput_parallelization(),
+                 laziness=common.Laziness.default(),
+                 parallelization=common.Parallelization.default_multiinput_parallelization(),
                  executor=default_executor):
         """
         :param observers: the names of output methods that are affected by passing

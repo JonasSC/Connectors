@@ -72,8 +72,8 @@ class InputDecorator(ConnectorDecorator):
 
     def __init__(self,
                  observers=(),
-                 laziness=lib.Laziness.get_default(),
-                 parallelization=lib.Parallelization.get_default_input_parallelization(),
+                 laziness=lib.Laziness.default(),
+                 parallelization=lib.Parallelization.default_input_parallelization(),
                  executor=default_executor):
         """
         :param observers: the names of output methods that are affected by passing
