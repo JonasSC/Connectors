@@ -4,7 +4,7 @@ with open("README.rst") as f:
     long_description = f.read()
 
 setup(name="connectors",
-      version="3.0",
+      version="4.0 SNAPSHOT",
       description="A package for connecting objects to form a processing chain",
       long_description=long_description,
       url="https://github.com/JonasSC/Connectors",
@@ -13,6 +13,7 @@ setup(name="connectors",
       classifiers=["Development Status :: 5 - Production/Stable",
                    "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
                    "Programming Language :: Python :: 3.6",
+                   "Programming Language :: Python :: 3.7",
                    "Intended Audience :: Developers",
                    "Intended Audience :: Science/Research",
                    "Topic :: Software Development :: Libraries :: Application Frameworks"],
