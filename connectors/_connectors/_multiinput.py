@@ -89,10 +89,11 @@ class MultiInputConnector(InputConnector):
         output is stored.
 
         :param key: a key for accessing a particular virtual single-input connector
-        :returns: a MultiinputItem, which enhances the decorated method with the
-                  functionality of the virtual single-input connector
+        :returns: a :class:`~connectors._common._multiinput_item.MultiInputItem`, which enhances
+                  the decorated method with the functionality of the virtual
+                  single-input connector
         """
-        return common.MultiinputItem(connector=self,
+        return common.MultiInputItem(connector=self,
                                      instance=self._instance(),
                                      replace_method=self.__replace,
                                      key=key,

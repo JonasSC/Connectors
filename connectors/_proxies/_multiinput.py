@@ -111,18 +111,20 @@ class MultiInputProxy(SingleInputProxy):
 
     def __getitem__(self, key):
         """Allows to use a multi-input connector as multiple single-input connectors.
+
         The key, under which a virtual single-input connector is accessed, shall
         also be returned the data ID, under which the result of the connected
         output is stored.
 
         :param key: a key for accessing a particular virtual single-input connector
-        :returns: a MultiinputItem, which enhances the decorated method with the
-                  functionality of the virtual single-input connector
+        :returns: a :class:`~connectors._common._multiinput_item.MultiInputItem`, which enhances
+                  the decorated method with the functionality of the virtual
+                  single-input connector
         """
         for o in self._observers:
             if isinstance(getattr(self._get_instance(), o), Connector):
                 return self._get_connector()[key]
-        return common.MultiinputItem(connector=self,
+        return common.MultiInputItem(connector=self,
                                      instance=self._get_instance(),
                                      replace_method=self.__replace,
                                      key=key,

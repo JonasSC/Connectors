@@ -14,16 +14,18 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""Contains the :class:`MultiinputItem` class"""
-
-__all__ = ("MultiinputItem",)
+"""Contains the :class:`~connectors._common._multiinput_item.MultiInputItem` class"""
 
 from ._flags import Laziness
 from ._non_lazy_inputs import NonLazyInputs
+from ._input import get_first_argument
+
+__all__ = ("MultiInputItem",)
 
 
-class MultiinputItem:
-    """An object, that is returned by the :meth:`~connectors.MultiInputConnector.__getitem__` overload.
+class MultiInputItem:
+    """An object, that is returned by the :meth:`~connectors.connectors.MultiInputConnector.__getitem__`
+    overload.
 
     It simulates the behavior of a single-input connector, so it is possible to
     use a multi-input connector as arbitrarily many single-inputs.
