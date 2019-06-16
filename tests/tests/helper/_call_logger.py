@@ -17,10 +17,41 @@
 """Contains a class for logging calls and comparing that log to a given call sequence"""
 
 import collections
+from . import _expected_calls as expected_calls
 
 __all__ = ("CallLogger",)
 
 Call = collections.namedtuple(typename="Call", field_names=("class_", "method", "identifier", "value"))
+
+
+def format_call(call, mapping):
+    """formats a call as a human readable string, so it can be used for debug prints
+    and error messages
+
+    :param call: either a logged call (a Call instance) or an expected call, which
+                 is a tuple (INSTANCE, METHOD, VALUE), where INSTANCE is the object,
+                 of which a method call is expected, METHOD is the string method
+                 name and VALUE is optional and can be the argument, that is
+                 expected to be passed to the method
+    :param mapping: an optional mapping from an instance's identifier to the name
+                    of the variable, in which it is stored
+    :returns: a string
+    """
+    if isinstance(call, Call):
+        identifier = call.identifier
+        class_ = call.class_
+        method = call.method
+        value = call.value
+    else:
+        identifier = call[0].get_identifier()
+        class_ = call[0].__class__.__name__
+        method = call[1]
+        value = call[2] if len(call) >= 3 else ""
+    if identifier in mapping:
+        instance = mapping[identifier]
+        return f"{instance}.{method}({value})"
+    else:
+        return f"{identifier}-{class_}.{method}({value})"
 
 
 class CallLogger:
@@ -31,6 +62,7 @@ class CallLogger:
 
     def __init__(self):
         self.__calls = []
+        self.__mapping = {}
 
     def register_call(self, instance, methodname, value):
         """Is called by methods, when a call shall be logged"""
@@ -39,9 +71,18 @@ class CallLogger:
                                  identifier=instance.get_identifier(),
                                  value=value))
 
+    def set_instance_mapping(self, mapping):
+        """Specifies a mapping from string variable names to BaseTestClass instances,
+        which allows for more readable debug prints and error messages.
+        """
+        for k, v in mapping.items():
+            self.__mapping[v.get_identifier()] = k
+        return self
+
     def clear(self):
         """Clears the current call log"""
         self.__calls = []
+        return self
 
     def compare(self, call_list):
         """Compares the recorded call log to an expected call sequence.
@@ -53,32 +94,20 @@ class CallLogger:
 
         :param call_list: the call sequence as a list. This list is modified by this call.
         """
-        index = 0
-        while call_list:
-            assert index < len(self.__calls)
-            call_description = call_list.pop(0)
-            if isinstance(call_description, set):
-                old_set = call_description
-                new_set = set()
-                found = False
-                while old_set:
-                    call_sublist = old_set.pop()
-                    if isinstance(call_sublist[0], set):
-                        raise NotImplementedError("modelling concurrency inside a concurrent branch is not supported")
-                    if self.__check_call(call=self.__calls[index], call_description=call_sublist[0]):
-                        found = True
-                        index += 1
-                        if len(call_sublist) > 1:
-                            new_set.add(call_sublist[1:])
-                    else:
-                        new_set.add(call_sublist)
-                if new_set:
-                    call_list.insert(0, new_set)    # keep the set at the beginning of the call list as long as it is not empty
-                assert found
+        expected = expected_calls.ExpectedCallList(call_list)
+        for call in self.__calls:
+            if expected.found():
+                c = format_call(call, self.__mapping)
+                raise AssertionError(f"the call of {c} was not expected")
             else:
-                assert self.__check_call(self.__calls[index], call_description)
-                index += 1
-        assert index == len(self.__calls)
+                if not expected.check(call):
+                    e = "{" + ", ".join([format_call(c, self.__mapping) for c in expected.expected()]) + "}"
+                    c = format_call(call, self.__mapping)
+                    raise AssertionError(f"expected one of the following calls:\n    {e}\nbut found {c}.")
+        if not expected.found():
+            e = "{" + ", ".join([format_call(c, self.__mapping) for c in expected.expected()]) + "}"
+            raise AssertionError(f"expected one of the following calls:\n    {e}\nbut no calls were registered.")
+        return self
 
     def get_number_of_calls(self):
         """Returns the number of recorded calls"""
@@ -87,23 +116,5 @@ class CallLogger:
     def print_log(self):
         """Prints the call log"""
         for i, c in enumerate(self.__calls):
-            print(f"{i}.", c.class_, c.method, c.identifier, c.value)
-
-    def __check_call(self, call, call_description):  # pylint: disable=no-self-use; pylint shall not complain, that this is a private method rather than a function
-        """Is used internally to compare an element from the call log to an element
-        from the call sequence.
-        """
-        if call.class_ != call_description[0].__class__.__name__:
-            return False
-        if isinstance(call[1], str):
-            if call.method != call_description[1]:
-                return False
-        else:
-            if call.method != call_description[1].__name__:
-                return False
-        if call.identifier != call_description[0].get_identifier():
-            return False
-        if len(call_description) > 3:
-            if call.value != call_description[3]:
-                return False
-        return True
+            print(f"{i+1}.", format_call(c, self.__mapping))
+        return self
