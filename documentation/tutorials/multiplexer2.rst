@@ -94,11 +94,11 @@ In order to test and demonstrate the avoidance of unnecessary computations, the 
 It has a non-lazy input, which requests the updated value as soon as an update is announced.
 And whenever it receives a new value, it prints a message.
 
-In the following test set up, two :class:`~connectors.blocks.Passthrough` instances are connected to the inputs of a multiplexer, while a :class:`Tester` instance is connected to its output.
+In the following test set up, two :class:`~connectors.blocks.PassThrough` instances are connected to the inputs of a multiplexer, while a :class:`Tester` instance is connected to its output.
 It is now expected, that the tester prints a message, whenever the selected input of the multiplexer changes its value, while it remains silent, when there is a value change in a not-selected input.
 
->>> source1 = connectors.blocks.Passthrough("value 1")
->>> source2 = connectors.blocks.Passthrough("value 2")
+>>> source1 = connectors.blocks.PassThrough("value 1")
+>>> source2 = connectors.blocks.PassThrough("value 2")
 >>> multiplexer = Multiplexer()
 >>> tester = Tester()
 >>>

@@ -14,8 +14,8 @@ The following example shows, what happens, when a processing chain is set up, wh
 It consists of two trivial processors, that simply pass their input value to their output.
 
 >>> import connectors
->>> p1 = connectors.blocks.Passthrough()
->>> p2 = connectors.blocks.Passthrough().input.connect(p1.output)  # (Connect)
+>>> p1 = connectors.blocks.PassThrough()
+>>> p2 = connectors.blocks.PassThrough().input.connect(p1.output)  # (Connect)
 >>> _ = p1.input("data")                                           # (Set)
 >>> p2.output()                                                    # (Get)
 'data'

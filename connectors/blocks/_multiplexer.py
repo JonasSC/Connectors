@@ -29,8 +29,8 @@ class Multiplexer:
 
     >>> import connectors
     >>> # Create some test objects
-    >>> test1 = connectors.blocks.Passthrough(data="One")
-    >>> test2 = connectors.blocks.Passthrough(data="Two")
+    >>> test1 = connectors.blocks.PassThrough(data="One")
+    >>> test2 = connectors.blocks.PassThrough(data="Two")
     >>> multiplexer = connectors.blocks.Multiplexer()
     >>> # Connect the test objects to the multiplexer
     >>> # Note, how the input of the input connector of the multiplexer is accessed like a dictionary

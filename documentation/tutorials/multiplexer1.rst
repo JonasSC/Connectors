@@ -144,7 +144,7 @@ The latter two approaches do not work in the context of connecting an output con
 The :meth:`~Multiplexer.replace` method does not accept connections, while when using the :meth:`~Multiplexer.input` method the usual way, the data ID is unknown to the user, so it cannot be used as a selector key.
 Therefore, connections to the multiplexer have to use the virtual single-inputs from the ``[]`` operator.
 
->>> data_source = connectors.blocks.Passthrough("value 3 (value from the data source)")
+>>> data_source = connectors.blocks.PassThrough("value 3 (value from the data source)")
 >>> _ = data_source.output.connect(multiplexer.input["key 3"])
 >>> _ = multiplexer.select("key 3")
 >>> multiplexer.output()

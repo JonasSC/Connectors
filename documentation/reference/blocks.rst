@@ -8,7 +8,7 @@ constructing a processing network.
 Routing data in a processing network
 ------------------------------------
 
-.. autoclass:: connectors.blocks.Passthrough
+.. autoclass:: connectors.blocks.PassThrough
 
    .. automethod:: output()
    .. automethod:: input(data)
@@ -20,7 +20,7 @@ Routing data in a processing network
    .. automethod:: input(data)
    .. automethod:: remove(data_id)
    .. automethod:: replace(data_id, data)
-   
+
 
 
 Reducing the memory consumption

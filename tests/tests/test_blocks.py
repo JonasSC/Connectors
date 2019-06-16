@@ -90,9 +90,9 @@ def test_multiplexer_connectors():
 
 
 def test_passthrough():
-    """Tests the functionality of the :class:`Passthrough` class."""
-    assert connectors.blocks.Passthrough().output() is None
-    p = connectors.blocks.Passthrough(7.2)
+    """Tests the functionality of the :class:`~connectors.blocks.PassThrough` class."""
+    assert connectors.blocks.PassThrough().output() is None
+    p = connectors.blocks.PassThrough(7.2)
     assert p.output() == 7.2
     p.input(5)
     assert p.output() == 5
