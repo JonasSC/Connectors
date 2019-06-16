@@ -20,6 +20,7 @@ replaced by the actual connectors. Think of a connector proxy like of a bound me
 which is also created freshly, whenever a method is accessed.
 """
 
-from ._output import *
 from ._input import *
 from ._multiinput import *
+from ._multioutput import *
+from ._output import *

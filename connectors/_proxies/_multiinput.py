@@ -16,7 +16,7 @@
 
 """Contains classes for the multi-input proxies"""
 
-from ..connectors import Connector, MultiInputConnector, ConditionalMultiInputConnector
+from .. import _connectors as connectors
 from .. import _common as common
 from ._input import SingleInputProxy
 
@@ -122,7 +122,7 @@ class MultiInputProxy(SingleInputProxy):
                   single-input connector
         """
         for o in self._observers:
-            if isinstance(getattr(self._get_instance(), o), Connector):
+            if isinstance(getattr(self._get_instance(), o), connectors.Connector):
                 return self._get_connector()[key]
         return common.MultiInputItem(connector=self,
                                      instance=self._get_instance(),
@@ -146,24 +146,24 @@ class MultiInputProxy(SingleInputProxy):
         :returns: an :class:`MultiInputConnector` instance
         """
         if self._announce_condition is None and self._notify_condition is None:
-            return MultiInputConnector(instance=instance,
-                                       method=method,
-                                       remove_method=self.__remove,
-                                       replace_method=self.__replace,
-                                       observers=self._observers,
-                                       laziness=self._laziness,
-                                       parallelization=parallelization,
-                                       executor=executor)
-        else:
-            announce_condition, notify_condition = common.select_condition_methods(self._announce_condition,
-                                                                                   self._notify_condition)
-            return ConditionalMultiInputConnector(instance=instance,
+            return connectors.MultiInputConnector(instance=instance,
                                                   method=method,
                                                   remove_method=self.__remove,
                                                   replace_method=self.__replace,
                                                   observers=self._observers,
-                                                  announce_condition=announce_condition,
-                                                  notify_condition=notify_condition,
                                                   laziness=self._laziness,
                                                   parallelization=parallelization,
                                                   executor=executor)
+        else:
+            announce_condition, notify_condition = common.select_condition_methods(self._announce_condition,
+                                                                                   self._notify_condition)
+            return connectors.ConditionalMultiInputConnector(instance=instance,
+                                                             method=method,
+                                                             remove_method=self.__remove,
+                                                             replace_method=self.__replace,
+                                                             observers=self._observers,
+                                                             announce_condition=announce_condition,
+                                                             notify_condition=notify_condition,
+                                                             laziness=self._laziness,
+                                                             parallelization=parallelization,
+                                                             executor=executor)

@@ -25,7 +25,7 @@ __all__ = ("OutputConnector",)
 
 
 class OutputConnector(Connector):
-    """A Connector-class that replaces getter methods, so they can be used to
+    """A connector-class that replaces getter methods, so they can be used to
     connect different objects.
     """
 
@@ -50,7 +50,7 @@ class OutputConnector(Connector):
         self.__connections = set()          # stores tuples (connector, instance). The instance is only saved to prevent its deletion through reference counting
         self.__result = None
         self.__result_is_valid = False
-        self.__observed_has_changed = True
+        self.__observed_has_changed = True  # this is used to track, if all inputs, on which this output depends have canceled their announcements, in which case, the cached result remains valid
         self.__running = False              # is used to prevent, that the getter is executed multiple times for the same changes
         self.__computable = common.Event()  # is set, when there is no pending announcement
         self.__computable.set()
@@ -107,7 +107,8 @@ class OutputConnector(Connector):
 
     def _announce(self, connector, non_lazy_inputs):
         """This method is to notify this output connector, when an observed input
-        connector (a setter from self._instance) can retrieve updated data.
+        connector (a setter from the instance to which this connector belongs)
+        can retrieve updated data.
 
         :param connector: the input connector, which is about to change a value
         :param non_lazy_inputs: a :class:`~connectors._common._non_lazy_inputs.NonLazyInputs`
@@ -125,7 +126,8 @@ class OutputConnector(Connector):
 
     def _notify(self, connector):
         """This method is to notify this output connector, when an observed input
-        connector (a setter from self._instance) has retrieved updated data.
+        connector (a setter from the instance to which this connector belongs)
+        has retrieved updated data.
 
         :param connector: the input connector, which has changed a value
         :param non_lazy_inputs: a :class:`~connectors._common._non_lazy_inputs.NonLazyInputs`
@@ -161,7 +163,6 @@ class OutputConnector(Connector):
         This method is called by a connected input connector, when it needs the
         result value of this output connector.
 
-        :param connector: the input connector, from which the request is issued
         :param executor: the :class:`~connectors._common._executors.Executor` instance,
                          that manages the current computations
         :returns: the result value of the output connector

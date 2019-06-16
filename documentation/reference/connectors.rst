@@ -3,17 +3,13 @@
 Connectors
 ==========
 
-This section shows the capabilities and configuration options of the connector objects, with which the decorated methods are replaced.
-
-Connector classes
------------------
-
+This section documents the capabilities of the connector objects, with which the decorated methods are replaced.
 Instances of the following classes replace the decorated methods, so they are enhanced with the functionality of a connector.
 These classes are not instantiated by code outside the *Connectors* package.
 
-.. autoclass:: connectors.connectors.OutputConnector
-   :members:
-   :inherited-members:
+
+Connectors for setter methods
+-----------------------------
 
 .. autoclass:: connectors.connectors.SingleInputConnector
    :members:
@@ -26,19 +22,16 @@ These classes are not instantiated by code outside the *Connectors* package.
    .. automethod:: __getitem__
 
 
-Automated parallelization
--------------------------
+Connectors for getter methods
+-----------------------------
 
-The following functionalities are for configuring the automated parallelization of the connector's computations.
-
-.. autoclass:: connectors.Parallelization
-
-.. autofunction:: connectors.executor
+.. autoclass:: connectors.connectors.OutputConnector
+   :members:
+   :inherited-members:
 
 
-Configuring the laziness
-------------------------
+.. autoclass:: connectors.connectors.MultiOutputConnector
+   :members:
+   :inherited-members:
 
-Flags of the following enumeration can be passed to an input connectors :meth:`~connectors._connectors._baseclasses.InputConnector.set_laziness` method.
-
-.. autoclass:: connectors.Laziness
+   .. automethod:: __getitem__

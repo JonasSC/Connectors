@@ -18,6 +18,7 @@
 These decorators can be used to turn methods into connectors.
 """
 
-from ._output import *
 from ._input import *
 from ._multiinput import *
+from ._multioutput import *
+from ._output import *

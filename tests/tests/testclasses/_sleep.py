@@ -20,7 +20,7 @@ import time
 import connectors
 from ._baseclass import BaseTestClass
 
-__all__ = ("SleepInOutput", "SleepInInput", "SleepInMultiInput")
+__all__ = ("SleepInOutput", "SleepInInput", "SleepInMultiInput", "SleepInMultiOutput")
 
 
 class SleepInOutput(BaseTestClass):
@@ -92,3 +92,26 @@ class SleepInMultiInput(BaseTestClass):
     def get_values(self):                       # pylint: disable=missing-docstring
         self._register_call(methodname="get_values", value=list(self.__data.values()))
         return list(self.__data.values())
+
+
+class SleepInMultiOutput(BaseTestClass):
+    """Features a multi-output connector, that sleeps for a second before returning the result."""
+
+    def _initialize(self):
+        """is called in the super class's constructor"""
+        self.__value = 0
+
+    @connectors.Input("get_value")
+    def set_value(self, value):
+        """Sets the value"""
+        self._register_call(methodname="set_value", value=value)
+        self.__value = value
+        return self
+
+    @connectors.MultiOutput()
+    def get_value(self, key):
+        """Sleeps for a second and returns the product of the value and the key"""
+        time.sleep(1.0)
+        result = self.__value * key
+        self._register_call(methodname="get_value", value=result)
+        return result

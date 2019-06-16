@@ -17,13 +17,21 @@
 """Contains the OutputProxy class"""
 
 from .. import _connectors as connectors
+from .. import _common as common
 from ._baseclasses import ConnectorProxy
 
-__all__ = ("OutputProxy",)
+__all__ = ("MultiOutputProxy",)
 
 
-class OutputProxy(ConnectorProxy):
-    """A proxy class for output connectors.
+class MultiOutputProxy(ConnectorProxy):
+    """A proxy class for multi-output connectors, that replace getter methods,
+    which accept one parameter, so they can be used as a multi-output connector,
+    which can be connected to different objects.
+
+    Multi-output connectors can either be used to route a dynamic number of values
+    to a multi-input connector. Or the argument for the ``[]``-operator can be used
+    to parameterize the getter method.
+
     Connector proxies are returned by the connector decorators, while the methods
     are replaced by the actual connectors. Think of a connector proxy like of a
     bound method, which is also created freshly, whenever a method is accessed.
@@ -35,7 +43,7 @@ class OutputProxy(ConnectorProxy):
     during its call.
     """
 
-    def __init__(self, instance, method, caching, parallelization, executor):
+    def __init__(self, instance, method, caching, parallelization, executor, keys):
         """
         :param instance: the instance in which the method is replaced by this connector proxy
         :param method: the unbound method that is replaced by this connector proxy
@@ -51,6 +59,17 @@ class OutputProxy(ConnectorProxy):
         """
         ConnectorProxy.__init__(self, instance, method, parallelization, executor)
         self.__caching = caching
+        self.__keys = keys
+
+    def __getitem__(self, key):
+        """Allows to use a multi-output connector as multiple single-output connectors.
+
+        :param key: a key for accessing a particular virtual single-output connector
+        :returns: a :class:`connectors._common._multioutput_item.MultiOutputItem`,
+                  which enhances the decorated method with the functionality of
+                  the virtual single-output connector
+        """
+        return common.MultiOutputItem(connector=self, instance=self._get_instance(), key=key)
 
     def set_caching(self, caching):
         """Specifies, if the result value of this output connector shall be cached.
@@ -80,15 +99,29 @@ class OutputProxy(ConnectorProxy):
                          method for details
         :returns: an :class:`~connectors.connectors.OutputConnector` instance
         """
-        return connectors.OutputConnector(instance=instance,
-                                          method=method,
-                                          caching=self.__caching,
-                                          parallelization=parallelization,
-                                          executor=executor)
+        return connectors.MultiOutputConnector(instance=instance,
+                                               method=method,
+                                               caching=self.__caching,
+                                               parallelization=parallelization,
+                                               executor=executor,
+                                               keys=self.__keys)
+
+    def _connect(self, key, connector):
+        """Connects a virtual single output to the given input connector.
+
+        This method is called from a :class:`connectors._common._multioutput_item.MultiOutputItem`
+        instance.
+
+        :param item: the :class:`connectors._common._multioutput_item.MultiOutputItem`
+                     instance, from which this method is called
+        :param connector: the input connector to which the connection shall be established
+        """
+        return self._get_connector()._connect(key, connector)
 
     def _announce(self, connector, non_lazy_inputs):
         """This method is to notify this output connector, when an observed input
-        connector (a setter from self._instance) can retrieve updated data.
+        connector (a setter from the instance to which this connector belongs)
+        can retrieve updated data.
 
         :param connector: the input connector, which is about to change a value
         :param non_lazy_inputs: a :class:`~connectors._common._non_lazy_inputs.NonLazyInputs`
@@ -101,8 +134,9 @@ class OutputProxy(ConnectorProxy):
         # nothing to do for a proxy
 
     def _notify(self, connector):
-        """This method is to notify this output connector, when an observed input
-        connector (a setter from self._instance) has retrieved updated data.
+        """This method is to notify this multi-output connector, when an observed
+        input connector (a setter from the instance to which this connector belongs)
+        has retrieved updated data.
 
         :param connector: the input connector, which has changed a value
         :param non_lazy_inputs: a :class:`~connectors._common._non_lazy_inputs.NonLazyInputs`

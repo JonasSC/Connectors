@@ -8,6 +8,7 @@ This section contains the API reference for the *Connectors* package.
 
    decorators
    connectors
+   options
    helper
    macro
    blocks

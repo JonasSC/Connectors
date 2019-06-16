@@ -16,7 +16,7 @@
 
 """Contains the SingleInputProxy class"""
 
-from ..connectors import SingleInputConnector, ConditionalSingleInputConnector
+from .. import _connectors as connectors
 from .. import _common as common
 from ._baseclasses import ConnectorProxy
 
@@ -125,20 +125,20 @@ class SingleInputProxy(ConnectorProxy):
         :returns: an :class:`SingleInputConnector` instance
         """
         if self._announce_condition is None and self._notify_condition is None:
-            return SingleInputConnector(instance=instance,
-                                        method=method,
-                                        observers=self._observers,
-                                        laziness=self._laziness,
-                                        parallelization=parallelization,
-                                        executor=executor)
-        else:
-            announce_condition, notify_condition = common.select_condition_methods(self._announce_condition,
-                                                                                   self._notify_condition)
-            return ConditionalSingleInputConnector(instance=instance,
+            return connectors.SingleInputConnector(instance=instance,
                                                    method=method,
                                                    observers=self._observers,
-                                                   announce_condition=announce_condition,
-                                                   notify_condition=notify_condition,
                                                    laziness=self._laziness,
                                                    parallelization=parallelization,
                                                    executor=executor)
+        else:
+            announce_condition, notify_condition = common.select_condition_methods(self._announce_condition,
+                                                                                   self._notify_condition)
+            return connectors.ConditionalSingleInputConnector(instance=instance,
+                                                              method=method,
+                                                              observers=self._observers,
+                                                              announce_condition=announce_condition,
+                                                              notify_condition=notify_condition,
+                                                              laziness=self._laziness,
+                                                              parallelization=parallelization,
+                                                              executor=executor)

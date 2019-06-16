@@ -23,7 +23,7 @@ __all__ = ("SingleInputConnector", "ConditionalSingleInputConnector")
 
 
 class SingleInputConnector(InputConnector):
-    """A Connector-class that replaces setter methods, so they can be used to connect
+    """A connector-class that replaces setter methods, so they can be used to connect
     different objects in a processing chain."""
 
     def __init__(self, instance, method, observers, laziness, parallelization, executor):

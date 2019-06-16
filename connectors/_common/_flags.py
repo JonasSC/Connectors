@@ -88,6 +88,14 @@ class Parallelization(enum.Enum):
         return Parallelization.THREAD
 
     @staticmethod
+    def default_multioutput_parallelization():
+        """returns the default parallelization setting for multi-output connectors.
+
+        :returns: a constant from this enumeration
+        """
+        return Parallelization.THREAD
+
+    @staticmethod
     def default_input_parallelization():
         """returns the default parallelization setting for input connectors.
 

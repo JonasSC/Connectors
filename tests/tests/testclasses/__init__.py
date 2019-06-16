@@ -20,6 +20,7 @@ from ._constructor_method_call import *
 from ._input_conditions import *
 from ._macro import *
 from ._multiinput import *
+from ._multioutput import *
 from ._multiple_inputs import *
 from ._multiple_outputs import *
 from ._non_lazy_inputs import *

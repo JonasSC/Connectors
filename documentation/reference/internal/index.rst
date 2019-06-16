@@ -11,3 +11,4 @@ It contains implementation details, that are shown here for completeness and ref
    connectors_base
    executors
    proxies
+   multi

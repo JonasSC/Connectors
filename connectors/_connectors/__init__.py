@@ -21,6 +21,7 @@ Connector objects replace the decorated methods in the processing classes.
 
 from ._baseclasses import Connector
 
-from ._output import *
 from ._input import *
 from ._multiinput import *
+from ._multioutput import *
+from ._output import *

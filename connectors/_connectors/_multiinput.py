@@ -19,13 +19,14 @@
 import asyncio
 import weakref
 from .. import _common as common
+from . import _multioutput as multioutput
 from ._baseclasses import InputConnector
 
 __all__ = ("MultiInputConnector", "ConditionalMultiInputConnector")
 
 
 class MultiInputConnector(InputConnector):
-    """A Connector-class that replaces special setter methods, that allow to pass
+    """A connector-class that replaces special setter methods, that allow to pass
     multiple values, so they can be used to connect different objects in a processing
     chain.
     """
@@ -55,8 +56,10 @@ class MultiInputConnector(InputConnector):
         self.__replace = replace_method
         self.__observers = common.resolve_observers(instance=instance, observers=observers)
         self._connections = weakref.WeakKeyDictionary()
-        self.__announcements = set()
-        self.__notifications = {}
+        self._multi_connections = weakref.WeakKeyDictionary()
+        self.__announcements = set()        # stores output connectors, that announced a value change
+        self.__notifications = {}           # maps output connectors, that notified about a value change, to pending input values
+        self.__multi_notifications = {}     # maps data ids to pending input values; is used, when a multi-output notifies this connector
         self.__running = False              # is used to prevent, that the setter is executed multiple times for the same changes
         self.__computable = common.Event()  # is set, when there is no pending announcement
         self.__computable.set()
@@ -73,10 +76,18 @@ class MultiInputConnector(InputConnector):
         for o in self.__observers:
             o._announce(self, non_lazy_inputs)
         # call the replaced method
-        self._executor.run_coroutine(self._request(self._executor))    # retrieve the announced values from the connectors first, so that everything is added in the correct order
+        self.__running = True
+        try:
+            changed = self._executor.run_coroutine(self.__request_pending(self._executor))    # retrieve the announced values from the connectors first, so that everything is added in the correct order
+        finally:
+            self.__running = False
         result = self._method(self._instance(), *args, **kwargs)
         # notify observers about the value change
-        self._conditional_observer_notification(result, *args, **kwargs)
+        for data_id, value in changed.items():
+            self._add_to_notification_condition_checks(data_id, value)
+        value = common.get_first_argument(self._method, *args, **kwargs)
+        self._add_to_notification_condition_checks(data_id=result, value=value)
+        self._notify_observers()
         # execute the non-lazy inputs
         non_lazy_inputs.execute(self._executor)
         # return the result of the method call
@@ -84,6 +95,7 @@ class MultiInputConnector(InputConnector):
 
     def __getitem__(self, key):
         """Allows to use a multi-input connector as multiple single-input connectors.
+
         The key, under which a virtual single-input connector is accessed, shall
         also be returned the data ID, under which the result of the connected
         output is stored.
@@ -111,9 +123,12 @@ class MultiInputConnector(InputConnector):
                   all the :class:`~connectors.SingleInputConnector`s that it exports)
         """
         yield self
-        self._connections[connector] = key
         self.__announcements.add(connector)
-        self.__notifications[connector] = None  # create a placeholder in the notifications dict
+        if isinstance(connector, multioutput.MultiOutputConnector):
+            self._multi_connections[connector] = set()
+        else:
+            self._connections[connector] = key
+            self.__notifications[connector] = None  # create a placeholder to add the values in the correct order
         non_lazy_inputs = common.NonLazyInputs(situation=common.Laziness.ON_CONNECT)
         self._announce(connector, non_lazy_inputs=non_lazy_inputs)
         non_lazy_inputs.execute(self._executor)
@@ -135,17 +150,24 @@ class MultiInputConnector(InputConnector):
                                     observers=self.__observers,
                                     non_lazy_inputs=non_lazy_inputs,
                                     laziness=self._laziness)
-        data_id = self._connections[connector]
-        if data_id is not None:
-            self.__remove(self._instance(), data_id)
-        del self._connections[connector]
-        self._conditional_observer_notification(data_id)
+        if isinstance(connector, multioutput.MultiOutputConnector):
+            for data_id in self._multi_connections[connector]:
+                self.__remove(self._instance(), data_id)
+                self._add_to_notification_condition_checks(data_id)
+            del self._multi_connections[connector]
+        else:
+            data_id = self._connections[connector]
+            if data_id is not None:
+                self.__remove(self._instance(), data_id)
+            self._add_to_notification_condition_checks(data_id)
+            del self._connections[connector]
+        self._notify_observers()
         non_lazy_inputs.execute(self._executor)
         yield self
 
     def _announce(self, connector, non_lazy_inputs):
-        """This method is to notify this input connector, when a connected output
-        connector can produce updated data.
+        """This method is to notify this multi-input connector, when a connected
+        output connector can produce updated data.
 
         :param connector: the output connector whose value is about to change
         :param non_lazy_inputs: a :class:`~connectors._common._non_lazy_inputs.NonLazyInputs`
@@ -162,8 +184,8 @@ class MultiInputConnector(InputConnector):
                                     laziness=self._laziness)
 
     async def _notify(self, connector, value, executor):
-        """This method is to notify this input connector, when a connected output
-        connector has produced updated data.
+        """This method is to notify this multi-input connector, when a connected
+        output connector has produced updated data.
 
         :param connector: the output connector whose value has changed
         :param value: the updated data from the output connector
@@ -179,9 +201,27 @@ class MultiInputConnector(InputConnector):
         if self._laziness == common.Laziness.ON_NOTIFY:
             await self._request(executor)
 
+    async def _notify_multi(self, connector, values, executor):
+        """This method is to notify this multi-input connector, when a connected
+        multi-output connector has produced updated data.
+
+        :param connector: the output connector whose value has changed
+        :param values: a dictionary, that maps data ids to the updated values
+        :param executor: the :class:`~connectors._common._executors.Executor`
+                         instance, which managed the computation of the output
+                         connector, and which shall be used for the computation
+                         of this connector, in case it is not lazy.
+        """
+        self.__multi_notifications[connector] = values
+        self.__announcements.discard(connector)
+        if not self.__announcements:
+            self.__computable.set()
+        if self._laziness == common.Laziness.ON_NOTIFY:
+            await self._request(executor)
+
     def _cancel(self, connector):
-        """Notifies this input connector, that an announced value change is not
-        going to happen.
+        """Notifies this multi-input connector, that an announced value change
+        is not going to happen.
 
         :param connector: the output connector whose value change is canceled
         """
@@ -203,51 +243,101 @@ class MultiInputConnector(InputConnector):
         if not self.__running:
             self.__running = True
             try:
-                # wait for the announced value changes
-                if self.__announcements:
-                    await asyncio.wait([a._request(executor) for a in self.__announcements])
-                    await self.__computable.wait(executor)
-                # execute the setter
-                if self.__notifications:
-                    for output_connector in self.__notifications:
-                        data_id = self._connections[output_connector]
-                        value = self.__notifications[output_connector]
-                        if data_id is None:
-                            self._connections[output_connector] = await executor.run_method(self._parallelization,
-                                                                                            self._method,
-                                                                                            self._instance(),
-                                                                                            value)
-                        else:
-                            self._connections[output_connector] = await executor.run_method(self._parallelization,
-                                                                                            self.__replace,
-                                                                                            self._instance(),
-                                                                                            data_id,
-                                                                                            value)
-                        self._conditional_observer_notification(data_id, value)
-                        self._add_to_notification_condition_checks(data_id, value)
-                    self.__notifications.clear()
-                    if self._check_notification_condition():
-                        for o in self.__observers:
-                            o._notify(self)
+                changed = await self.__request_pending(executor)
+                # notify the observers
+                for data_id, value in changed.items():
+                    self._add_to_notification_condition_checks(data_id, value)
+                self._notify_observers()
             finally:
                 self.__running = False
 
-    def _conditional_observer_notification(self, data_id, *args, **kwargs):   # pylint: disable=unused-argument; this method has to be compatible with other input connectors
-        """Notifies the observing output connectors, that this input has changed
-        the instance's state.
+    async def __request_pending(self, executor):
+        """This method retrieves the updated data from the connected output connectors
+        and recomputes this connector (if necessary).
 
-        This method can be overridden by derived classes, for example to implement
-        a conditional notification of the outputs.
+        This is basically the :meth:`~connectors.connectors.MultiInputConnector._request`
+        method, but without notifying the observing output connectors. It returns
+        a dictionary, that maps data_ids to updated values, which can be used to
+        trigger the notifications.
 
-        :param `*args,**kwargs`: the parameters, with which the replaced setter
-                                method has been called (excluding ``self``)
+        :param executor: the :class:`~connectors._common._executors.Executor` instance,
+                         that manages the current computations
+        :returns: a dictionary, that maps data_ids to updated values
         """
-        for o in self.__observers:
-            o._notify(self)
+        # wait for the announced value changes
+        if self.__announcements:
+            await asyncio.wait([a._request(executor) for a in self.__announcements])
+            await self.__computable.wait(executor)
+        # execute the setter
+        single_tasks = {}
+        if self.__notifications:
+            for connector, value in self.__notifications.items():
+                data_id = self._connections[connector]
+                if data_id is None:
+                    task = executor.run_method(self._parallelization,
+                                               self._method,
+                                               self._instance(),
+                                               value)
+                else:
+                    task = executor.run_method(self._parallelization,
+                                               self.__replace,
+                                               self._instance(),
+                                               data_id,
+                                               value)
+                single_tasks[connector] = (task, value)
+            self.__notifications.clear()
+        remove_tasks = []
+        multi_tasks = {}
+        if self.__multi_notifications:
+            for connector, data in self.__multi_notifications.items():
+                to_remove = self._multi_connections[connector] - data.keys()
+                remove_tasks += [executor.run_method(self._parallelization,
+                                                     self.__remove,
+                                                     self._instance(),
+                                                     data_id)
+                                 for data_id in to_remove]
+                multi_tasks[connector] = [(executor.run_method(self._parallelization,
+                                                               self.__replace,
+                                                               self._instance(),
+                                                               data_id,
+                                                               value),
+                                           value)
+                                          for data_id, value in data.items()]
+            self.__multi_notifications.clear()
+        # save the data ids
+        if remove_tasks:
+            await asyncio.wait(remove_tasks)
+        changed = {}
+        for connector, (task, value) in single_tasks.items():
+            data_id = await task
+            self._connections[connector] = data_id
+            changed[data_id] = value
+        for connector, tasks in multi_tasks.items():
+            data_ids = set()
+            for task, value in tasks:
+                data_id = await task
+                changed[data_id] = value
+                data_ids.add(data_id)
+            self._multi_connections[connector] = data_ids
+        return changed
 
-    def _add_to_notification_condition_checks(self, data_id, value):
+    def _notify_observers(self):
+        """Checks the notification condition and notifies the observers about value
+        changes or cancellations.
+
+        This method is not private, because it is also used by the :class:`~connectors._common.MultiInputItem`
+        class.
+        """
+        if self._check_notification_condition():
+            for o in self.__observers:
+                o._notify(self)     # pylint: disable=protected-access; these methods are called by the connectors, but are not part of the public API.
+        else:
+            for o in self.__observers:
+                o._cancel(self)     # pylint: disable=protected-access; these methods are called by the connectors, but are not part of the public API.
+
+    def _add_to_notification_condition_checks(self, data_id, value=None):
         """A protected helper method to determine, if the observing output connectors
-        have to be notified at the end of the :meth:`~connectors.MultiInputConnector._request`
+        have to be notified at the end of the :meth:`~connectors.connectors.MultiInputConnector._request`
         method.
 
         This method is meant to be overridden in derived classes, that implement
@@ -256,7 +346,7 @@ class MultiInputConnector(InputConnector):
 
     def _check_notification_condition(self):   # pylint: disable=no-self-use; this method is a hook for derived classes
         """A protected helper method to determine, if the observing output connectors
-        have to be notified at the end of the :meth:`~connectors.MultiInputConnector._request`
+        have to be notified at the end of the :meth:`~connectors.connectors.MultiInputConnector._request`
         method.
 
         This method is meant to be overridden in derived classes, that implement
@@ -266,10 +356,10 @@ class MultiInputConnector(InputConnector):
 
 
 class ConditionalMultiInputConnector(MultiInputConnector):
-    """A variant of the :class:`~connectors.MultiInputConnector`, in which it
-    depends on externally defined conditions, if the value changes are announced
-    to the observing output connectors, and if the output connectors are notified
-    about value changes.
+    """A variant of the :class:`~connectors.connectors.MultiInputConnector`, in
+    which it depends on externally defined conditions, if the value changes are
+    announced to the observing output connectors, and if the output connectors
+    are notified about value changes.
 
     The conditions are defined as methods, which are called before sending an
     announcement or a notification to the observing output connectors and which
@@ -330,23 +420,7 @@ class ConditionalMultiInputConnector(MultiInputConnector):
         if self.__announce_condition(self._instance(), self._connections[connector]):
             super()._announce(connector, non_lazy_inputs)
 
-    def _conditional_observer_notification(self, data_id, *args, **kwargs):
-        """Notifies the observing output connectors, that this input has changed
-        the instance's state.
-
-        This method can be overridden by derived classes, for example to implement
-        a conditional notification of the outputs.
-
-        :param `*args,**kwargs`: the parameters, with which the replaced setter
-                                method has been called (excluding ``self``)
-        """
-        value = common.get_first_argument(self._method, *args, **kwargs)
-        if self.__notify_condition(self._instance(), data_id, value):
-            super()._conditional_observer_notification(data_id, value)
-        else:
-            super()._cancel(None)
-
-    def _add_to_notification_condition_checks(self, data_id, value):
+    def _add_to_notification_condition_checks(self, data_id, value=None):
         """A protected helper method to determine, if the observing output connectors
         have to be notified at the end of the :meth:`~connectors.MultiInputConnector._request`
         method.

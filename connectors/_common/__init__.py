@@ -23,6 +23,7 @@ from ._flags import *
 from ._input import *
 from ._multiinput_associate import *
 from ._multiinput_item import *
+from ._multioutput_item import *
 from ._non_lazy_inputs import *
 
 from ._executors import *   # this has to be imported last because of circular dependencies

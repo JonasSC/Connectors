@@ -63,3 +63,21 @@ def test_concurrency():
     run_duration = time.time() - start_time
     assert run_duration > 1.0   # the longest running path has a sleep time of 1s
     assert run_duration < 2.0   # since both paths can be executed in parallel, their sleep times must not be added
+
+
+def test_multioutput_parallelization():
+    """tests if the getter method is executed concurrently with the different parameters."""
+    t1 = testclasses.SleepInMultiOutput()
+    t2 = testclasses.Simple().set_value.connect(t1.get_value[1])
+    t3 = testclasses.Simple().set_value.connect(t1.get_value[1])
+    t4 = testclasses.Simple().set_value.connect(t1.get_value[4])
+    t5 = testclasses.ReplacingMultiInput() \
+        .add_value.connect(t2.get_value) \
+        .add_value.connect(t3.get_value) \
+        .add_value.connect(t4.get_value)
+    t1.set_value(3)
+    start_time = time.time()
+    assert t5.get_values() == [3, 3, 12]
+    run_duration = time.time() - start_time
+    assert run_duration > 1.0                   # the longest running path has a sleep time of 1s
+    assert run_duration < 2.0                   # since the getter can be executed in parallel, its sleep times must not be added
