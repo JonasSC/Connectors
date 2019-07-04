@@ -44,6 +44,7 @@ class MultiInputData(collections.OrderedDict):
     ...     @add_value.replace
     ...     def replace_value(self, data_id, value):
     ...         self.__data[data_id] = value
+    ...         return data_id
 
     """
 
