@@ -1,13 +1,23 @@
-.cache
+# Python bytecode
+*.pyc
+*__pycache__
+
+# build files
+sumpf.egg-info
+dist
+docs
+
+# test caches
 .coverage
+.hypothesis
+.pytest_cache
+
+# IDE config files
+.cache
+.idea
 .project
 .pydevproject
 .settings
 
-connectors.egg-info
-dist
-docs
-
-*.pyc
-*__pycache__
-
+# OSX garbage
+.DS_Store
