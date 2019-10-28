@@ -20,5 +20,9 @@ are created by decorating methods.
 """
 
 from ._connectors import *                          # pylint: disable=wildcard-import,unused-wildcard-import
+
 from ._macro._input import MacroInputConnector      # pylint: disable=unused-import
 from ._macro._output import MacroOutputConnector    # pylint: disable=unused-import
+
+from ._proxies import *
+from ._common import MultiInputAssociateProxy
