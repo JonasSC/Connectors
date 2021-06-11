@@ -256,7 +256,7 @@ class MultiOutputConnector(Connector):
             keys = tuple(keys)
         values = await asyncio.gather(*(self.__compute_key(executor, key, False, *args, **kwargs) for key in keys))
         dictionary = {k: v for k, v in zip(keys, values)}
-        await asyncio.wait([mi._notify_multi(self, dictionary, executor) for mi, _ in self.__multi_connections])         # pylint: disable=protected-access; these methods are called by the connectors, but are not part of the public API.
+        await asyncio.gather(*(mi._notify_multi(self, dictionary, executor) for mi, _ in self.__multi_connections))         # pylint: disable=protected-access; these methods are called by the connectors, but are not part of the public API.
 
     async def _request_key(self, executor, key, key_in_args, *args, **kwargs):   # pylint: disable=too-many-branches
         """Causes this multi-output connector to re-compute one of its values and
@@ -302,7 +302,7 @@ class MultiOutputConnector(Connector):
                     item = self.__items[key]
                     tasks = [c._notify(item, result, executor) for c, _ in self.__single_connections[key]]
                     if tasks:
-                        await asyncio.wait(tasks)
+                        await asyncio.gather(*tasks)
                 return result
             finally:
                 self.__running.discard(key)
@@ -310,5 +310,5 @@ class MultiOutputConnector(Connector):
     async def __request_announcements(self, executor):
         """Requests the announced value changes from the observed inputs."""
         if self.__announcements:
-            await asyncio.wait([a._request(executor) for a in self.__announcements])
+            await asyncio.gather(*(a._request(executor) for a in self.__announcements))
             await self.__computable.wait(executor)

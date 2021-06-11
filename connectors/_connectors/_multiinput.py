@@ -266,7 +266,7 @@ class MultiInputConnector(InputConnector):
         """
         # wait for the announced value changes
         if self.__announcements:
-            await asyncio.wait([a._request(executor) for a in self.__announcements])
+            await asyncio.gather(*(a._request(executor) for a in self.__announcements))
             await self.__computable.wait(executor)
         # execute the setter
         single_tasks = {}
@@ -306,7 +306,7 @@ class MultiInputConnector(InputConnector):
             self.__multi_notifications.clear()
         # save the data ids
         if remove_tasks:
-            await asyncio.wait(remove_tasks)
+            await asyncio.gather(*remove_tasks)
         changed = {}
         for connector, (task, value) in single_tasks.items():
             data_id = await task

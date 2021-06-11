@@ -172,12 +172,12 @@ class OutputConnector(Connector):
             try:
                 if self.__result_is_valid:
                     if self.__connections:
-                        await asyncio.wait([c._notify(self, self.__result, executor) for c, _ in self.__connections])
+                        await asyncio.gather(*(c._notify(self, self.__result, executor) for c, _ in self.__connections))
                     return self.__result
                 else:
                     # wait for the announced value changes
                     if self.__announcements:
-                        await asyncio.wait([a._request(executor) for a in self.__announcements])
+                        await asyncio.gather(*(a._request(executor) for a in self.__announcements))
                         await self.__computable.wait(executor)
                         if self.__result_is_valid:  # this can happen, if all announcements have been canceled
                             return self.__result
@@ -190,7 +190,7 @@ class OutputConnector(Connector):
                         self.__observed_has_changed = False
                     # notify the connected inputs
                     if self.__connections:
-                        await asyncio.wait([c._notify(self, result, executor) for c, _ in self.__connections])
+                        await asyncio.gather(*(c._notify(self, result, executor) for c, _ in self.__connections))
                     return result
             finally:
                 self.__running = False
