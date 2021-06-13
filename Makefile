@@ -1,10 +1,10 @@
 .PHONY: test test_coverage lint docs
 
 test:
-	python3 -m pytest --doctest-glob="*.rst" --doctest-modules
+	python3 -m pytest --doctest-glob="*.rst" --doctest-modules $(filter-out $@,$(MAKECMDGOALS))
 
 test_coverage:
-	python3 -m pytest --doctest-glob="*.rst" --doctest-modules --cov="connectors" --cov-report term:skip-covered
+	python3 -m pytest --doctest-glob="*.rst" --doctest-modules --cov="connectors" --cov-report term:skip-covered $(filter-out $@,$(MAKECMDGOALS))
 
 lint:
 	python3 -m flake8 --config=tests/flake8 connectors
