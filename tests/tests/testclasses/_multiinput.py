@@ -30,20 +30,25 @@ class NonReplacingMultiInput(BaseTestClass):
         self.__data = connectors.MultiInputData()
 
     @connectors.MultiInput("get_values")
-    def add_value(self, value):         # pylint: disable=missing-docstring
-        self._register_call(methodname="add_value", value=value)
-        return self.__data.add(value)
+    def add_value(self, value):
+        """adds a value to the output list"""
+        data_id = self.__data.add(value)
+        self._register_call("add_value", [value], data_id)
+        return data_id
 
     @add_value.remove
-    def remove_value(self, data_id):    # pylint: disable=missing-docstring
-        self._register_call(methodname="remove_value", value=data_id)
+    def remove_value(self, data_id):
+        """removes a value from the output list"""
+        self._register_call("remove_value", [data_id], self)
         del self.__data[data_id]
         return self
 
     @connectors.Output()
-    def get_values(self):               # pylint: disable=missing-docstring
-        self._register_call(methodname="get_values", value=list(self.__data.values()))
-        return list(self.__data.values())
+    def get_values(self):
+        """returns the output list"""
+        result = tuple(self.__data.values())
+        self._register_call("get_values", [], result)
+        return result
 
 
 class ReplacingMultiInput(BaseTestClass):
@@ -56,25 +61,27 @@ class ReplacingMultiInput(BaseTestClass):
     @connectors.MultiInput("get_values")
     def add_value(self, value):
         """adds a value to the output list"""
-        self._register_call(methodname="add_value", value=value)
-        return self.__data.add(value)
+        data_id = self.__data.add(value)
+        self._register_call("add_value", [value], data_id)
+        return data_id
 
     @add_value.remove
     def remove_value(self, data_id):
         """removes a value from the output list"""
-        self._register_call(methodname="remove_value", value=data_id)
+        self._register_call("remove_value", [data_id], self)
         del self.__data[data_id]
         return self
 
     @add_value.replace
     def replace_value(self, data_id, value):
         """replaces a value in the output list"""
-        self._register_call(methodname="replace_value", value=data_id)
+        self._register_call("replace_value", [data_id, value], data_id)
         self.__data[data_id] = value
         return data_id
 
     @connectors.Output()
     def get_values(self):
         """returns the output list"""
-        self._register_call(methodname="get_values", value=list(self.__data.values()))
-        return list(self.__data.values())
+        result = tuple(self.__data.values())
+        self._register_call("get_values", [], result)
+        return result

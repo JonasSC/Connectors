@@ -41,31 +41,31 @@ class ConstructorMethodCall(BaseTestClass):
 
     @connectors.Input("get_values")
     def set_first_value(self, value):           # pylint: disable=missing-docstring
-        self._register_call(methodname="set_first_value", value=value)
+        self._register_call(method_name="set_first_value", parameters=[value], return_value=self)
         self.__value = value
         return self
 
     @connectors.MultiInput("get_values")
     def add_value(self, value):                 # pylint: disable=missing-docstring
-        self._register_call(methodname="add_value", value=value)
+        self._register_call(method_name="add_value", parameters=[value], return_value=self)
         return self.__values.add(value)
 
     @add_value.remove
     def remove_value(self, data_id):            # pylint: disable=missing-docstring
-        self._register_call(methodname="remove_value", value=data_id)
+        self._register_call(method_name="remove_value", parameters=[data_id], return_value=self)
         del self.__values[data_id]
         return self
 
     @add_value.replace
     def replace_value(self, data_id, value):    # pylint: disable=missing-docstring
-        self._register_call(methodname="replace_value", value=data_id)
+        self._register_call(method_name="replace_value", parameters=[data_id, value], return_value=self)
         self.__values[data_id] = value
         return self
 
     @connectors.Output()
     def get_values(self):                       # pylint: disable=missing-docstring
         result = [self.__value] + list(self.__values.values())
-        self._register_call(methodname="get_values", value=result)
+        self._register_call(method_name="get_values", parameters=[], return_value=result)
         return result
 
 

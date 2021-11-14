@@ -14,44 +14,153 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
+
 """Contains a class for logging calls and comparing that log to a given call sequence"""
 
-import collections
-from . import _expected_calls as expected_calls
+import functools
 
-__all__ = ("CallLogger",)
-
-Call = collections.namedtuple(typename="Call", field_names=("class_", "method", "identifier", "value"))
+__all__ = ("CallLogger", "ignore")
 
 
-def format_call(call, mapping):
-    """formats a call as a human readable string, so it can be used for debug prints
-    and error messages
+class Ignore:
+    """A class for the singleton `ignore` value, that is used to indicate, that the parameters or
+    the return value of a method call shall not be checked by the call logger."""
+    def __eq__(self, other):
+        return True
 
-    :param call: either a logged call (a Call instance) or an expected call, which
-                 is a tuple (INSTANCE, METHOD, VALUE), where INSTANCE is the object,
-                 of which a method call is expected, METHOD is the string method
-                 name and VALUE is optional and can be the argument, that is
-                 expected to be passed to the method
-    :param mapping: an optional mapping from an instance's identifier to the name
-                    of the variable, in which it is stored
-    :returns: a string
-    """
-    if isinstance(call, Call):
-        identifier = call.identifier
-        class_ = call.class_
-        method = call.method
-        value = call.value
-    else:
-        identifier = call[0].get_identifier()
-        class_ = call[0].__class__.__name__
-        method = call[1]
-        value = call[2] if len(call) >= 3 else ""
-    if identifier in mapping:
-        instance = mapping[identifier]
-        return f"{instance}.{method}({value})"
-    else:
-        return f"{identifier}-{class_}.{method}({value})"
+    def __ne__(self, other):
+        return False
+
+
+ignore = Ignore()
+
+
+class Call:
+    """A class for representing a single method call in the call log"""
+
+    def __init__(self, instance, method_name, parameters=ignore, return_value=ignore, name_mapping=None):
+        self.instance = instance
+        self.method_name = method_name
+        if parameters is ignore or parameters is None:
+            self.parameters = ignore
+        else:
+            self.parameters = tuple(parameters)
+        self.return_value = return_value
+        self.__instance_name = self.__lookup_name(name_mapping if name_mapping else {})
+
+    def __str__(self):
+        if self.__instance_name:
+            instance_name = self.__instance_name
+        else:
+            instance_name = f"{self.instance.__class__.__name__}({id(self.instance)})"
+        parameters = "" if self.parameters is ignore else ", ".join(str(p) for p in self.parameters)
+        if self.return_value is ignore:
+            return f"{instance_name}.{self.method_name}({parameters})"
+        else:
+            return_value = self.__instance_name if self.return_value is self.instance else self.return_value
+            return f"{instance_name}.{self.method_name}({parameters}) -> {return_value}"
+
+    def __eq__(self, other):
+        return (self.instance is other.instance
+                and self.method_name == other.method_name
+                and (self.parameters == other.parameters or other.parameters == self.parameters)           # checking the == in both directions checks, whether the parameters are ignored by one call (see. __eq__ method of Ignore)
+                and (self.return_value == other.return_value or other.return_value == self.return_value))  # checking the == in both directions checks, whether the return value is ignored by one call (see. __eq__ method of Ignore)
+
+    def __ne__(self, other):
+        return not self == other
+
+    def set_name_mapping(self, **kwargs):
+        """Specifies a mapping from string variable names to instances,
+        which allows for more readable debug prints and error messages.
+
+        :param kwargs: keyword arguments: NAME=INSTANCE
+        """
+        new_name = self.__lookup_name(kwargs)
+        if new_name:
+            self.__instance_name = new_name
+        return self
+
+    def __lookup_name(self, name_mapping):
+        """looks up the name of this call's instance in the given name mapping"""
+        for name, instance in name_mapping.items():
+            if instance is self.instance:
+                return name
+        return None
+
+
+class CallList:
+    """Manages lists of expected calls and allows to check if a given recorded
+    call is expected."""
+
+    def __init__(self, call_list, name_mapping=None):
+        """
+        @param call_list: a list of expected calls as tuples (INSTANCE, METHOD, VALUE),
+                          where INSTANCE is the object, of which a method call is
+                          expected, METHOD is the string method name and VALUE is
+                          optional and can be the argument, that is expected to
+                          be passed to the method.
+        """
+        self.__name_mapping = name_mapping
+        self.__call_list = self.__parse_list(call_list)
+
+    def __parse_list(self, call_list):
+        result = []
+        for item in call_list:
+            if isinstance(item, (set, frozenset)):
+                result.append([CallList(l, self.__name_mapping) for l in item])
+            else:
+                if len(item) == 2:
+                    instance, method_name = item
+                    parameters = ignore
+                    return_value = ignore
+                elif len(item) == 3:
+                    instance, method_name, parameters = item
+                    return_value = ignore
+                elif len(item) == 4:
+                    instance, method_name, parameters, return_value = item
+                result.append(Call(instance=instance,
+                                   method_name=method_name,
+                                   parameters=parameters,
+                                   return_value=return_value,
+                                   name_mapping=self.__name_mapping))
+        return result
+
+    def __str__(self):
+        items = []
+        for item in self.__call_list:
+            if isinstance(item, list):
+                items.append(f"{{{', '.join(str(i) for i in item)}}}")
+            else:
+                items.append(str(item))
+        return f"[{', '.join(items)}]"
+
+    def check(self, call):
+        """Checks if the given call is expected now."""
+        if isinstance(self.__call_list[0], Call):
+            result = call == self.__call_list[0]
+            if result:
+                self.__call_list.pop(0)
+            return result
+        else:
+            for i, call_list in enumerate(self.__call_list[0]):
+                if call_list.check(call):
+                    if call_list.found():
+                        del self.__call_list[0][i]
+                        if not self.__call_list[0]:
+                            self.__call_list.pop(0)
+                    return True
+        return False
+
+    def found(self):
+        """Returns True, if all expected calls in the list have already been passed to the check method."""
+        return not self.__call_list
+
+    def expected(self):
+        """Returns a list of still expected calls. This is useful when generating error messages."""
+        if isinstance(self.__call_list[0], Call):
+            return [self.__call_list[0]]
+        else:
+            return functools.reduce(lambda a, b: a + b, (call_list.expected() for call_list in self.__call_list[0]))
 
 
 class CallLogger:
@@ -62,21 +171,25 @@ class CallLogger:
 
     def __init__(self):
         self.__calls = []
-        self.__mapping = {}
+        self.__name_mapping = {}
 
-    def register_call(self, instance, methodname, value):
+    def register_call(self, instance, method_name, parameters=ignore, return_value=ignore):
         """Is called by methods, when a call shall be logged"""
-        self.__calls.append(Call(class_=instance.__class__.__name__,
-                                 method=methodname,
-                                 identifier=instance.get_identifier(),
-                                 value=value))
+        self.__calls.append(Call(instance=instance,
+                                 method_name=method_name,
+                                 parameters=parameters,
+                                 return_value=return_value,
+                                 name_mapping=self.__name_mapping))
 
-    def set_instance_mapping(self, mapping):
-        """Specifies a mapping from string variable names to BaseTestClass instances,
+    def set_name_mapping(self, **kwargs):
+        """Specifies a mapping from string variable names to instances,
         which allows for more readable debug prints and error messages.
+
+        :param kwargs: keyword arguments: NAME=INSTANCE
         """
-        for k, v in mapping.items():
-            self.__mapping[v.get_identifier()] = k
+        self.__name_mapping.update(kwargs)
+        for call in self.__calls:
+            call.set_name_mapping(**self.__name_mapping)
         return self
 
     def clear(self):
@@ -87,26 +200,25 @@ class CallLogger:
     def compare(self, call_list):
         """Compares the recorded call log to an expected call sequence.
 
-        Calls in the call sequence are described by tuples (INSTANCE, METHOD_NAME, PARAMETER).
+        Calls in the call sequence are described by tuples (INSTANCE, METHOD_NAME, PARAMETERS, RETURN_VALUE).
 
         If the order of parts of the call sequence is not known, these parts can
         be put in a set inside the call sequence.
 
         :param call_list: the call sequence as a list. This list is modified by this call.
         """
-        expected = expected_calls.ExpectedCallList(call_list)
-        for call in self.__calls:
-            if expected.found():
-                c = format_call(call, self.__mapping)
-                raise AssertionError(f"the call of {c} was not expected")
-            else:
-                if not expected.check(call):
-                    e = "{" + ", ".join([format_call(c, self.__mapping) for c in expected.expected()]) + "}"
-                    c = format_call(call, self.__mapping)
-                    raise AssertionError(f"expected one of the following calls:\n    {e}\nbut found {c}.")
+        expected = CallList(call_list, name_mapping=self.__name_mapping)
+        for i, call in enumerate(self.__calls, start=1):
+            if expected.found():  # this means, that all calls in the expected list have been found, but there are still calls in self.__calls, that were not in the list
+                raise AssertionError(f"the call of {call} was not expected")
+            if not expected.check(call):
+                raise AssertionError(f"expected one of the following calls:\n"
+                                     f"    {[str(c) for c in expected.expected()]}\n"
+                                     f"but found {call}.")
         if not expected.found():
-            e = "{" + ", ".join([format_call(c, self.__mapping) for c in expected.expected()]) + "}"
-            raise AssertionError(f"expected one of the following calls:\n    {e}\nbut no calls were registered.")
+            raise AssertionError(f"expected one of the following calls:\n"
+                                 f"    {[str(c) for c in expected.expected()]}\n"
+                                 f"but no calls were registered.")
         return self
 
     def get_number_of_calls(self):
@@ -115,6 +227,6 @@ class CallLogger:
 
     def print_log(self):
         """Prints the call log"""
-        for i, c in enumerate(self.__calls):
-            print(f"{i+1}.", format_call(c, self.__mapping))
+        for i, call in enumerate(self.__calls, start=1):
+            print(f"{i}. {call}")
         return self

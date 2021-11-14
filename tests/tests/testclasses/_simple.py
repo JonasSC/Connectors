@@ -32,12 +32,12 @@ class Simple(BaseTestClass):
     @connectors.Input("get_value")
     def set_value(self, value):
         """sets the internal value"""
-        self._register_call(methodname="set_value", value=value)
+        self._register_call("set_value", [value], self)
         self.__value = value
         return self
 
     @connectors.Output()
     def get_value(self):
         """returns the internal value"""
-        self._register_call(methodname="get_value", value=self.__value)
+        self._register_call("get_value", [], self.__value)
         return self.__value

@@ -32,13 +32,13 @@ class SleepInOutput(BaseTestClass):
 
     @connectors.Input("get_value")
     def set_value(self, value):                 # pylint: disable=missing-docstring
-        self._register_call(methodname="set_value", value=value)
+        self._register_call(method_name="set_value", parameters=[value], return_value=self)
         self.__value = value
         return self
 
     @connectors.Output()
     def get_value(self):                        # pylint: disable=missing-docstring
-        self._register_call(methodname="get_value", value=self.__value)
+        self._register_call(method_name="get_value", parameters=[], return_value=self.__value)
         time.sleep(1.0)
         return self.__value
 
@@ -52,14 +52,14 @@ class SleepInInput(BaseTestClass):
 
     @connectors.Input("get_value", parallelization=connectors.Parallelization.THREAD)
     def set_value(self, value):                 # pylint: disable=missing-docstring
-        self._register_call(methodname="set_value", value=value)
+        self._register_call(method_name="set_value", parameters=[value], return_value=self)
         self.__value = value
         time.sleep(1.0)
         return self
 
     @connectors.Output()
     def get_value(self):                        # pylint: disable=missing-docstring
-        self._register_call(methodname="get_value", value=self.__value)
+        self._register_call(method_name="get_value", parameters=[], return_value=self.__value)
         return self.__value
 
 
@@ -73,25 +73,27 @@ class SleepInMultiInput(BaseTestClass):
     @connectors.MultiInput("get_values", parallelization=connectors.Parallelization.THREAD)
     def add_value(self, value):                 # pylint: disable=missing-docstring
         time.sleep(1.0)
-        self._register_call(methodname="add_value", value=value)
-        return self.__data.add(value)
+        data_id = self.__data.add(value)
+        self._register_call(method_name="add_value", parameters=[value], return_value=data_id)
+        return data_id
 
     @add_value.remove
     def remove_value(self, data_id):            # pylint: disable=missing-docstring
-        self._register_call(methodname="remove_value", value=data_id)
+        self._register_call(method_name="remove_value", parameters=[data_id], return_value=self)
         del self.__data[data_id]
         return self
 
     @add_value.replace
     def replace_value(self, data_id, value):    # pylint: disable=missing-docstring
-        self._register_call(methodname="replace_value", value=data_id)
+        self._register_call(method_name="replace_value", parameters=[data_id, value], return_value=self)
         self.__data[data_id] = value
         return self
 
     @connectors.Output()
     def get_values(self):                       # pylint: disable=missing-docstring
-        self._register_call(methodname="get_values", value=list(self.__data.values()))
-        return list(self.__data.values())
+        result = tuple(self.__data.values())
+        self._register_call(method_name="get_values", parameters=[], return_value=result)
+        return result
 
 
 class SleepInMultiOutput(BaseTestClass):
@@ -104,7 +106,7 @@ class SleepInMultiOutput(BaseTestClass):
     @connectors.Input("get_value")
     def set_value(self, value):
         """Sets the value"""
-        self._register_call(methodname="set_value", value=value)
+        self._register_call(method_name="set_value", parameters=[value], return_value=self)
         self.__value = value
         return self
 
@@ -113,5 +115,5 @@ class SleepInMultiOutput(BaseTestClass):
         """Sleeps for a second and returns the product of the value and the key"""
         time.sleep(1.0)
         result = self.__value * key
-        self._register_call(methodname="get_value", value=result)
+        self._register_call(method_name="get_value", parameters=[key], return_value=result)
         return result

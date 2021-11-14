@@ -51,13 +51,13 @@ def test_manual_method_calls():
     connected = testclasses.NonReplacingMultiInput().add_value.connect(t1.get_value)
     t2.set_value.connect(connected.get_values)
     for instance in (not_connected, connected):
-        assert instance.get_values() == [None]
+        assert instance.get_values() == (None,)
         id1 = instance.add_value(1.0)
-        assert instance.get_values() == [None, 1.0]
+        assert instance.get_values() == (None, 1.0)
         instance.add_value(2.0)
-        assert instance.get_values() == [None, 1.0, 2.0]
+        assert instance.get_values() == (None, 1.0, 2.0)
         instance.remove_value(id1)
-        assert instance.get_values() == [None, 2.0]
+        assert instance.get_values() == (None, 2.0)
     # replacing MultiInput
     t1 = testclasses.Simple()
     t2 = testclasses.Simple()
@@ -67,15 +67,15 @@ def test_manual_method_calls():
     connected = testclasses.ReplacingMultiInput().add_value.connect(t1.get_value)
     t2.set_value.connect(connected.get_values)
     for instance in (not_connected, connected):
-        assert instance.get_values() == [None]
+        assert instance.get_values() == (None,)
         id1 = instance.add_value(10)
-        assert instance.get_values() == [None, 10]
+        assert instance.get_values() == (None, 10)
         instance.add_value(20)
-        assert instance.get_values() == [None, 10, 20]
+        assert instance.get_values() == (None, 10, 20)
         instance.replace_value(id1, 30)
-        assert instance.get_values() == [None, 30, 20]
+        assert instance.get_values() == (None, 30, 20)
         instance.remove_value(id1)
-        assert instance.get_values() == [None, 20]
+        assert instance.get_values() == (None, 20)
 
 
 def test_non_replacing_multiinput():
@@ -83,13 +83,13 @@ def test_non_replacing_multiinput():
     call_logger = helper.CallLogger()
     # test without connections
     instance = testclasses.NonReplacingMultiInput(call_logger)
-    assert instance.get_values() == []
+    assert instance.get_values() == ()
     id1 = instance.add_value(1)
-    assert instance.get_values() == [1]
+    assert instance.get_values() == (1,)
     instance.add_value(2)
-    assert instance.get_values() == [1, 2]
+    assert instance.get_values() == (1, 2)
     instance.remove_value(id1)
-    assert instance.get_values() == [2]
+    assert instance.get_values() == (2,)
     # test with connections
     t1 = testclasses.Simple(call_logger)
     t1.set_value(11)
@@ -97,9 +97,9 @@ def test_non_replacing_multiinput():
     t2 = testclasses.Simple(call_logger)
     t2.set_value(12)
     instance.add_value.connect(t2.get_value)
-    assert instance.get_values() == [2, 11, 12]
+    assert instance.get_values() == (2, 11, 12)
     t1.set_value(13)
-    assert instance.get_values() == [2, 12, 13]
+    assert instance.get_values() == (2, 12, 13)
 
 
 def test_replacing_multiinput():
@@ -107,15 +107,15 @@ def test_replacing_multiinput():
     call_logger = helper.CallLogger()
     # test without connections
     instance = testclasses.ReplacingMultiInput(call_logger)
-    assert instance.get_values() == []
+    assert instance.get_values() == ()
     id1 = instance.add_value(1)
-    assert instance.get_values() == [1]
+    assert instance.get_values() == (1,)
     instance.add_value(2)
-    assert instance.get_values() == [1, 2]
+    assert instance.get_values() == (1, 2)
     instance.replace_value(id1, 3)
-    assert instance.get_values() == [3, 2]
+    assert instance.get_values() == (3, 2)
     instance.remove_value(id1)
-    assert instance.get_values() == [2]
+    assert instance.get_values() == (2,)
     # test with connections
     t1 = testclasses.Simple(call_logger)
     t1.set_value(11)
@@ -123,9 +123,9 @@ def test_replacing_multiinput():
     t2 = testclasses.Simple(call_logger)
     t2.set_value(12)
     instance.add_value.connect(t2.get_value)
-    assert instance.get_values() == [2, 11, 12]
+    assert instance.get_values() == (2, 11, 12)
     t1.set_value(13)
-    assert instance.get_values() == [2, 13, 12]
+    assert instance.get_values() == (2, 13, 12)
 
 
 def test_multiple_outputs():
@@ -135,16 +135,17 @@ def test_multiple_outputs():
     t1 = testclasses.Simple(call_logger)
     t2 = testclasses.MultiInputMultipleOutputs(call_logger).add_value.connect(t1.get_value)
     t3 = testclasses.MultipleInputs(call_logger)
+    call_logger.set_name_mapping(t1=t1, t2=t2, t3=t3)
     t3.set_value1.connect(t2.get_values)
     t3.set_value2.connect(t2.get_bools)
     call_logger.compare([])
     # check the executed methods
     t1.set_value(25.4)
-    assert t3.get_values() == ([25.4], [True])
-    call_logger.compare([(t1, "set_value", 25.4), (t1, "get_value", 25.4), (t2, "add_value", 25.4),
-                         set((((t2, "get_values", (25.4)), (t3, "set_value1", (25.4))),
-                              ((t2, "get_bools", (True)), (t3, "set_value2", (True))))),
-                         (t3, "get_values", ([25.4], [True]))])
+    assert t3.get_values() == ((25.4,), (True,))
+    call_logger.compare([(t1, "set_value", [25.4], t1), (t1, "get_value", [], 25.4), (t2, "add_value", (25.4,)),
+                         {((t2, "get_values", (), (25.4,)), (t3, "set_value1", ((25.4,),), t3)),
+                          ((t2, "get_bools", (), (True,)), (t3, "set_value2", ((True,),), t3))},
+                         (t3, "get_values", [], ((25.4,), (True,)))])
 
 
 def test_disconnect():
@@ -156,9 +157,9 @@ def test_disconnect():
     t3.add_value.connect(t2.get_value)
     t1.set_value(1.0)
     t2.set_value(2.0)
-    assert t3.get_values() == [1.0, 2.0]
+    assert t3.get_values() == (1.0, 2.0)
     t3.add_value.disconnect(t2.get_value)
-    assert t3.get_values() == [1.0]
+    assert t3.get_values() == (1.0,)
 
 
 def test_laziness_on_connect():
@@ -169,18 +170,19 @@ def test_laziness_on_connect():
     # set up a small processing chain
     t1 = testclasses.NonReplacingMultiInput(call_logger)
     t2 = testclasses.NonLazyInputs(call_logger)
+    call_logger.set_name_mapping(t1=t1, t2=t2)
     t2.add_value.set_laziness(connectors.Laziness.ON_CONNECT)
     t2.add_value.connect(t1.get_values)
     call_logger.compare([(t1, "get_values", None), (t2, "add_value", None)])
     # change a value and check that the setter is called
     call_logger.clear()
     t1.add_value(1.0)
-    call_logger.compare([(t1, "add_value", 1.0), (t1, "get_values", 1.0), (t2, "replace_value")])
+    call_logger.compare([(t1, "add_value", [1.0]), (t1, "get_values", [], (1.0,)), (t2, "replace_value")])
     # change the input's laziness and check again
     call_logger.clear()
     t2.add_value.set_laziness(connectors.Laziness.ON_REQUEST)
     t1.add_value(2.0)
-    call_logger.compare([(t1, "add_value", 2.0)])
+    call_logger.compare([(t1, "add_value", [2.0])])
 
 
 def test_laziness_on_announce():
@@ -190,23 +192,27 @@ def test_laziness_on_announce():
     # set up a small processing chain
     t1 = testclasses.NonReplacingMultiInput(call_logger)
     t2 = testclasses.NonLazyInputs(call_logger).add_value.connect(t1.get_values)
+    call_logger.set_name_mapping(t1=t1, t2=t2)
     call_logger.compare([])
     # change a value and check that the setter is called
     t1.add_value(1.0)
-    call_logger.compare([(t1, "add_value", 1.0), (t1, "get_values", 1.0), (t2, "add_value", 1.0)])
+    call_logger.compare([(t1, "add_value", [1.0]), (t1, "get_values", [], (1.0,)), (t2, "add_value", [(1.0,)])])
     # change the input's laziness and check again
     call_logger.clear()
     t2.add_value.set_laziness(connectors.Laziness.ON_REQUEST)
     t1.add_value(2.0)
-    call_logger.compare([(t1, "add_value", 2.0)])
+    call_logger.compare([(t1, "add_value", [2.0])])
     # check that the set_laziness method is also available in the proxies
     call_logger.clear()
     t3 = testclasses.ReplacingMultiInput(call_logger)
+    call_logger.set_name_mapping(t3=t3)
     t3.add_value.set_laziness(connectors.Laziness.ON_ANNOUNCE)
     t3.add_value.connect(t1.get_values)
     call_logger.compare([])
     t1.add_value(3.0)
-    call_logger.compare([(t1, "add_value", 3.0), (t1, "get_values", 3.0), (t3, "add_value", 3.0)])
+    call_logger.compare([(t1, "add_value", [3.0]),
+                         (t1, "get_values", [], (1.0, 2.0, 3.0)),
+                         (t3, "add_value", [(1.0, 2.0, 3.0)])])
 
 
 def test_laziness_on_notify():
@@ -217,20 +223,21 @@ def test_laziness_on_notify():
     t1 = testclasses.Simple(call_logger)
     t2 = testclasses.Simple(call_logger).set_value.connect(t1.get_value)
     t3 = testclasses.NonReplacingMultiInput(call_logger).add_value.connect(t1.get_value)
+    call_logger.set_name_mapping(t1=t1, t2=t2, t3=t3)
     t3.add_value.set_laziness(connectors.Laziness.ON_NOTIFY)
     call_logger.compare([])
     # set the value
     t1.set_value(1.0)
-    call_logger.compare([(t1, "set_value", 1.0)])
+    call_logger.compare([(t1, "set_value", [1.0], t1)])
     call_logger.clear()
     # retrieve the value through t2 and check if t3 updates itself
     assert t2.get_value() == 1.0
-    call_logger.compare([(t1, "get_value", 1.0),
-                         set([((t2, "set_value", 1.0), (t2, "get_value", 1.0)),
-                              ((t3, "add_value", 1.0),)])])
+    call_logger.compare([(t1, "get_value", [], 1.0),
+                         {((t2, "set_value", (1.0,), t2), (t2, "get_value", (), 1.0)),
+                          ((t3, "add_value", (1.0,)),)}])
     call_logger.clear()
-    assert t3.get_values() == [1.0]
-    call_logger.compare([(t3, "get_values", (1.0,))])
+    assert t3.get_values() == (1.0,)
+    call_logger.compare([(t3, "get_values", [], (1.0,))])
 
 
 def test_condition_on_announce():
@@ -239,34 +246,35 @@ def test_condition_on_announce():
     t1 = testclasses.Simple(call_logger)
     t2 = testclasses.ConditionalMultiInputAnnouncement(call_logger).add_value.connect(t1.get_value)
     t3 = testclasses.Simple(call_logger).set_value.connect(t2.get_values)
+    call_logger.set_name_mapping(t1=t1, t2=t2, t3=t3)
     # test with condition == True
     call_logger.compare([])
     t1.set_value(1.0)
-    assert t3.get_value() == [1.0]
-    call_logger.compare([(t1, "set_value", 1.0), (t1, "get_value", 1.0),
-                         (t2, "add_value", 1.0), (t2, "get_values", [1.0]),
-                         (t3, "set_value", [1.0]), (t3, "get_value", [1.0])])
+    assert t3.get_value() == (1.0,)
+    call_logger.compare([(t1, "set_value", [1.0], t1), (t1, "get_value", [], 1.0),
+                         (t2, "add_value", [1.0]), (t2, "get_values", [], (1.0,)),
+                         (t3, "set_value", [(1.0,)], t3), (t3, "get_value", [], (1.0,))])
     # test with condition == False
     t2.condition = False
     call_logger.clear()
     t1.set_value(2.0)
-    assert t3.get_value() == [1.0]
-    call_logger.compare([(t1, "set_value", 2.0)])
-    assert t2.get_values() == [1.0]
+    assert t3.get_value() == (1.0,)
+    call_logger.compare([(t1, "set_value", [2.0], t1)])
+    assert t2.get_values() == (1.0,)
     # test calling the method directly
     t2.condition = False
     call_logger.clear()
     t2.add_value(3.0)
-    assert t3.get_value() == [1.0, 3.0]
-    call_logger.compare([(t2, "add_value", 3.0), (t2, "get_values", [1.0, 3.0]),
-                         (t3, "set_value", [1.0, 3.0]), (t3, "get_value", [1.0, 3.0])])
+    assert t3.get_value() == (1.0, 3.0)
+    call_logger.compare([(t2, "add_value", [3.0]), (t2, "get_values", [], (1.0, 3.0)),
+                         (t3, "set_value", [(1.0, 3.0)], t3), (t3, "get_value", [], (1.0, 3.0))])
     # test disconnecting
     t2.condition = False
     call_logger.clear()
     t1.get_value.disconnect(t2.add_value)
-    assert t3.get_value() == [3.0]
-    call_logger.compare([(t2, "remove_value"), (t2, "get_values", [3.0]),
-                         (t3, "set_value", [3.0]), (t3, "get_value", [3.0])])
+    assert t3.get_value() == (3.0,)
+    call_logger.compare([(t2, "remove_value"), (t2, "get_values", [], (3.0,)),
+                         (t3, "set_value", [(3.0,)], t3), (t3, "get_value", [], (3.0,))])
 
 
 def test_condition_on_notify():
@@ -275,27 +283,30 @@ def test_condition_on_notify():
     t1 = testclasses.Simple(call_logger)
     t2 = testclasses.ConditionalMultiInputNotification(call_logger).add_value.connect(t1.get_value)
     t3 = testclasses.Simple(call_logger).set_value.connect(t2.get_values)
+    call_logger.set_name_mapping(t1=t1, t2=t2, t3=t3)
     call_logger.compare([])
     # test with condition == True
     t1.set_value(1.0)
-    assert t3.get_value() == [1.0]
-    call_logger.compare([(t1, "set_value", 1.0), (t1, "get_value", 1.0),
-                         (t2, "add_value", 1.0), (t2, "get_values", [1.0]),
-                         (t3, "set_value", [1.0]), (t3, "get_value", [1.0])])
+    assert t3.get_value() == (1.0,)
+    call_logger.compare([(t1, "set_value", [1.0], t1), (t1, "get_value", [], 1.0),
+                         (t2, "add_value", [1.0]), (t2, "get_values", [], (1.0,)),
+                         (t3, "set_value", [(1.0,)], t3), (t3, "get_value", [], (1.0,))])
     # test with condition == False
     t2.condition = False
     call_logger.clear()
     t1.set_value(2.0)
-    assert t3.get_value() == [1.0]
-    call_logger.compare([(t1, "set_value", 2.0), (t1, "get_value", 2.0), (t2, "replace_value", 1.0)])
-    assert t2.get_values() == [1.0]
+    assert t3.get_value() == (1.0,)
+    call_logger.compare([(t1, "set_value", [2.0], t1),
+                         (t1, "get_value", [], 2.0),
+                         (t2, "replace_value")])
+    assert t2.get_values() == (1.0,)
     # test calling the method directly
     t2.condition = False
     call_logger.clear()
     t2.add_value(3.0)
-    assert t3.get_value() == [1.0]
-    call_logger.compare([(t2, "add_value", 3.0)])
-    assert t2.get_values() == [1.0]
+    assert t3.get_value() == (1.0,)
+    call_logger.compare([(t2, "add_value", [3.0])])
+    assert t2.get_values() == (1.0,)
     # test for an implementation detail, that specifying the value as keyword argument takes a slightly more complex code path
     data_id = t2.add_value(value=4.0)
     t2.remove_value(data_id)
@@ -303,11 +314,11 @@ def test_condition_on_notify():
     t2.condition = False
     call_logger.clear()
     t1.get_value.disconnect(t2.add_value)
-    assert t3.get_value() == [1.0]
-    call_logger.compare([(t2, "remove_value")])
+    assert t3.get_value() == (1.0,)
+    call_logger.compare([(t2, "remove_value", None, t2)])
     # test changing the condition
     call_logger.clear()
     t2.set_condition(True)
-    assert t3.get_value() == [3.0]  # the value from calling the method directly
-    call_logger.compare([(t2, "set_condition", True), (t2, "get_values", [3.0]),
-                         (t3, "set_value", [3.0]), (t3, "get_value", [3.0])])
+    assert t3.get_value() == (3.0,)  # the value from calling the method directly
+    call_logger.compare([(t2, "set_condition", [True], t2), (t2, "get_values", [], (3.0,)),
+                         (t3, "set_value", [(3.0,)], t3), (t3, "get_value", [], (3.0,))])

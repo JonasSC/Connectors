@@ -73,15 +73,16 @@ def test_caching():
     call_logger = helper.CallLogger()
     t1 = testclasses.Simple(call_logger).set_value(1)
     t2 = testclasses.MultiOutputWithKeys(call_logger).set_value.connect(t1.get_value)
+    call_logger.set_name_mapping(t1=t1, t2=t2)
     # test with caching enabled
     assert t2.get_value(2) == 2
-    call_logger.compare([(t1, "set_value", 1), (t1, "get_value", 2),
-                         (t2, "set_value", 1), (t2, "get_value", 2)]).clear()
+    call_logger.compare([(t1, "set_value", [1], t1), (t1, "get_value", [], 1),
+                         (t2, "set_value", [1], t2), (t2, "get_value", [2], 2)]).clear()
     assert t2.get_value(2) == 2     # this should come from the cache
     assert t2.get_value[2]() == 2   # this should come from the cache
     assert call_logger.get_number_of_calls() == 0
     assert t2.get_value[9]() == 9
-    call_logger.compare([(t2, "get_value", 9)]).clear()
+    call_logger.compare([(t2, "get_value", [9], 9)]).clear()
     assert t2.get_value(9) == 9     # this should come from the cache
     assert t2.get_value[9]() == 9   # this should come from the cache
     assert call_logger.get_number_of_calls() == 0
@@ -90,7 +91,7 @@ def test_caching():
     assert t2.get_value(2) == 2
     assert t2.get_value(4) == 4
     assert t2.get_value[9]() == 9
-    call_logger.compare([(t2, "get_value", 2), (t2, "get_value", 4), (t2, "get_value", 9)]).clear()
+    call_logger.compare([(t2, "get_value", [2], 2), (t2, "get_value", [4], 4), (t2, "get_value", [9], 9)]).clear()
 
 
 def test_caching_in_parallelization():
@@ -105,14 +106,14 @@ def test_caching_in_parallelization():
         .add_value.connect(t2.get_value) \
         .add_value.connect(t3.get_value) \
         .add_value.connect(t4.get_value)
-    call_logger.set_instance_mapping({"t1": t1, "t2": t2, "t3": t3, "t4": t4, "t5": t5})
+    call_logger.set_name_mapping(t1=t1, t2=t2, t3=t3, t4=t4, t5=t5)
     t1.set_value(3)
-    assert t5.get_values() == [3, 3, 12]
-    call_logger.compare([(t1, "set_value", 3),  # test that the getter is only executed once for the parameter 1
-                         {((t1, "get_value", 3), frozenset({((t2, "set_value", 3), (t2, "get_value", 3), (t5, "add_value", 3)),
-                                                            ((t3, "set_value", 3), (t3, "get_value", 3), (t5, "add_value", 3))})),
-                          ((t1, "get_value", 12), (t4, "set_value", 12), (t4, "get_value", 12), (t5, "add_value", 12))},
-                         (t5, "get_values", [3, 3, 12])])
+    assert t5.get_values() == (3, 3, 12)
+    call_logger.compare([(t1, "set_value", (3,), t1),  # test that the getter is only executed once for the parameter 1
+                        {((t1, "get_value", (1,), 3), frozenset({((t2, "set_value", (3,), t2), (t2, "get_value", (), 3), (t5, "add_value", (3,))),
+                                                                ((t3, "set_value", (3,), t3), (t3, "get_value", (), 3), (t5, "add_value", (3,)))})),
+                        ((t1, "get_value", (4,), 12), (t4, "set_value", (12,), t4), (t4, "get_value", (), 12), (t5, "add_value", (12,)))},
+                        (t5, "get_values", (), (3, 3, 12))])
 
 
 def test_single_connections():
@@ -128,13 +129,13 @@ def test_single_connections():
     assert t2.get_value() == 0
     assert t3.get_value() == 0
     assert t4.get_value() == 0
-    assert t5.get_values() == [0, 0]
+    assert t5.get_values() == (0, 0)
     # check if the value change is propagated correctly
     t1.set_value(5)
     assert t2.get_value() == 5
     assert t3.get_value() == 5
     assert t4.get_value() == 20
-    assert t5.get_values() == [25, 30]
+    assert t5.get_values() == (25, 30)
     # check if disconnecting works as expected
     t1.get_value[1].disconnect(t2.set_value)
     t4.set_value.disconnect(t1.get_value[4])
@@ -144,7 +145,7 @@ def test_single_connections():
     assert t2.get_value() == 5
     assert t3.get_value() == 7  # this should still be connected
     assert t4.get_value() == 20
-    assert t5.get_values() == []
+    assert t5.get_values() == ()
 
 
 def test_connection_errors():
@@ -166,7 +167,7 @@ def test_multi_connections_with_keys():
     """tests if connecting the multi-output connector to a multi-input works as expected."""
     t1 = testclasses.MultiOutputWithKeys()
     t2 = testclasses.ReplacingMultiInput().add_value.connect(t1.get_value)
-    assert t2.get_values() == [0, 0, 0]
+    assert t2.get_values() == (0, 0, 0)
     t1.set_value(7)
     assert set(t2.get_values()) == {14, 21, 35}
     # test changing keys
@@ -174,26 +175,26 @@ def test_multi_connections_with_keys():
     assert set(t2.get_values()) == {21, 35, 49}
     # test disconnecting
     t1.get_value.disconnect(t2.add_value)
-    assert t2.get_values() == []
+    assert t2.get_values() == ()
 
 
 def test_multi_connections_without_keys():
     """tests if connecting the multi-output connector to a multi-input works as expected."""
     t2 = testclasses.ReplacingMultiInput()
     t1 = testclasses.MultiOutputWithoutKeys().get_value.connect(t2.add_value)
-    assert t2.get_values() == []
+    assert t2.get_values() == ()
     t1.set_value(7)
-    assert t2.get_values() == []
+    assert t2.get_values() == ()
     # test disconnecting
     t2.add_value.disconnect(t1.get_value)
-    assert t2.get_values() == []
+    assert t2.get_values() == ()
 
 
 def test_multi_connections_with_volatile_keys():
     """tests if connecting the multi-output connector to a multi-input works as expected."""
     t1 = testclasses.MultiOutputWithVolatileKeys()
     t2 = testclasses.ReplacingMultiInput().add_value.connect(t1.get_value)
-    assert t2.get_values() == [0, 0, 0]
+    assert t2.get_values() == (0, 0, 0)
     t1.set_value(7)
     assert set(t2.get_values()) == {14, 21, 35}
     # test changing keys
@@ -201,7 +202,7 @@ def test_multi_connections_with_volatile_keys():
     assert set(t2.get_values()) == {21, 35, 49}
     # test disconnecting
     t1.get_value.disconnect(t2.add_value)
-    assert t2.get_values() == []
+    assert t2.get_values() == ()
 
 
 def test_multi_connections_with_dynamic_keys():
@@ -209,7 +210,7 @@ def test_multi_connections_with_dynamic_keys():
     t1 = testclasses.Simple().set_value({1, 2, 3})
     t2 = testclasses.MultiOutputWithKeys().set_keys.connect(t1.get_value)
     t3 = testclasses.ReplacingMultiInput().add_value.connect(t2.get_value)
-    assert t3.get_values() == [0, 0, 0]
+    assert t3.get_values() == (0, 0, 0)
     t2.set_value(7)
     assert set(t3.get_values()) == {7, 14, 21}
     # test changing keys
@@ -219,4 +220,4 @@ def test_multi_connections_with_dynamic_keys():
     t1.get_value.disconnect(t2.set_keys)
     assert set(t3.get_values()) == {21, 35, 49}
     t2.get_value.disconnect(t3.add_value)
-    assert t3.get_values() == []
+    assert t3.get_values() == ()

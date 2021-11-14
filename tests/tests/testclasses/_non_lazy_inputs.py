@@ -31,22 +31,23 @@ class NonLazyInputs(BaseTestClass):
 
     @connectors.Input(laziness=connectors.Laziness.ON_ANNOUNCE)
     def set_value(self, value):         # pylint: disable=missing-docstring
-        self._register_call(methodname="set_value", value=value)
+        self._register_call(method_name="set_value", parameters=[value], return_value=self)
         return self
 
     @connectors.MultiInput(laziness=connectors.Laziness.ON_ANNOUNCE)
     def add_value(self, value):         # pylint: disable=missing-docstring
-        self._register_call(methodname="add_value", value=value)
-        return self.__data.add(value)
+        data_id = self.__data.add(value)
+        self._register_call(method_name="add_value", parameters=[value], return_value=data_id)
+        return data_id
 
     @add_value.remove
     def remove_value(self, data_id):    # pylint: disable=missing-docstring
-        self._register_call(methodname="remove_value", value=data_id)
+        self._register_call(method_name="remove_value", parameters=[data_id], return_value=self)
         del self.__data[data_id]
         return self
 
     @add_value.replace
     def replace_value(self, data_id, value):    # pylint: disable=missing-docstring
-        self._register_call(methodname="replace_value", value=data_id)
+        self._register_call(method_name="replace_value", parameters=[data_id, value], return_value=data_id)
         self.__data[data_id] = value
-        return self
+        return data_id

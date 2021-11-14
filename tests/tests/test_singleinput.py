@@ -39,17 +39,18 @@ def test_simple_input_output_chain():
     # set up a small processing chain
     t1 = testclasses.Simple(call_logger)
     t2 = testclasses.Simple(call_logger).set_value.connect(t1.get_value)
+    call_logger.set_name_mapping(t1=t1, t2=t2)
     call_logger.compare([])
     # retrieve a value and check the executed methods
     assert t2.get_value() is None
-    call_logger.compare([(t1, "get_value", None), (t2, "set_value", None), (t2, "get_value", None)])
+    call_logger.compare([(t1, "get_value", [], None), (t2, "set_value", [None], t2), (t2, "get_value", [], None)])
     call_logger.clear()
     # modify a value and check the executed methods
     t1.set_value(1.0)
-    call_logger.compare([(t1, "set_value", 1.0)])
+    call_logger.compare([(t1, "set_value", [1.0], t1)])
     assert t2.get_value() == 1.0
-    call_logger.compare([(t1, "set_value", 1.0), (t1, "get_value", 1.0),
-                         (t2, "set_value", 1.0), (t2, "get_value", 1.0)])
+    call_logger.compare([(t1, "set_value", [1.0], t1), (t1, "get_value", [], 1.0),
+                         (t2, "set_value", [1.0], t2), (t2, "get_value", [], 1.0)])
 
 
 def test_multiple_inputs():
@@ -58,22 +59,25 @@ def test_multiple_inputs():
     # set up a small processing chain
     t1 = testclasses.Simple(call_logger)
     t2 = testclasses.MultipleInputs(call_logger).set_value1.connect(t1.get_value)
+    call_logger.set_name_mapping(t1=t1, t2=t2)
     call_logger.compare([])
     # retrieve a value and check the executed methods
     assert t2.get_values() == (None, None)
-    call_logger.compare([(t1, "get_value", None), (t2, "set_value1", None), (t2, "get_values", (None, None))])
+    call_logger.compare([(t1, "get_value", [], None),
+                         (t2, "set_value1", [None], t2),
+                         (t2, "get_values", [], (None, None))])
     call_logger.clear()
     # set one value and check that the methods for the others have not been executed
     t2.set_value2(94.7)
     assert t2.get_values() == (None, 94.7)
-    call_logger.compare([(t2, "set_value2", None), (t2, "get_values", (None, 94.7))])
+    call_logger.compare([(t2, "set_value2", [94.7], t2), (t2, "get_values", [], (None, 94.7))])
     call_logger.clear()
     # modify a value at the very beginning of the chain and check the executed methods
     t1.set_value(1.0)
-    call_logger.compare([(t1, "set_value", 1.0)])
+    call_logger.compare([(t1, "set_value", [1.0], t1)])
     assert t2.get_values() == (1.0, 94.7)
-    call_logger.compare([(t1, "set_value", 1.0), (t1, "get_value", 1.0),
-                         (t2, "set_value1", 1.0), (t2, "get_values", (1.0, 1.0))])
+    call_logger.compare([(t1, "set_value", [1.0], t1), (t1, "get_value", [], 1.0),
+                         (t2, "set_value1", [1.0], t2), (t2, "get_values", [], (1.0, 94.7))])
     call_logger.clear()
     # connect both inputs of the second instance to the output of the first
     t2.set_value2.connect(t1.get_value)
@@ -81,8 +85,9 @@ def test_multiple_inputs():
     call_logger.clear()
     t1.set_value(2)
     assert t2.get_values() == (2, 2)
-    call_logger.compare([(t1, "set_value", 2), (t1, "get_value", 2),
-                         set((((t2, "set_value1", 2),), ((t2, "set_value2", 2),))), (t2, "get_values", (2, 2))])
+    call_logger.compare([(t1, "set_value", [2], t1), (t1, "get_value", [], 2),
+                         {((t2, "set_value1", (2,), t2),), ((t2, "set_value2", (2,), t2),)},
+                         (t2, "get_values", [], (2, 2))])
 
 
 def test_multiple_outputs():
@@ -91,14 +96,15 @@ def test_multiple_outputs():
     # set up a small processing chain
     t1 = testclasses.Simple(call_logger)
     t2 = testclasses.MultipleOutputs(call_logger).set_value.connect(t1.get_value)
+    call_logger.set_name_mapping(t1=t1, t2=t2)
     call_logger.compare([])
     # retrieve one value and check the executed methods
     assert t2.get_value() is None
-    call_logger.compare([(t1, "get_value", None), (t2, "set_value", None), (t2, "get_value", None)])
+    call_logger.compare([(t1, "get_value", [], None), (t2, "set_value", [None], t2), (t2, "get_value", [], None)])
     call_logger.clear()
     # retrieve the other value and check the executed methods
     assert t2.get_bool() == bool(None)
-    call_logger.compare([(t2, "get_bool", bool(None))])
+    call_logger.compare([(t2, "get_bool", [], bool(None))])
     call_logger.clear()
     # make the processing chain a bit more complex and check the executed methods
     t3 = testclasses.MultipleInputs(call_logger)
@@ -106,10 +112,10 @@ def test_multiple_outputs():
     t3.set_value2.connect(t2.get_bool)
     t1.set_value(25.4)
     assert t3.get_values() == (25.4, True)
-    call_logger.compare([(t1, "set_value", 25.4), (t1, "get_value", 25.4), (t2, "set_value", 25.4),
-                         set((((t2, "get_value", 25.4), (t3, "set_value1", 25.4)),
-                              ((t2, "get_bool", True), (t3, "set_value2", True)))),
-                         (t3, "get_values", (25.4, True))])
+    call_logger.compare([(t1, "set_value", [25.4], t1), (t1, "get_value", [], 25.4), (t2, "set_value", [25.4], t2),
+                         {((t2, "get_value", (), 25.4), (t3, "set_value1", (25.4,), t3)),
+                          ((t2, "get_bool", (), True), (t3, "set_value2", (True,), t3))},
+                         (t3, "get_values", (), (25.4, True))])
 
 
 def test_disconnect():
@@ -118,18 +124,19 @@ def test_disconnect():
     # set up a small processing chain
     t1 = testclasses.Simple(call_logger)
     t2 = testclasses.Simple(call_logger).set_value.connect(t1.get_value)
+    call_logger.set_name_mapping(t1=t1, t2=t2)
     call_logger.compare([])
     # change a value
     t1.set_value(1.0)
-    call_logger.compare([(t1, "set_value", 1.0)])
+    call_logger.compare([(t1, "set_value", [1.0], t1)])
     # break the connection and check, that the value change before the break is propagated
     t2.set_value.disconnect(t1.get_value)
-    call_logger.compare([(t1, "set_value", 1.0), (t1, "get_value", 1.0), (t2, "set_value", 1.0)])
+    call_logger.compare([(t1, "set_value", [1.0], t1), (t1, "get_value", [], 1.0), (t2, "set_value", [1.0], t2)])
     # verify, that later value changes are not propagated
     call_logger.clear()
     t1.set_value(2.0)
     assert t2.get_value() == 1.0
-    call_logger.compare([(t1, "set_value", 2.0), (t2, "get_value", 1.0)])
+    call_logger.compare([(t1, "set_value", [2.0], t1), (t2, "get_value", [], 1.0)])
 
 
 def test_laziness_on_connect():
@@ -139,28 +146,33 @@ def test_laziness_on_connect():
     call_logger = helper.CallLogger()
     # test ON_REQUEST setting
     t1 = testclasses.Simple(call_logger)
+    call_logger.set_name_mapping(t1=t1)
     testclasses.Simple(call_logger).set_value.connect(t1.get_value)
     call_logger.compare([])
     # test ON_NOTIFY setting with a cached result
     t1 = testclasses.Simple(call_logger)
+    call_logger.set_name_mapping(t1=t1)
     t1.get_value()  # even if there is a cached value, the creation of the connection shall not cause a value propagation
     call_logger.clear()
     t2 = testclasses.Simple(call_logger)
+    call_logger.set_name_mapping(t2=t2)
     t2.set_value.set_laziness(connectors.Laziness.ON_NOTIFY)
     t2.set_value.connect(t1.get_value)
     call_logger.compare([])
     # test ON_ANNOUNCE setting
     t1 = testclasses.Simple(call_logger)
     t2 = testclasses.Simple(call_logger)
+    call_logger.set_name_mapping(t1=t1, t2=t2)
     t2.set_value.set_laziness(connectors.Laziness.ON_ANNOUNCE)
     t2.set_value.connect(t1.get_value)
     call_logger.compare([])
     # test ON_CONNECT setting
     t1 = testclasses.Simple(call_logger)
     t2 = testclasses.Simple(call_logger)
+    call_logger.set_name_mapping(t1=t1, t2=t2)
     t2.set_value.set_laziness(connectors.Laziness.ON_CONNECT)
     t2.set_value.connect(t1.get_value)
-    call_logger.compare([(t1, "get_value", None), (t2, "set_value", None)])
+    call_logger.compare([(t1, "get_value", [], None), (t2, "set_value", [None], t2)])
 
 
 def test_laziness_on_announce():
@@ -170,23 +182,25 @@ def test_laziness_on_announce():
     # set up a small processing chain
     t1 = testclasses.Simple(call_logger)
     t2 = testclasses.NonLazyInputs(call_logger).set_value.connect(t1.get_value)
+    call_logger.set_name_mapping(t1=t1, t2=t2)
     call_logger.compare([])
     # change a value and check that the setter is called
     t1.set_value(1.0)
-    call_logger.compare([(t1, "set_value", 1.0), (t1, "get_value", 1.0), (t2, "set_value", 1.0)])
+    call_logger.compare([(t1, "set_value", [1.0], t1), (t1, "get_value", [], 1.0), (t2, "set_value", [1.0], t2)])
     # change the input's laziness and check again
     call_logger.clear()
     t2.set_value.set_laziness(connectors.Laziness.ON_REQUEST)
     t1.set_value(2.0)
-    call_logger.compare([(t1, "set_value", 2.0)])
+    call_logger.compare([(t1, "set_value", [2.0], t1)])
     # check that the set_laziness method is also available in the proxies
     call_logger.clear()
     t3 = testclasses.Simple(call_logger)
+    call_logger.set_name_mapping(t3=t3)
     t3.set_value.set_laziness(connectors.Laziness.ON_ANNOUNCE)
     t3.set_value.connect(t1.get_value)
     call_logger.compare([])
     t1.set_value(3.0)
-    call_logger.compare([(t1, "set_value", 3.0), (t1, "get_value", 3.0), (t3, "set_value", 3.0)])
+    call_logger.compare([(t1, "set_value", [3.0], t1), (t1, "get_value", [], 3.0), (t3, "set_value", [3.0], t3)])
 
 
 def test_laziness_on_notify():
@@ -197,22 +211,23 @@ def test_laziness_on_notify():
     t1 = testclasses.Simple(call_logger)
     t2 = testclasses.Simple(call_logger)
     t3 = testclasses.Simple(call_logger)
+    call_logger.set_name_mapping(t1=t1, t2=t2, t3=t3)
     t3.set_value.set_laziness(connectors.Laziness.ON_NOTIFY)
     t2.set_value.connect(t1.get_value)
     t3.set_value.connect(t1.get_value)
     call_logger.compare([])
     # set the value
     t1.set_value(1.0)
-    call_logger.compare([(t1, "set_value", 1.0)])
+    call_logger.compare([(t1, "set_value", [1.0], t1)])
     call_logger.clear()
     # retrieve the value through t2 and check if t3 updates itself
     assert t2.get_value() == 1.0
-    call_logger.compare([(t1, "get_value", 1.0),
-                         set([((t2, "set_value", 1.0), (t2, "get_value", 1.0)),
-                              ((t3, "set_value", 1.0),)])])
+    call_logger.compare([(t1, "get_value", [], 1.0),
+                         {((t2, "set_value", (1.0,), t2), (t2, "get_value", (), 1.0)),
+                          ((t3, "set_value", (1.0,), t3),)}])
     call_logger.clear()
     assert t3.get_value() == 1.0
-    call_logger.compare([(t3, "get_value", 1.0)])
+    call_logger.compare([(t3, "get_value", [], 1.0)])
 
 
 def test_condition_on_announce():
@@ -221,27 +236,28 @@ def test_condition_on_announce():
     t1 = testclasses.Simple(call_logger)
     t2 = testclasses.ConditionalInputAnnouncement(call_logger).set_value.connect(t1.get_value)
     t3 = testclasses.Simple(call_logger).set_value.connect(t2.get_value)
+    call_logger.set_name_mapping(t1=t1, t2=t2, t3=t3)
     # test with condition == True
     call_logger.compare([])
     t1.set_value(1.0)
     assert t3.get_value() == 1.0
-    call_logger.compare([(t1, "set_value", 1.0), (t1, "get_value", 1.0),
-                         (t2, "set_value", 1.0), (t2, "get_value", 1.0),
-                         (t3, "set_value", 1.0), (t3, "get_value", 1.0)])
+    call_logger.compare([(t1, "set_value", [1.0], t1), (t1, "get_value", [], 1.0),
+                         (t2, "set_value", [1.0], t2), (t2, "get_value", [], 1.0),
+                         (t3, "set_value", [1.0], t3), (t3, "get_value", [], 1.0)])
     # test with condition == False
     t2.condition = False
     call_logger.clear()
     t1.set_value(2.0)
     assert t3.get_value() == 1.0
-    call_logger.compare([(t1, "set_value", 2.0)])
+    call_logger.compare([(t1, "set_value", [2.0], t1)])
     assert t2.get_value() == 1.0
     # test calling the method directly
     t2.condition = False
     call_logger.clear()
     t2.set_value(3.0)
     assert t3.get_value() == 3.0
-    call_logger.compare([(t2, "set_value", 3.0), (t2, "get_value", 3.0),
-                         (t3, "set_value", 3.0), (t3, "get_value", 3.0)])
+    call_logger.compare([(t2, "set_value", [3.0], t2), (t2, "get_value", [], 3.0),
+                         (t3, "set_value", [3.0], t3), (t3, "get_value", [], 3.0)])
 
 
 def test_condition_on_notify():
@@ -250,25 +266,26 @@ def test_condition_on_notify():
     t1 = testclasses.Simple(call_logger)
     t2 = testclasses.ConditionalInputNotification(call_logger).set_value.connect(t1.get_value)
     t3 = testclasses.Simple(call_logger).set_value.connect(t2.get_value)
+    call_logger.set_name_mapping(t1=t1, t2=t2, t3=t3)
     call_logger.compare([])
     # test with condition == True
     t1.set_value(1.0)
     assert t3.get_value() == 1.0
-    call_logger.compare([(t1, "set_value", 1.0), (t1, "get_value", 1.0),
-                         (t2, "set_value", 1.0), (t2, "get_value", 1.0),
-                         (t3, "set_value", 1.0), (t3, "get_value", 1.0)])
+    call_logger.compare([(t1, "set_value", [1.0], t1), (t1, "get_value", [], 1.0),
+                         (t2, "set_value", [1.0], t2), (t2, "get_value", [], 1.0),
+                         (t3, "set_value", [1.0], t3), (t3, "get_value", [], 1.0)])
     # test with condition == False
     t2.condition = False
     call_logger.clear()
     t1.set_value(2.0)
     assert t3.get_value() == 1.0
-    call_logger.compare([(t1, "set_value", 2.0), (t1, "get_value", 2.0), (t2, "set_value", 2.0)])
+    call_logger.compare([(t1, "set_value", [2.0], t1), (t1, "get_value", [], 2.0), (t2, "set_value", [2.0], t2)])
     assert t2.get_value() == 1.0
     # test calling the method directly
     t2.condition = False
     call_logger.clear()
     t2.set_value(3.0)
     assert t3.get_value() == 1.0
-    call_logger.compare([(t2, "set_value", 3.0)])
+    call_logger.compare([(t2, "set_value", [3.0], t2)])
     assert t2.get_value() == 1.0
     t2.set_value(value=4.0)     # tests for an implementation detail, that specifying the value as keyword argument takes a slightly more complex code path

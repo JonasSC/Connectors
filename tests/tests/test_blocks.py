@@ -45,32 +45,34 @@ def test_multiplexer_connectors():
     """Tests the connectors of the :class:`Multiplexer` class."""
     call_logger = helper.CallLogger()
     mux = connectors.blocks.Multiplexer()
-    t1 = testclasses.Simple(call_logger, "t1").set_value("one").get_value.connect(mux.input[1])
-    t2 = testclasses.Simple(call_logger, "t2").set_value("two").get_value.connect(mux.input[2])
-    to = testclasses.Simple(call_logger, "to").set_value.connect(mux.output)
+    t1 = testclasses.Simple(call_logger).set_value("one").get_value.connect(mux.input[1])
+    t2 = testclasses.Simple(call_logger).set_value("two").get_value.connect(mux.input[2])
+    to = testclasses.Simple(call_logger).set_value.connect(mux.output)
+    call_logger.set_name_mapping(t1=t1, t2=t2, to=to)
     assert call_logger.get_number_of_calls() == 2   # the three set_value calls of the Simple instances
     # test when nothing is selected
     call_logger.clear()
     assert to.get_value() is None
-    call_logger.compare([{((t1, "get_value", "one"),), ((t2, "get_value", "two"),)},
-                         (to, "set_value", None), (to, "get_value", None)])
+    call_logger.compare([{((t1, "get_value", (), "one"),), ((t2, "get_value", (), "two"),)},
+                         (to, "set_value", [None], to), (to, "get_value", (), None)])
     # test when a present value is selected
     call_logger.clear()
-    ts = testclasses.Simple(call_logger, "ts").set_value(2).get_value.connect(mux.select)
+    ts = testclasses.Simple(call_logger).set_value(2).get_value.connect(mux.select)
+    call_logger.set_name_mapping(ts=ts)
     assert to.get_value() == "two"
-    call_logger.compare([(ts, "set_value", 2), (ts, "get_value", 2),
-                         (to, "set_value", "two"), (to, "get_value", "two")])
+    call_logger.compare([(ts, "set_value", [2], ts), (ts, "get_value", [], 2),
+                         (to, "set_value", ["two"], to), (to, "get_value", [], "two")])
     # test changing a selected input
     call_logger.clear()
     t2.set_value("Two")
     assert to.get_value() == "Two"
-    call_logger.compare([(t2, "set_value", "Two"), (t2, "get_value", "Two"),
-                         (to, "set_value", "Two"), (to, "get_value", "Two")])
+    call_logger.compare([(t2, "set_value", ["Two"], t2), (t2, "get_value", [], "Two"),
+                         (to, "set_value", ["Two"], to), (to, "get_value", [], "Two")])
     # test changing a not selected input
     call_logger.clear()
     t1.set_value("One")
     assert to.get_value() == "Two"
-    call_logger.compare([(t1, "set_value", "One"), (t1, "get_value", "One")])
+    call_logger.compare([(t1, "set_value", ["One"], t1), (t1, "get_value", [], "One")])
     # test disconnecting a not selected input
     t1.get_value.disconnect(mux.input[1])
     call_logger.clear()
@@ -80,13 +82,13 @@ def test_multiplexer_connectors():
     ts.set_value(1)
     mux.input[1].connect(t1.get_value)
     assert to.get_value() == "One"
-    call_logger.compare([(ts, "set_value", 1), (ts, "get_value", 1),
-                         (to, "set_value", "One"), (to, "get_value", "One")])
+    call_logger.compare([(ts, "set_value", [1], ts), (ts, "get_value", [], 1),
+                         (to, "set_value", ["One"], to), (to, "get_value", [], "One")])
     # test disconnecting a selected input
     call_logger.clear()
     mux.input[1].disconnect(t1.get_value)
     assert to.get_value() is None
-    call_logger.compare([(to, "set_value", None), (to, "get_value", None)])
+    call_logger.compare([(to, "set_value", [None], to), (to, "get_value", [], None)])
 
 
 def test_passthrough():

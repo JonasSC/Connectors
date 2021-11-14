@@ -40,24 +40,25 @@ def test_caching():
     t1.get_value.set_caching(False)
     t2 = testclasses.Simple(call_logger).set_value.connect(t1.get_value)
     t3 = testclasses.Simple(call_logger).set_value.connect(t1.get_value)
+    call_logger.set_name_mapping(t1=t1, t2=t2, t3=t3)
     # change a value and check if it is propagated correctly
     t1.set_value(1.0)
     assert t2.get_value() == 1.0
     assert t3.get_value() == 1.0
     # check the call log (t1.get_value should only be called once)
-    call_logger.compare([(t1, "set_value", 1.0), (t1, "get_value", 1.0),
-                         (t2, "set_value", 1.0), (t2, "get_value", 1.0),
-                         (t3, "set_value", 1.0), (t3, "get_value", 1.0)])
+    call_logger.compare([(t1, "set_value", [1.0], t1), (t1, "get_value", [], 1.0),
+                         (t2, "set_value", [1.0], t2), (t2, "get_value", [], 1.0),
+                         (t3, "set_value", [1.0], t3), (t3, "get_value", [], 1.0)])
     # call the getter of t2 again (since there has been no announcement, t1.get_value should not be called again)
     call_logger.clear()
     assert t2.get_value() == 1.0
     call_logger.compare([])     # t2.get_value should not have been called either, because it has cached its value
     # call the getter of t1 manually (t1.get_value should be called again, because it does not cache its value)
     assert t1.get_value() == 1.0
-    call_logger.compare([(t1, "get_value", 1.0)])
+    call_logger.compare([(t1, "get_value", [], 1.0)])
     # repeat the first tests with MultiInput setters
     t4 = testclasses.ReplacingMultiInput(call_logger).add_value.connect(t1.get_value)
     t5 = testclasses.NonReplacingMultiInput(call_logger).add_value.connect(t1.get_value)
     t1.set_value(2.0)
-    assert t4.get_values() == [2.0]
-    assert t5.get_values() == [2.0]
+    assert t4.get_values() == (2.0,)
+    assert t5.get_values() == (2.0,)

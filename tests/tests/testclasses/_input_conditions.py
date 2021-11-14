@@ -32,13 +32,13 @@ class ConditionalInputAnnouncement(BaseTestClass):
 
     @connectors.Input("get_value")
     def set_value(self, value):                 # pylint: disable=missing-docstring
-        self._register_call(methodname="set_value", value=value)
+        self._register_call(method_name="set_value", parameters=[value], return_value=self)
         self.__value = value
         return self
 
     @connectors.Output()
     def get_value(self):                        # pylint: disable=missing-docstring
-        self._register_call(methodname="get_value", value=self.__value)
+        self._register_call(method_name="get_value", parameters=[], return_value=self.__value)
         return self.__value
 
     @set_value.announce_condition
@@ -55,13 +55,13 @@ class ConditionalInputNotification(BaseTestClass):
 
     @connectors.Input("get_value")
     def set_value(self, value):                 # pylint: disable=missing-docstring
-        self._register_call(methodname="set_value", value=value)
+        self._register_call(method_name="set_value", parameters=[value], return_value=self)
         self.__value = value
         return self
 
     @connectors.Output()
     def get_value(self):                        # pylint: disable=missing-docstring
-        self._register_call(methodname="get_value", value=self.__value)
+        self._register_call(method_name="get_value", parameters=[], return_value=self.__value)
         return self.__value
 
     @set_value.notify_condition
@@ -78,18 +78,19 @@ class ConditionalMultiInputAnnouncement(BaseTestClass):
 
     @connectors.MultiInput("get_values")
     def add_value(self, value):                 # pylint: disable=missing-docstring
-        self._register_call(methodname="add_value", value=value)
-        return self.__data.add(value)
+        data_id = self.__data.add(value)
+        self._register_call(method_name="add_value", parameters=[value], return_value=data_id)
+        return data_id
 
     @add_value.remove
     def remove_value(self, data_id):            # pylint: disable=missing-docstring
-        self._register_call(methodname="remove_value", value=data_id)
+        self._register_call(method_name="remove_value", parameters=[data_id], return_value=self)
         del self.__data[data_id]
         return self
 
     @add_value.replace
     def replace_value(self, data_id, value):    # pylint: disable=missing-docstring
-        self._register_call(methodname="replace_value", value=data_id)
+        self._register_call(method_name="replace_value", parameters=[data_id, value], return_value=data_id)
         self.__data[data_id] = value
         return data_id
 
@@ -99,8 +100,9 @@ class ConditionalMultiInputAnnouncement(BaseTestClass):
 
     @connectors.Output()
     def get_values(self):                       # pylint: disable=missing-docstring
-        self._register_call(methodname="get_values", value=list(self.__data.values()))
-        return list(self.__data.values())
+        result = tuple(self.__data.values())
+        self._register_call(method_name="get_values", parameters=[], return_value=result)
+        return result
 
 
 class ConditionalMultiInputNotification(BaseTestClass):
@@ -112,24 +114,25 @@ class ConditionalMultiInputNotification(BaseTestClass):
 
     @connectors.Input("get_values")
     def set_condition(self, condition):         # pylint: disable=missing-docstring
-        self._register_call(methodname="set_condition", value=condition)
+        self._register_call(method_name="set_condition", parameters=[condition], return_value=self)
         self.condition = condition
         return self
 
     @connectors.MultiInput("get_values")
     def add_value(self, value):                 # pylint: disable=missing-docstring
-        self._register_call(methodname="add_value", value=value)
-        return self.__data.add(value)
+        data_id = self.__data.add(value)
+        self._register_call(method_name="add_value", parameters=[value], return_value=data_id)
+        return data_id
 
     @add_value.remove
     def remove_value(self, data_id):            # pylint: disable=missing-docstring
-        self._register_call(methodname="remove_value", value=data_id)
+        self._register_call(method_name="remove_value", parameters=[data_id], return_value=self)
         del self.__data[data_id]
         return self
 
     @add_value.replace
     def replace_value(self, data_id, value):    # pylint: disable=missing-docstring
-        self._register_call(methodname="replace_value", value=data_id)
+        self._register_call(method_name="replace_value", parameters=[data_id, value], return_value=data_id)
         self.__data[data_id] = value
         return data_id
 
@@ -139,5 +142,6 @@ class ConditionalMultiInputNotification(BaseTestClass):
 
     @connectors.Output()
     def get_values(self):                       # pylint: disable=missing-docstring
-        self._register_call(methodname="get_values", value=list(self.__data.values()))
-        return list(self.__data.values())
+        result = tuple(self.__data.values())
+        self._register_call(method_name="get_values", parameters=[], return_value=result)
+        return result

@@ -33,26 +33,28 @@ class MultiOutputWithKeys(BaseTestClass):
     @connectors.Input("get_value")
     def set_value(self, value):
         """Sets the value"""
-        self._register_call(methodname="set_value", value=value)
+        self._register_call("set_value", [value], self)
         self.__value = value
         return self
 
     @connectors.Input("get_value")
     def set_keys(self, keys):
         """Changes the return value of the keys method"""
+        self._register_call("set_keys", [keys], self)
         self.__keys = keys
+        return self
 
     @connectors.MultiOutput()
     def get_value(self, key):
         """Returns the product of the value and the key"""
         result = self.__value * key
-        self._register_call(methodname="get_value", value=result)
+        self._register_call("get_value", [key], result)
         return result
 
     @get_value.keys
     def keys(self):
         """Returns a couple of example keys for the get_value method"""
-        self._register_call(methodname="keys", value=self.__keys)
+        self._register_call("keys", [], self.__keys)
         return self.__keys
 
 
@@ -66,7 +68,7 @@ class MultiOutputWithoutKeys(BaseTestClass):
     @connectors.Input("get_value")
     def set_value(self, value):
         """Sets the value"""
-        self._register_call(methodname="set_value", value=value)
+        self._register_call("set_value", [value], self)
         self.__value = value
         return self
 
@@ -74,7 +76,7 @@ class MultiOutputWithoutKeys(BaseTestClass):
     def get_value(self, key):
         """Returns the product of the value and the key"""
         result = self.__value * key
-        self._register_call(methodname="get_value", value=result)
+        self._register_call("get_value", [key], result)
         return result
 
 
@@ -89,25 +91,27 @@ class MultiOutputWithVolatileKeys(BaseTestClass):
     @connectors.Input("get_value")
     def set_value(self, value):
         """Sets the value"""
-        self._register_call(methodname="set_value", value=value)
+        self._register_call("set_value", [value], self)
         self.__value = value
         return self
 
     @connectors.Input("get_value")
     def set_keys(self, keys):
         """Changes the return value of the keys method"""
+        self._register_call("set_keys", [keys], self)
         self.__keys = keys
+        return self
 
     @connectors.MultiOutput()
     def get_value(self, key):
         """Returns the product of the value and the key"""
         result = self.__value * key
-        self._register_call(methodname="get_value", value=result)
+        self._register_call("get_value", [key], result)
         return result
 
     @get_value.keys
     def keys(self):
         """Returns a couple of example keys for the get_value method"""
-        self._register_call(methodname="keys", value=self.__keys)
+        self._register_call("keys", [])
         for k in self.__keys:
             yield k

@@ -31,19 +31,19 @@ class MultipleOutputs(BaseTestClass):
 
     @connectors.Input(("get_value", "get_bool"))
     def set_value(self, value):                 # pylint: disable=missing-docstring
-        self._register_call(methodname="set_value", value=value)
+        self._register_call(method_name="set_value", parameters=[value], return_value=self)
         self.__value = value
         return self
 
     @connectors.Output()
     def get_value(self):                        # pylint: disable=missing-docstring
-        self._register_call(methodname="get_value", value=self.__value)
+        self._register_call(method_name="get_value", parameters=[], return_value=self.__value)
         return self.__value
 
     @connectors.Output()
     def get_bool(self):                         # pylint: disable=missing-docstring
         result = bool(self.__value)
-        self._register_call(methodname="get_bool", value=result)
+        self._register_call(method_name="get_bool", parameters=[], return_value=result)
         return result
 
 
@@ -56,28 +56,30 @@ class MultiInputMultipleOutputs(BaseTestClass):
 
     @connectors.MultiInput(("get_values", "get_bools"))
     def add_value(self, value):                 # pylint: disable=missing-docstring
-        self._register_call(methodname="add_value", value=value)
-        return self.__data.add(value)
+        data_id = self.__data.add(value)
+        self._register_call(method_name="add_value", parameters=[value], return_value=data_id)
+        return data_id
 
     @add_value.remove
     def remove_value(self, data_id):            # pylint: disable=missing-docstring
-        self._register_call(methodname="remove_value", value=data_id)
+        self._register_call(method_name="remove_value", parameters=[data_id], return_value=self)
         del self.__data[data_id]
         return self
 
     @add_value.replace
     def replace_value(self, data_id, value):    # pylint: disable=missing-docstring
-        self._register_call(methodname="replace_value", value=data_id)
+        self._register_call(method_name="replace_value", parameters=[data_id, value], return_value=data_id)
         self.__data[data_id] = value
-        return self
+        return data_id
 
     @connectors.Output()
     def get_values(self):                       # pylint: disable=missing-docstring
-        self._register_call(methodname="get_values", value=list(self.__data.values()))
-        return list(self.__data.values())
+        result = tuple(self.__data.values())
+        self._register_call(method_name="get_values", parameters=[], return_value=result)
+        return result
 
     @connectors.Output()
     def get_bools(self):                        # pylint: disable=missing-docstring
-        result = [bool(v) for v in self.__data.values()]
-        self._register_call(methodname="get_bools", value=result)
+        result = tuple(bool(v) for v in self.__data.values())
+        self._register_call(method_name="get_bools", parameters=[], return_value=result)
         return result

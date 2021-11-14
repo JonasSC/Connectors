@@ -40,7 +40,7 @@ def test_parallelization_and_executors():
                     t3.set_value.set_parallelization(input_parallelization)
                     t3.get_value.set_executor(executor)
                     t1.set_value(input_value)
-                    assert t3.get_value() == [input_value]
+                    assert t3.get_value() == (input_value,)
                     input_value += 1
 
 
@@ -59,7 +59,7 @@ def test_concurrency():
     t1.set_value(1.0)
     t6.get_values.set_executor(connectors.executor(threads=4))
     start_time = time.time()
-    assert t6.get_values() == [([1.0], True), 1.0]
+    assert t6.get_values() == (((1.0,), True), 1.0)
     run_duration = time.time() - start_time
     assert run_duration > 1.0   # the longest running path has a sleep time of 1s
     assert run_duration < 2.0   # since both paths can be executed in parallel, their sleep times must not be added
@@ -77,7 +77,7 @@ def test_multioutput_parallelization():
         .add_value.connect(t4.get_value)
     t1.set_value(3)
     start_time = time.time()
-    assert t5.get_values() == [3, 3, 12]
+    assert t5.get_values() == (3, 3, 12)
     run_duration = time.time() - start_time
     assert run_duration > 1.0                   # the longest running path has a sleep time of 1s
     assert run_duration < 2.0                   # since the getter can be executed in parallel, its sleep times must not be added

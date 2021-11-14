@@ -32,17 +32,17 @@ class MultipleInputs(BaseTestClass):
 
     @connectors.Input("get_values")
     def set_value1(self, value):    # pylint: disable=missing-docstring
-        self._register_call(methodname="set_value1", value=value)
+        self._register_call(method_name="set_value1", parameters=[value], return_value=self)
         self.__value1 = value
         return self
 
     @connectors.Input("get_values")
     def set_value2(self, value):    # pylint: disable=missing-docstring
-        self._register_call(methodname="set_value2", value=value)
+        self._register_call(method_name="set_value2", parameters=[value], return_value=self)
         self.__value2 = value
         return self
 
     @connectors.Output()
     def get_values(self):           # pylint: disable=missing-docstring
-        self._register_call(methodname="get_values", value=(self.__value1, self.__value2))
+        self._register_call(method_name="get_values", parameters=[], return_value=(self.__value1, self.__value2))
         return (self.__value1, self.__value2)
