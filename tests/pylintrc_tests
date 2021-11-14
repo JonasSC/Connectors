@@ -225,14 +225,14 @@ expected-line-ending-format=LF
 
 # Regexp for a line that is allowed to be longer than the limit.
 ## allow long hyperlinks in comments and excessive line lengths due to comments
-ignore-long-lines=((^\s*(# )?<?https?://\S+>?$)|(^[\w\W]{0,120}\s{2,4}#[\w\W]*$)|(^#*\s*logging.))
+ignore-long-lines=^[^#]{0,120}#.*$
 
 # Number of spaces of indent required inside a hanging  or continued line.
 indent-after-paren=4
 
 # String used as indentation unit. This is usually "    " (4 spaces) or "\t" (1
 # tab).
-indent-string='    '
+indent-string="    "
 
 # Maximum number of characters on a single line.
 max-line-length=120

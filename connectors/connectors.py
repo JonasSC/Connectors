@@ -24,5 +24,5 @@ from ._connectors import *                          # pylint: disable=wildcard-i
 from ._macro._input import MacroInputConnector      # pylint: disable=unused-import
 from ._macro._output import MacroOutputConnector    # pylint: disable=unused-import
 
-from ._proxies import *
-from ._common import MultiInputAssociateProxy
+from ._proxies import *                             # pylint: disable=wildcard-import,unused-wildcard-import
+from ._common import MultiInputAssociateProxy       # pylint: disable=unused-import

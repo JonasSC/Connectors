@@ -8,9 +8,9 @@ test_coverage:
 
 lint:
 	python3 -m flake8 --config=tests/flake8 connectors
-	pylint3 --rcfile=tests/pylintrc_connectors connectors
+	python3 -m pylint --rcfile=tests/pylintrc_connectors connectors
 	python3 -m flake8 --config=tests/flake8 tests/tests
-	pylint3 --rcfile=tests/pylintrc_tests tests/tests
+	python3 -m pylint --rcfile=tests/pylintrc_tests tests/tests
 
 docs:
 	sphinx-build -a -b html documentation docs

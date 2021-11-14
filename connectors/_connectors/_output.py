@@ -155,7 +155,7 @@ class OutputConnector(Connector):
             self.__computable.set()
             self.__result_is_valid = not self.__observed_has_changed    # if all announcements have been canceled, the cached result is still valid
             for c, _ in self.__connections:
-                c._cancel(self)     # pylint: disable=protected-access; the _cancel method is meant to be called from other connectors, but not from outside this package
+                c._cancel(self)     # pylint: disable=protected-access # the _cancel method is meant to be called from other connectors, but not from outside this package
 
     async def _request(self, executor, *args, **kwargs):
         """Causes this output connector to re-compute its value and notifies the

@@ -22,7 +22,7 @@ __all__ = ("MultiInputData",)
 
 
 class MultiInputData(collections.OrderedDict):
-    # pylint: disable=wrong-spelling-in-docstring;    avoid that the spell checker complains about the code in this comment
+    # pylint: disable=wrong-spelling-in-docstring # avoid that the spell checker complains about the code in this comment
     """A container for data that is managed with a multi-input connector.
     This is basically an :class:`~collections.OrderedDict` with an add method,
     that stores the added data under a unique key.

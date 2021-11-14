@@ -154,7 +154,7 @@ class Connector:
 
 class InputConnector(Connector):
     """Base class for input connectors, that replace setter methods."""
-    # pylint: disable=abstract-method; pylint shall not complain, that the __call__ and _announce-methods are not overridden in InputConnector
+    # pylint: disable=abstract-method # pylint shall not complain, that the __call__ and _announce-methods are not overridden in InputConnector
 
     def __init__(self, instance, method, laziness, parallelization, executor):
         """

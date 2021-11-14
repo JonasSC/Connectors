@@ -112,7 +112,7 @@ class MultiInputConnector(InputConnector):
                                      observers=self.__observers,
                                      executor=self._executor)
 
-    def _connect(self, connector, key=None):    # pylint: disable=arguments-differ; the key is only used by the multi-input connector
+    def _connect(self, connector, key=None):    # pylint: disable=arguments-differ # the key is only used by the multi-input connector
         """This method is called from an :class:`~connectors.OutputConnector`,
         when it is  being connected to this :class:`~connectors.MultiInputConnector`.
 
@@ -229,7 +229,7 @@ class MultiInputConnector(InputConnector):
         if not self.__announcements:
             self.__computable.set()
             for o in self.__observers:
-                o._cancel(self)     # pylint: disable=protected-access; the _cancel method is meant to be called from other connectors, but not from outside this package
+                o._cancel(self)     # pylint: disable=protected-access # the _cancel method is meant to be called from other connectors, but not from outside this package
 
     async def _request(self, executor):
         """This method retrieves the updated data from the connected output connectors
@@ -330,10 +330,10 @@ class MultiInputConnector(InputConnector):
         """
         if self._check_notification_condition():
             for o in self.__observers:
-                o._notify(self)     # pylint: disable=protected-access; these methods are called by the connectors, but are not part of the public API.
+                o._notify(self)     # pylint: disable=protected-access # these methods are called by the connectors, but are not part of the public API.
         else:
             for o in self.__observers:
-                o._cancel(self)     # pylint: disable=protected-access; these methods are called by the connectors, but are not part of the public API.
+                o._cancel(self)     # pylint: disable=protected-access # these methods are called by the connectors, but are not part of the public API.
 
     def _add_to_notification_condition_checks(self, data_id, value=None):
         """A protected helper method to determine, if the observing output connectors
@@ -344,7 +344,7 @@ class MultiInputConnector(InputConnector):
         a conditional notification of the observing output connectors.
         """
 
-    def _check_notification_condition(self):   # pylint: disable=no-self-use; this method is a hook for derived classes
+    def _check_notification_condition(self):   # pylint: disable=no-self-use # this method is a hook for derived classes
         """A protected helper method to determine, if the observing output connectors
         have to be notified at the end of the :meth:`~connectors.connectors.MultiInputConnector._request`
         method.
@@ -368,7 +368,7 @@ class ConditionalMultiInputConnector(MultiInputConnector):
     cancellation notice.
     """
 
-    def __init__(self, instance, method,                            # pylint: disable=too-many-arguments; this constructor may be complicated, since the class is instantiated through the decorators, which have a much simpler API
+    def __init__(self, instance, method,                            # pylint: disable=too-many-arguments # this constructor may be complicated, since the class is instantiated through the decorators, which have a much simpler API
                  remove_method, replace_method,
                  observers, announce_condition, notify_condition,
                  laziness, parallelization, executor):

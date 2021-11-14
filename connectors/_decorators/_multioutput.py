@@ -23,7 +23,7 @@ from ._baseclasses import ConnectorDecorator, default_executor
 __all__ = ("MultiOutput",)
 
 
-def no_keys(self):  # pylint: disable=unused-argument; the self-parameter is needed to simulate an unbound method
+def no_keys(self):  # pylint: disable=unused-argument # the self-parameter is needed to simulate an unbound method
     """This function is used for multi-output connectors, for which no keys method
     has been specified. It always returns an empty set.
     """

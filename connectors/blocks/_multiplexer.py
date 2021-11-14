@@ -113,7 +113,7 @@ class Multiplexer:
         return data_id
 
     @input.notify_condition
-    def __input_condition(self, data_id, value):   # pylint: disable=unused-argument; notify condition methods must accept the new value
+    def __input_condition(self, data_id, value):   # pylint: disable=unused-argument # notify condition methods must accept the new value
         """Prevents, that the output is notified about changes of an input, that
         is not currently selected.
         """

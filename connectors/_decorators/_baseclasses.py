@@ -68,7 +68,7 @@ class InputDecorator(ConnectorDecorator):
     their instances' output connectors when an incoming value changes their result
     values.
     """
-    # pylint: disable=abstract-method; pylint shall not complain, that the __get__-method is not overridden in InputDecorator
+    # pylint: disable=abstract-method # pylint shall not complain, that the __get__-method is not overridden in InputDecorator
 
     def __init__(self,
                  observers=(),

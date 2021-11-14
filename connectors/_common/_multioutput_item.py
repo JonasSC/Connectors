@@ -78,4 +78,4 @@ class MultiOutputItem:
                          that manages the current computations
         :returns: the result value of the output connector
         """
-        await self.__connector._request_key(executor, self.__key, False, *args, **kwargs)   # pylint: disable=protected-access; this call stays within the context of a multi-output connector.
+        await self.__connector._request_key(executor, self.__key, False, *args, **kwargs)  # pylint: disable=protected-access # this call stays within the context of a multi-output connector.

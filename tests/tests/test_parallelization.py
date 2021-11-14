@@ -27,7 +27,7 @@ def test_parallelization_and_executors():
     t2 = testclasses.ReplacingMultiInput().add_value.connect(t1.get_value)
     t3 = testclasses.Simple().set_value.connect(t2.get_values)
     input_value = 0
-    for executor in (connectors.executor(threads=t, processes=p) for p in (0, 2) for t in(0, 2)):
+    for executor in (connectors.executor(threads=t, processes=p) for p in (0, 2) for t in (0, 2)):
         for output_parallelization in (connectors.Parallelization.SEQUENTIAL,
                                        connectors.Parallelization.THREAD,
                                        connectors.Parallelization.PROCESS):

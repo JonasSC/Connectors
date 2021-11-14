@@ -67,7 +67,7 @@ class WeakrefProxyGenerator:
         return self
 
     @connectors.Input(laziness=connectors.Laziness.ON_NOTIFY)
-    def delete_reference(self, *args, **kwargs):    # pylint: disable=unused-argument; passing arguments to the delete_reference method shall not raise an error, so it can be connected to any output
+    def delete_reference(self, *args, **kwargs):    # pylint: disable=unused-argument # passing arguments to the delete_reference method shall not raise an error, so it can be connected to any output
         """Causes the strong reference to the input object to be deleted, so that
         the input object can be garbage collected.
         This connector should be connected to the output of the final result, so

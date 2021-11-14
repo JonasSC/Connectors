@@ -232,11 +232,11 @@ class MultiOutputConnector(Connector):
             self.__computable.set()
             self.__valid_results = set(self.__results.keys())   # if all announcements have been canceled, the cached results are still valid
             for c, _ in self.__multi_connections:
-                c._cancel(self)         # pylint: disable=protected-access; the _cancel method is meant to be called from other connectors, but not from outside this package
+                c._cancel(self)         # pylint: disable=protected-access # the _cancel method is meant to be called from other connectors, but not from outside this package
             for key in self.__single_connections:
                 item = self.__items[key]
                 for c, _ in self.__single_connections[key]:
-                    c._cancel(item)     # pylint: disable=protected-access; the _cancel method is meant to be called from other connectors, but not from outside this package
+                    c._cancel(item)     # pylint: disable=protected-access # the _cancel method is meant to be called from other connectors, but not from outside this package
 
     async def _request(self, executor, *args, **kwargs):
         """Causes this multi-output connector to re-compute its values and notifies
@@ -255,10 +255,10 @@ class MultiOutputConnector(Connector):
         if not isinstance(keys, collections.abc.Sequence):  # repack to a tuple, if necessary, to allow multiple iteration passes
             keys = tuple(keys)
         values = await asyncio.gather(*(self.__compute_key(executor, key, False, *args, **kwargs) for key in keys))
-        dictionary = {k: v for k, v in zip(keys, values)}
-        await asyncio.gather(*(mi._notify_multi(self, dictionary, executor) for mi, _ in self.__multi_connections))         # pylint: disable=protected-access; these methods are called by the connectors, but are not part of the public API.
+        dictionary = dict(zip(keys, values))
+        await asyncio.gather(*(mi._notify_multi(self, dictionary, executor) for mi, _ in self.__multi_connections))  # pylint: disable=protected-access # these methods are called by the connectors, but are not part of the public API.
 
-    async def _request_key(self, executor, key, key_in_args, *args, **kwargs):   # pylint: disable=too-many-branches
+    async def _request_key(self, executor, key, key_in_args, *args, **kwargs):
         """Causes this multi-output connector to re-compute one of its values and
         notifies the connected input connectors.
         This method is called by a connected input connector, when it needs the

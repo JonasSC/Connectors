@@ -90,7 +90,7 @@ class SingleInputConnector(InputConnector):
         self._announce(connector, non_lazy_inputs=non_lazy_inputs)
         non_lazy_inputs.execute(self._executor)
 
-    def _disconnect(self, connector):   # pylint: disable=unused-argument; this method has to be compatible with other input connectors
+    def _disconnect(self, connector):   # pylint: disable=unused-argument # this method has to be compatible with other input connectors
         """This method is called from an :class:`~connectors.OutputConnector`,
         when it is  being disconnected from this :class:`~connectors.SingleInputConnector`.
 
@@ -122,7 +122,7 @@ class SingleInputConnector(InputConnector):
                                     non_lazy_inputs=non_lazy_inputs,
                                     laziness=self._laziness)
 
-    async def _notify(self, connector, value, executor):    # pylint: disable=unused-argument; this method has to be compatible with other input connectors
+    async def _notify(self, connector, value, executor):    # pylint: disable=unused-argument # this method has to be compatible with other input connectors
         """This method is to notify this input connector, when a connected output
         connector has produced updated data.
 
@@ -140,7 +140,7 @@ class SingleInputConnector(InputConnector):
         if self._laziness == common.Laziness.ON_NOTIFY:
             await self._request(executor)
 
-    def _cancel(self, connector):   # pylint: disable=unused-argument; this method has to be compatible with other input connectors
+    def _cancel(self, connector):   # pylint: disable=unused-argument # this method has to be compatible with other input connectors
         """Notifies this input connector, that an announced value change is not
         going to happen.
 
@@ -149,7 +149,7 @@ class SingleInputConnector(InputConnector):
         self.__announcement = None
         self.__computable.set()
         for o in self.__observers:
-            o._cancel(self)     # pylint: disable=protected-access; the _cancel method is meant to be called from other connectors, but not from outside this package
+            o._cancel(self)     # pylint: disable=protected-access # the _cancel method is meant to be called from other connectors, but not from outside this package
 
     async def _request(self, executor):
         """This method retrieves the updated data from the connected output connector
@@ -178,7 +178,7 @@ class SingleInputConnector(InputConnector):
             finally:
                 self.__running = False
 
-    def _conditional_observer_notification(self, *args, **kwargs):  # pylint: disable=unused-argument; this method has to be compatible with other input connectors
+    def _conditional_observer_notification(self, *args, **kwargs):  # pylint: disable=unused-argument # this method has to be compatible with other input connectors
         """Notifies the observing output connectors, that this input has changed
         the instance's state.
 

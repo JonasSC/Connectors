@@ -63,8 +63,8 @@ class MultiInputItem:
                 o._announce(self.__connector, non_lazy_inputs)
             data_id = self.__replace(self.__instance, self.__key, *args, **kwargs)
             value = get_first_argument(self.__replace, *args, **kwargs)
-            self.__connector._add_to_notification_condition_checks(data_id=data_id, value=value)    # pylint: disable=protected-access; this call stays within the context of a multi-input connector.
-            self.__connector._notify_observers()                                                    # pylint: disable=protected-access; this call stays within the context of a multi-input connector.
+            self.__connector._add_to_notification_condition_checks(data_id=data_id, value=value)    # pylint: disable=protected-access # this call stays within the context of a multi-input connector.
+            self.__connector._notify_observers()                                                    # pylint: disable=protected-access # this call stays within the context of a multi-input connector.
             non_lazy_inputs.execute(self.__executor)
         else:
             self.__replace(self.__instance, self.__key, *args, **kwargs)

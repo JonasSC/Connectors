@@ -62,7 +62,7 @@ class MultiInputProxy(SingleInputProxy):
     during its call.
     """
 
-    def __init__(self, instance, method,                            # pylint: disable=too-many-arguments; this constructor may be complicated, since the class is instantiated through the decorators, which have a much simpler API
+    def __init__(self, instance, method,                            # pylint: disable=too-many-arguments # this constructor may be complicated, since the class is instantiated through the decorators, which have a much simpler API
                  remove_method, replace_method,
                  observers, announce_condition, notify_condition,
                  laziness, parallelization, executor):
