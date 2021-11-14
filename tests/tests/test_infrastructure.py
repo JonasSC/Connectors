@@ -17,6 +17,7 @@
 """Tests for infrastructure tasks such as licensing, packaging etc."""
 
 import os
+import pytest
 import connectors
 import tests
 
@@ -41,16 +42,16 @@ def test_license():
     for directory in (os.path.split(connectors.__file__)[0],
                       os.path.split(tests.__file__)[0]):
         for dirpath, _, filenames in os.walk(directory):
-            for filename in filenames:
-                if filename.lower().endswith(".py"):
-                    path = os.path.join(dirpath, filename)
-                    with open(path) as f:
-                        line = f.readline()
-                        if line == "":
-                            continue    # an empty file does not need a license header
-                        else:
+            relpath = os.path.relpath(dirpath, start=directory)
+            if relpath == "." or all(not d.startswith(".") for d in relpath.split(os.sep)):  # ignore hidden directories (e.g. rope creates a cache with Python-files, that are not committed to the repository and therefore do not need a license header)
+                for filename in filenames:
+                    if filename.lower().endswith(".py"):
+                        path = os.path.join(dirpath, filename)
+                        with open(path) as f:
+                            line = f.readline()
+                            if line == "":
+                                continue  # an empty file does not need a license header
                             for h in header:
                                 if line != h:
-                                    import pytest
                                     pytest.fail(msg=f"{path} is missing the license header", pytrace=False)
                                 line = f.readline()
