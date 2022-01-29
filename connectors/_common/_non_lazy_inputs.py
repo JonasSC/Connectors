@@ -16,8 +16,6 @@
 
 """Defines a container class for tracking non-lazy input connectors"""
 
-import asyncio
-
 __all__ = ("NonLazyInputs",)
 
 
@@ -56,5 +54,4 @@ class NonLazyInputs(set):
                          that manages the executions
         """
         if self:
-            tasks = asyncio.wait([i._request(executor) for i in self])
-            executor.run_until_complete(tasks)
+            executor.run_coroutines(i._request(executor) for i in self)

@@ -110,6 +110,19 @@ class Executor:
         finally:
             self._tear_down()
 
+    def run_coroutines(self, coros):
+        """Takes multiple coroutines and runs them in a newly created event loop.
+
+        :param coros: a sequence of coroutines
+        """
+        self._set_up()
+        try:
+            tasks = [self._loop.create_task(coro) for coro in coros]
+            future = asyncio.wait(tasks)
+            self._loop.run_until_complete(future)
+        finally:
+            self._tear_down()
+
     def run_until_complete(self, future):
         """Takes a future or a task and runs it in a newly created event loop.
         This is a wrapper for the event loop's :meth:`~asyncio.loop.run_until_complete`
