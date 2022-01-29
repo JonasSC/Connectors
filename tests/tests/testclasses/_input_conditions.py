@@ -42,7 +42,7 @@ class ConditionalInputAnnouncement(BaseTestClass):
         return self.__value
 
     @set_value.announce_condition
-    def __condition(self):                      # pylint: disable=missing-docstring
+    def __condition(self):                      # pylint: disable=missing-docstring,unused-private-member
         return self.condition
 
 
@@ -65,7 +65,7 @@ class ConditionalInputNotification(BaseTestClass):
         return self.__value
 
     @set_value.notify_condition
-    def __condition(self, value):               # pylint: disable=missing-docstring,unused-argument
+    def __condition(self, value):               # pylint: disable=missing-docstring,unused-argument,unused-private-member
         return self.condition
 
 
@@ -95,7 +95,7 @@ class ConditionalMultiInputAnnouncement(BaseTestClass):
         return data_id
 
     @add_value.announce_condition
-    def __condition(self, data_id):             # pylint: disable=missing-docstring,unused-argument
+    def __condition(self, data_id):             # pylint: disable=missing-docstring,unused-argument,unused-private-member
         return self.condition
 
     @connectors.Output()
@@ -137,7 +137,7 @@ class ConditionalMultiInputNotification(BaseTestClass):
         return data_id
 
     @add_value.notify_condition
-    def __condition(self, data_id, value):      # pylint: disable=missing-docstring,unused-argument
+    def __condition(self, data_id, value):      # pylint: disable=missing-docstring,unused-argument,unused-private-member
         return self.condition
 
     @connectors.Output()

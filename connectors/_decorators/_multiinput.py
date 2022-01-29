@@ -113,7 +113,6 @@ class MultiInput(InputDecorator):
         self.__remove_method = method
         return common.MultiInputAssociateDescriptor(method=method,
                                                     observers=self._observers,
-                                                    parallelization=self._parallelization,
                                                     executor=self._executor)
 
     def replace(self, method):
@@ -147,5 +146,4 @@ class MultiInput(InputDecorator):
         self.__replace_method = method
         return common.MultiInputAssociateDescriptor(method=method,
                                                     observers=self._observers,
-                                                    parallelization=self._parallelization,
                                                     executor=self._executor)

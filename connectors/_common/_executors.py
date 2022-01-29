@@ -82,7 +82,6 @@ class Executor:
 
     def __init__(self):
         self._loop = None   # will be initialized in run_coroutine or run_until_complete
-        self.__tasks = []
 
     async def run_method(self, parallelization, method, instance, *args, **kwargs):
         """Abstract method, whose overrides shall execute the given method.

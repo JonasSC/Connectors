@@ -32,15 +32,11 @@ class MultiInputAssociateDescriptor:
     and :meth:`~connectors.MultiInput.replace`.
     """
 
-    def __init__(self, method, observers, parallelization, executor):
+    def __init__(self, method, observers, executor):
         """
         :param method: the unbound method, that is wrapped
         :param observers: the names of output methods that are affected by passing
                           a value to the multi-input connector.
-        :param parallelization: a flag from the :class:`connectors.Parallelization` enum.
-                                See the :class:`~connectors.connectors.MultiInputConnector`'s
-                                :meth:`~connectors.connectors.MultiInputConnector.set_parallelization`
-                                method for details
         :param executor: an :class:`~connectors._common._executors.Executor` instance,
                          that can be created with the :func:`connectors.executor`
                          function. See the :class:`~connectors.connectors.MultiInputConnector`'s
@@ -49,7 +45,6 @@ class MultiInputAssociateDescriptor:
         """
         self.__method = method
         self.__observers = observers
-        self.__parallelization = parallelization
         self.__executor = executor
 
     def __get__(self, instance, instance_type):

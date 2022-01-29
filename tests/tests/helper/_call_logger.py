@@ -63,8 +63,8 @@ class Call:
     def __eq__(self, other):
         return (self.instance is other.instance
                 and self.method_name == other.method_name
-                and (self.parameters == other.parameters or other.parameters == self.parameters)           # checking the == in both directions checks, whether the parameters are ignored by one call (see. __eq__ method of Ignore)
-                and (self.return_value == other.return_value or other.return_value == self.return_value))  # checking the == in both directions checks, whether the return value is ignored by one call (see. __eq__ method of Ignore)
+                and (self.parameters == other.parameters or other.parameters == self.parameters)           # pylint: disable=consider-using-in;  # checking the == in both directions checks, whether the parameters are ignored by one call (see. __eq__ method of Ignore)
+                and (self.return_value == other.return_value or other.return_value == self.return_value))  # pylint: disable=consider-using-in;  # checking the == in both directions checks, whether the return value is ignored by one call (see. __eq__ method of Ignore)
 
     def __ne__(self, other):
         return not self == other

@@ -197,9 +197,9 @@ class MultiOutputConnector(Connector):
         self.__computable.clear()
         for c, _ in self.__multi_connections:
             c._announce(self, non_lazy_inputs)
-        for key in self.__single_connections:
+        for key, connections in self.__single_connections.items():
             item = self.__items[key]
-            for c, _ in self.__single_connections[key]:
+            for c, _ in connections:
                 c._announce(item, non_lazy_inputs)
 
     def _notify(self, connector):
@@ -233,9 +233,9 @@ class MultiOutputConnector(Connector):
             self.__valid_results = set(self.__results.keys())   # if all announcements have been canceled, the cached results are still valid
             for c, _ in self.__multi_connections:
                 c._cancel(self)         # pylint: disable=protected-access # the _cancel method is meant to be called from other connectors, but not from outside this package
-            for key in self.__single_connections:
+            for key, connections in self.__single_connections.items():
                 item = self.__items[key]
-                for c, _ in self.__single_connections[key]:
+                for c, _ in connections:
                     c._cancel(item)     # pylint: disable=protected-access # the _cancel method is meant to be called from other connectors, but not from outside this package
 
     async def _request(self, executor, *args, **kwargs):
